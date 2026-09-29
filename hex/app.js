@@ -13,7 +13,8 @@
     "outcomeSelect","compareSelect","stateFilter","landFilter","pointToggle","sampleCount","coverageText","exportButton",
     "metricHexes","metricOccupied","metricMoran","metricSpatial","mapTitle","mapShell","map","mapViewport","stateLayer",
     "hexLayer","facilityLayer","outlineLayer","tooltip","legend","zoomOut","zoomReset","zoomIn","scatterplot","scatterTitle",
-    "pearsonStat","interpretTitle","interpretText","cellArea","pairCount","detailPanel","resetButton"
+    "pearsonStat","interpretTitle","interpretText","cellArea","pairCount","detailPanel","resetButton","outcomeHelp","compareHelp",
+    "guideButton","guideModal","guideClose","guideNav","guideContent"
   ].map(id => [id, document.getElementById(id)]));
   let outcome = "facilityCount";
   let comparison = "hvLineKm";
@@ -38,6 +39,46 @@
   els.compareSelect.value = comparison;
   [...new Set(cells.map(c => c.state).filter(Boolean))].sort().forEach(s => els.stateFilter.insertAdjacentHTML("beforeend", `<option value="${s}">${s}</option>`));
   els.cellArea.textContent = `${fmt.format(meta.cellAreaSqKm)} km²`;
+
+  function groupId(group) { return `guide-${group.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`; }
+  function renderGuide() {
+    const groups = {};
+    variables.forEach(v => (groups[v.group] ||= []).push(v));
+    els.guideNav.innerHTML = Object.keys(groups).map(group => `<a href="#${groupId(group)}">${escapeHtml(group)}</a>`).join("");
+    els.guideContent.innerHTML = Object.entries(groups).map(([group, items]) => `
+      <section id="${groupId(group)}" class="guide-group">
+        <div class="guide-group-heading"><h2>${escapeHtml(group)}</h2><span>${items.length} ${items.length===1?"measure":"measures"}</span></div>
+        <div class="measure-grid">${items.map(v => `
+          <article class="measure-card">
+            <header><h3>${escapeHtml(v.label)}</h3><span class="unit-pill">${escapeHtml(v.unit)}</span></header>
+            <p class="measure-definition">${escapeHtml(v.definition)}</p>
+            <dl class="measure-meta">
+              <div><dt>Underlying data</dt><dd>${escapeHtml(v.source)}</dd></div>
+              <div><dt>Cell calculation</dt><dd>${escapeHtml(v.calculation)}</dd></div>
+              <div><dt>Missing values and zeros</dt><dd>${escapeHtml(v.missing)}</dd></div>
+              <div class="caution"><dt>Interpretation limit</dt><dd>${escapeHtml(v.caution)}</dd></div>
+            </dl>
+          </article>`).join("")}</div>
+      </section>`).join("");
+  }
+  function renderVariableHelp() {
+    const ov = varByKey.get(outcome), cv = varByKey.get(comparison);
+    els.outcomeHelp.textContent = `${ov.definition} Unit: ${ov.unit}.`;
+    els.compareHelp.textContent = `${cv.definition} Unit: ${cv.unit}.`;
+  }
+  function openGuide() {
+    els.guideModal.hidden=false;
+    els.guideModal.classList.add("open");
+    document.body.classList.add("guide-open");
+    els.guideClose.focus();
+  }
+  function closeGuide() {
+    els.guideModal.classList.remove("open");
+    els.guideModal.hidden=true;
+    document.body.classList.remove("guide-open");
+    els.guideButton.focus();
+  }
+  renderGuide();
 
   function currentCells() {
     const state = els.stateFilter.value;
@@ -148,7 +189,8 @@
     els.mapTitle.textContent=display==="outcome"?ov.label:display==="comparison"?cv.label:`${ov.label} × ${cv.label}`;
     els.scatterTitle.textContent=`${ov.label} vs. ${cv.label}`;
     els.interpretTitle.textContent=`${cv.group} context at a common scale`;
-    els.interpretText.textContent=`${cv.basis}. Pearson’s r compares values in the same cells. Spatial-lag r compares ${ov.label.toLowerCase()} in each cell with the average ${cv.label.toLowerCase()} among adjacent cells.`;
+    els.interpretText.textContent=`${cv.definition} ${cv.calculation} Pearson’s r compares values in the same cells. Spatial-lag r compares ${ov.label.toLowerCase()} in each cell with the average ${cv.label.toLowerCase()} among adjacent cells.`;
+    renderVariableHelp();
   }
   function renderScatter() {
     const data=stats.valid;
@@ -185,6 +227,9 @@
   document.querySelectorAll(".display-button").forEach(b=>b.addEventListener("click",()=>{display=b.dataset.display;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x===b));update();}));
   els.resetButton.addEventListener("click",()=>{outcome="facilityCount";comparison="hvLineKm";display="outcome";els.outcomeSelect.value=outcome;els.compareSelect.value=comparison;els.stateFilter.value="";els.landFilter.value="0";els.pointToggle.checked=false;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display==="outcome"));selectedId=null;els.detailPanel.classList.remove("open");els.detailPanel.innerHTML='<div class="detail-empty"><span class="detail-hex"></span><h2>Select a hexagon</h2><p>Choose a cell to inspect its outcome, context measures, source geography, and neighbors.</p></div>';resetView();update();});
   els.exportButton.addEventListener("click",exportCsv); els.zoomIn.addEventListener("click",()=>zoom(1.35));els.zoomOut.addEventListener("click",()=>zoom(1/1.35));els.zoomReset.addEventListener("click",resetView);
+  els.guideButton.addEventListener("click",openGuide); els.guideClose.addEventListener("click",closeGuide);
+  els.guideModal.addEventListener("click",event=>{if(event.target===els.guideModal)closeGuide();});
+  document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!els.guideModal.hidden)closeGuide();});
   els.map.addEventListener("wheel",e=>{e.preventDefault();const r=els.map.getBoundingClientRect();zoom(e.deltaY<0?1.18:1/1.18,(e.clientX-r.left)/r.width*1000,(e.clientY-r.top)/r.height*600);},{passive:false});
   els.map.addEventListener("pointerdown",e=>{if(e.target.classList.contains("hex-cell"))return;dragging=true;dragStart={x:e.clientX,y:e.clientY,tx:transform.x,ty:transform.y};els.map.classList.add("dragging");els.map.setPointerCapture(e.pointerId);});
   els.map.addEventListener("pointermove",e=>{if(!dragging)return;const r=els.map.getBoundingClientRect();transform.x=dragStart.tx+(e.clientX-dragStart.x)/r.width*1000;transform.y=dragStart.ty+(e.clientY-dragStart.y)/r.height*600;updateTransform();});
