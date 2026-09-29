@@ -77,6 +77,7 @@ grid$policy_passed <- as.numeric(state_join$policy_bills_pass)
 grid$county_fips <- county_join$GEOID
 grid$county_name <- county_join$NAME
 grid$water_factor <- as.numeric(county_join$aware_annual_average_cf)
+grid$water_factor[grid$water_factor < 0] <- NA_real_
 grid$water_class <- county_join$water_scarcity_class
 grid$water_withdrawal_mgd <- as.numeric(county_join$usgs_total_withdrawal_mgd)
 grid$risk_score <- as.numeric(county_join$nri_risk_score)
@@ -213,24 +214,168 @@ cells$neighbors <- strsplit(cells$neighbors, ";", fixed = TRUE)
 cells$neighbors <- lapply(cells$neighbors, function(x) x[nzchar(x)])
 
 variables <- list(
-  list(key="facilityCount", label="Data-center count", group="Data centers", unit="facilities", basis="Point count; zero is meaningful"),
-  list(key="reportedMw", label="Reported data-center capacity", group="Data centers", unit="MW", basis="Sum of known facility MW; unknown capacity contributes zero"),
-  list(key="operatingCount", label="Operating facilities", group="Data centers", unit="facilities", basis="Point count; zero is meaningful"),
-  list(key="pipelineCount", label="Active-pipeline facilities", group="Data centers", unit="facilities", basis="Point count; zero is meaningful"),
-  list(key="plantOperatingMw", label="Operating generation capacity", group="Power", unit="MW", basis="eGRID 2024 plant points; zero is meaningful"),
-  list(key="plantCount", label="Power-plant count", group="Power", unit="plants", basis="eGRID 2024 plant points; zero is meaningful"),
-  list(key="hvLineKm", label="High-voltage line length", group="Power", unit="km", basis="OSM lines at or above 200 kV intersected with each cell"),
-  list(key="queueActiveMw", label="Active interconnection queue", group="Power", unit="MW", basis="County value assigned at cell centroid"),
-  list(key="waterFactor", label="Water-scarcity factor", group="Resources", unit="factor", basis="County AWARE annual average assigned at cell centroid"),
-  list(key="waterWithdrawalMgd", label="Total water withdrawal", group="Resources", unit="MGD", basis="County USGS value assigned at cell centroid"),
-  list(key="droughtScore", label="Drought risk score", group="Resources", unit="score", basis="County NRI value assigned at cell centroid"),
-  list(key="heatScore", label="Heat-wave risk score", group="Resources", unit="score", basis="County NRI value assigned at cell centroid"),
-  list(key="cbpEstablishments", label="Data-processing establishments", group="Resources", unit="establishments", basis="County CBP value assigned at cell centroid"),
-  list(key="policyBills", label="State data-center bills", group="Legislation", unit="bills", basis="State value assigned at cell centroid"),
-  list(key="incentive", label="Dedicated state incentive", group="Legislation", unit="0/1", basis="State indicator assigned at cell centroid"),
-  list(key="moratoriums", label="State moratorium tracker", group="Legislation", unit="records", basis="State value assigned at cell centroid"),
-  list(key="localActionCount", label="Local-action records", group="Local opposition", unit="records", basis="FracTracker action point count; zero is meaningful"),
-  list(key="directOppositionCount", label="Direct facility opposition", group="Local opposition", unit="facilities", basis="Direct matched facility records; zero is meaningful")
+  list(
+    key="facilityCount", label="Data-center count", group="Data centers", unit="facilities",
+    definition="Number of inventoried facility or project point records located inside the hexagon.",
+    source="Layer 08 data_centers table, derived from Data_Centers_Database.xlsx (DB_Output_V2); 1,669 records in the snapshot.",
+    calculation="Point-in-polygon count. Each inventory row contributes one record to one cell.",
+    missing="A cell with no matched inventory record is coded 0. Zero means none observed in this inventory, not proof that no facility exists.",
+    caution="Records describe facilities or projects, not individual buildings or servers; inventory completeness can vary by place.",
+    basis="Point count; zero is meaningful within the inventory"
+  ),
+  list(
+    key="reportedMw", label="Reported data-center capacity", group="Data centers", unit="MW",
+    definition="Sum of reported facility power capacity for records inside the hexagon.",
+    source="Layer 08 facility inventory field mw_mid, inherited from the project database.",
+    calculation="Exact MW is used when available; a range contributes its midpoint. Values are summed by cell.",
+    missing="Facilities without a usable MW value are excluded from the sum and tracked separately by known-MW count.",
+    caution="Reported MW is not verified electricity demand, delivered power, grid headroom, or actual utilization.",
+    basis="Sum of known facility MW; unknown capacity contributes nothing to the sum"
+  ),
+  list(
+    key="operatingCount", label="Operating facilities", group="Data centers", unit="facilities",
+    definition="Number of facility records whose project_phase is Operating.",
+    source="Layer 08 facility inventory project_phase field.",
+    calculation="Count of point records classified Operating within each cell.",
+    missing="Cells with no operating inventory record are coded 0.",
+    caution="This is a status snapshot and does not identify an opening date, continuous operation, or operating load.",
+    basis="Operating-status point count; zero is meaningful within the inventory"
+  ),
+  list(
+    key="pipelineCount", label="Active-pipeline facilities", group="Data centers", unit="facilities",
+    definition="Number of facility records grouped as Active pipeline, including pre-proposal, proposed, and development stages.",
+    source="Layer 08 facility inventory activity_group derived from project_phase.",
+    calculation="Count of Active pipeline point records within each cell.",
+    missing="Cells with no active-pipeline inventory record are coded 0.",
+    caution="Pipeline status does not imply construction has started or that a project will be completed.",
+    basis="Active-pipeline point count; zero is meaningful within the inventory"
+  ),
+  list(
+    key="plantOperatingMw", label="Operating generation capacity", group="Power", unit="MW",
+    definition="Operating generation capacity of mapped power plants located inside the hexagon.",
+    source="U.S. EPA eGRID 2024 power-plant records, operating_mw field.",
+    calculation="Plant-point operating MW is summed within each cell.",
+    missing="Cells with no mapped eGRID plant are coded 0.",
+    caution="Nearby generation is regional context; it does not establish available capacity or a supply relationship with a data center.",
+    basis="eGRID 2024 plant-point sum; zero is meaningful"
+  ),
+  list(
+    key="plantCount", label="Power-plant count", group="Power", unit="plants",
+    definition="Number of eGRID power-plant records whose mapped plant point falls inside the hexagon.",
+    source="U.S. EPA eGRID 2024 power-plant records.",
+    calculation="Point-in-polygon count of plant records.",
+    missing="Cells with no mapped eGRID plant are coded 0.",
+    caution="A plant record can contain multiple generators; the count measures plant sites, not generating units or fuel diversity.",
+    basis="eGRID 2024 plant-point count; zero is meaningful"
+  ),
+  list(
+    key="hvLineKm", label="High-voltage line length", group="Power", unit="km",
+    definition="Mapped length of transmission-line features rated at 200 kV or higher within the hexagon.",
+    source="OpenStreetMap U.S. power extract dated 7 September 2026.",
+    calculation="Qualifying line geometries are intersected with each cell and their within-cell segment lengths are summed.",
+    missing="No mapped qualifying segment is coded 0; incomplete voltage tags can also lead to a zero.",
+    caution="OSM completeness varies. Line presence does not measure interconnection, deliverability, congestion, redundancy, or spare capacity.",
+    basis="OSM line length at or above 200 kV intersected with each cell"
+  ),
+  list(
+    key="queueActiveMw", label="Active interconnection queue", group="Power", unit="MW",
+    definition="Active generation-interconnection queue capacity associated with the county containing the cell centroid.",
+    source="Berkeley Lab Queued Up project-level generation queue data through 2025, aggregated to counties.",
+    calculation="Positive reported MW fields are summed by county; the county value is assigned to cells by centroid.",
+    missing="No county queue value is shown as Unknown. A published county value of 0 remains 0.",
+    caution="This is a generation queue measure, not a data-center load queue, available grid headroom, or expected completion capacity.",
+    basis="County value assigned at the cell centroid"
+  ),
+  list(
+    key="waterFactor", label="Water-scarcity factor", group="Resources", unit="factor",
+    definition="AWARE annual-average characterization factor for the county containing the cell centroid; higher values indicate greater relative scarcity.",
+    source="Prepared county resource context using the AWARE annual-average factor.",
+    calculation="The county value is assigned to each cell by centroid. Negative source sentinel values are treated as missing.",
+    missing="Unavailable county values are Unknown and are excluded from complete-pair correlations.",
+    caution="County scarcity is screening context and does not establish site water demand, rights, utility capacity, cooling design, or local hydrology.",
+    basis="County AWARE annual average assigned at the cell centroid"
+  ),
+  list(
+    key="waterWithdrawalMgd", label="Total water withdrawal", group="Resources", unit="MGD",
+    definition="Total county water withdrawal across reported uses, measured in million gallons per day.",
+    source="U.S. Geological Survey 2015 county water-use data in the prepared resource layer.",
+    calculation="The county total is assigned to each cell by centroid; it is not divided by cell area.",
+    missing="Unavailable county values are Unknown. A published zero remains 0.",
+    caution="Total withdrawals are not data-center water use, available supply, consumptive use, or permitted capacity.",
+    basis="County USGS total assigned at the cell centroid"
+  ),
+  list(
+    key="droughtScore", label="Drought risk score", group="Resources", unit="score",
+    definition="County drought risk score on the National Risk Index 0–100 scale.",
+    source="FEMA National Risk Index county context in the prepared resource layer.",
+    calculation="The county score is assigned to each cell by centroid.",
+    missing="Unavailable county scores are Unknown and excluded from complete-pair calculations.",
+    caution="The score represents county-level relative risk, not a facility-specific probability, forecast, or expected outage.",
+    basis="County NRI drought score assigned at the cell centroid"
+  ),
+  list(
+    key="heatScore", label="Heat-wave risk score", group="Resources", unit="score",
+    definition="County heat-wave risk score on the National Risk Index 0–100 scale.",
+    source="FEMA National Risk Index county context in the prepared resource layer.",
+    calculation="The county score is assigned to each cell by centroid.",
+    missing="Unavailable county scores are Unknown and excluded from complete-pair calculations.",
+    caution="The score is county-level relative risk and does not measure site cooling performance or facility resilience.",
+    basis="County NRI heat-wave score assigned at the cell centroid"
+  ),
+  list(
+    key="cbpEstablishments", label="Data-processing establishments", group="Resources", unit="establishments",
+    definition="Published county establishment count for NAICS 518210, Computing Infrastructure Providers, Data Processing, Web Hosting, and Related Services.",
+    source="U.S. Census Bureau 2023 County Business Patterns, NAICS 518210.",
+    calculation="The published county count is assigned to each cell by centroid.",
+    missing="A county with no published CBP row is Unknown and is not treated as zero.",
+    caution="This is a broader industry-ecosystem measure and is not a count of physical data-center campuses.",
+    basis="County CBP 2023 value assigned at the cell centroid"
+  ),
+  list(
+    key="policyBills", label="State data-center bills", group="Legislation", unit="bills",
+    definition="Number of tracked state data-center legislative records in the prepared policy dataset.",
+    source="Layer 07 state legislation summary and underlying state_legislation_summary.csv, reviewed 28 September 2026.",
+    calculation="The state total is assigned to each cell by centroid.",
+    missing="States with no tracked record are represented by the prepared state total; tracker absence is not proof that no relevant policy exists.",
+    caution="A bill count mixes topics and statuses and does not measure policy stringency, enforcement, or project-level applicability.",
+    basis="State bill count assigned at the cell centroid"
+  ),
+  list(
+    key="incentive", label="Dedicated state incentive", group="Legislation", unit="0/1",
+    definition="Indicator that the state has a dedicated data-center incentive program in the prepared snapshot.",
+    source="Layer 07 NCSL-derived state incentive snapshot dated 25 September 2026.",
+    calculation="State indicator is assigned to each cell by centroid: 1 = present, 0 = not recorded in the snapshot.",
+    missing="The indicator reflects snapshot coverage; 0 should be read as not recorded rather than a permanent policy absence.",
+    caution="Presence does not establish eligibility, award receipt, incentive value, compliance, or a causal effect on construction.",
+    basis="State indicator assigned at the cell centroid"
+  ),
+  list(
+    key="moratoriums", label="State moratorium tracker", group="Legislation", unit="records",
+    definition="Count of tracked state moratorium-related data-center policy records.",
+    source="Layer 07 NCSL-derived moratorium snapshot dated 25 September 2026.",
+    calculation="The state tracker count is assigned to each cell by centroid.",
+    missing="No tracked record is coded 0 within the snapshot; tracker absence is not proof of no local or untracked restriction.",
+    caution="Records can differ in status, scope, duration, and legal effect; the count is not a stringency scale.",
+    basis="State tracker count assigned at the cell centroid"
+  ),
+  list(
+    key="localActionCount", label="Local-action records", group="Local opposition", unit="records",
+    definition="Number of geocoded local government action records whose point falls inside the hexagon.",
+    source="FracTracker local-actions GeoPackage used in Layer 08.",
+    calculation="Point-in-polygon count of local-action records.",
+    missing="No matched tracker point is coded 0; tracker absence is not proof of no local action.",
+    caution="Records vary in action type and status, and point placement may represent a jurisdiction rather than a project site.",
+    basis="FracTracker local-action point count; zero means no matched tracker record"
+  ),
+  list(
+    key="directOppositionCount", label="Direct facility opposition", group="Local opposition", unit="facilities",
+    definition="Number of facility records with direct project-specific opposition evidence.",
+    source="Layer 08 matched opposition events derived from opposition_events.csv, reviewed 28 September 2026.",
+    calculation="Count of facilities where opposition_direct_facility_flag equals 1 within each cell.",
+    missing="Facilities without a direct matched record contribute 0; that is unknown/no match, not confirmed absence of opposition.",
+    caution="Direct evidence indicates a documented match and does not provide a standardized intensity, duration, or causal effect.",
+    basis="Direct matched facility count; zero means no direct match in the tracker"
+  )
 )
 
 payload <- list(

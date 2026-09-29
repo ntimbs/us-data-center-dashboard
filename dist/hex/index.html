@@ -6,7 +6,7 @@
   <meta name="description" content="Analysis-ready 50 km equal-area hex grid for exploring spatial relationships between U.S. data centers, power, resources, legislation, and local opposition.">
   <title>U.S. Hexagon Spatial Explorer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M32 9l19 11v22L32 53 13 42V20z' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=1.2">
 </head>
 <body>
   <header class="topbar">
@@ -24,11 +24,11 @@
     <aside class="controls" aria-label="Spatial analysis controls">
       <div class="panel-heading">
         <div><span class="eyebrow">Model setup</span><h2>Compare variables</h2></div>
-        <button id="resetButton" class="text-button" type="button">Reset</button>
+        <div class="panel-actions"><button id="guideButton" class="text-button" type="button">Measure guide</button><button id="resetButton" class="text-button" type="button">Reset</button></div>
       </div>
 
-      <label class="field"><span>Outcome</span><select id="outcomeSelect"></select></label>
-      <label class="field"><span>Comparison variable</span><select id="compareSelect"></select></label>
+      <label class="field"><span>Outcome</span><select id="outcomeSelect" aria-describedby="outcomeHelp"></select><small id="outcomeHelp" class="variable-help"></small></label>
+      <label class="field"><span>Comparison variable</span><select id="compareSelect" aria-describedby="compareHelp"></select><small id="compareHelp" class="variable-help"></small></label>
       <label class="field"><span>State</span><select id="stateFilter"><option value="">All states</option></select></label>
       <label class="field"><span>Minimum land share</span><select id="landFilter"><option value="0">Any land share</option><option value="0.25">25% or more</option><option value="0.5">50% or more</option></select></label>
 
@@ -96,8 +96,40 @@
     </aside>
   </main>
 
-  <script src="../dashboard-data.js"></script>
-  <script src="hex-data.js"></script>
-  <script src="app.js"></script>
+  <div id="guideModal" class="guide-backdrop" hidden>
+    <section class="guide-dialog" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+      <header class="guide-header">
+        <div><span class="eyebrow">Data dictionary</span><h2 id="guideTitle">Measures and interpretation</h2></div>
+        <button id="guideClose" class="guide-close" type="button" aria-label="Close measure guide">×</button>
+      </header>
+      <div class="guide-scroll">
+        <div class="guide-intro">
+          <p>Every map value is calculated for a 50 km equal-area hexagon. Point and line features are aggregated inside cells; county and state measures are assigned using the cell centroid.</p>
+          <dl>
+            <div><dt>Projection</dt><dd>North America Albers Equal Area</dd></div>
+            <div><dt>Full-cell area</dt><dd>2,165.1 km²</dd></div>
+            <div><dt>Snapshot</dt><dd>28 September 2026</dd></div>
+          </dl>
+        </div>
+        <nav id="guideNav" class="guide-nav" aria-label="Measure groups"></nav>
+        <div id="guideContent" class="guide-content"></div>
+        <section class="statistics-guide">
+          <span class="eyebrow">Statistics</span><h2>How the comparison measures work</h2>
+          <div class="stat-guide-grid">
+            <article><h3>Pearson r</h3><p>Correlation between the outcome and comparison variable in the same complete cells. It ranges from −1 to 1 and does not adjust for spatial dependence.</p></article>
+            <article><h3>Outcome Moran’s I</h3><p>Global clustering of the selected outcome using row-standardized queen neighbors. Positive values indicate similar values tend to be adjacent. No permutation p-value is reported.</p></article>
+            <article><h3>Spatial-lag r</h3><p>Correlation between each cell’s outcome and the average comparison value among its adjacent cells. It is descriptive and is not a causal estimator.</p></article>
+            <article><h3>Bivariate map</h3><p>Classifies cells as high or low relative to the current sample mean for both selected variables. Changing the state or land-share filter changes the cut points.</p></article>
+            <article><h3>Complete pairs</h3><p>Cells with numeric values for both selected variables. Unknown values are excluded; valid zeros remain in the calculation.</p></article>
+            <article><h3>Land share</h3><p>Share of the full hexagon intersecting the 50-state boundary. Use the 25% or 50% filter to test sensitivity to marginal coastal cells.</p></article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script src="../dashboard-data.js?v=1.2"></script>
+  <script src="hex-data.js?v=1.2"></script>
+  <script src="app.js?v=1.2"></script>
 </body>
 </html>
