@@ -31,6 +31,8 @@ button, select, input { color: inherit; }
 .brand p { margin: 3px 0 0; color: var(--muted); font-size: .78rem; }
 .snapshot { display: flex; gap: 8px; align-items: baseline; color: var(--muted); font-size: .76rem; }
 .snapshot strong { color: var(--text); font-size: .82rem; font-weight: 650; }
+.header-actions { display:flex; align-items:center; gap:12px; }
+.header-actions > a { padding:7px 10px; border:1px solid #2b5368; border-radius:6px; color:#bfe9e4; text-decoration:none; font-size:.76rem; }
 
 .workspace { height: calc(100vh - 68px); display: grid; grid-template-columns: 282px minmax(620px, 1fr) 294px; }
 .filters, .detail-panel { min-height: 0; overflow-y: auto; background: var(--panel); }
@@ -141,7 +143,7 @@ h2 { margin: 3px 0 0; font-size: 1rem; line-height: 1.25; }
   .map-caption span:last-child { display: none; }
 }
 @media (max-width: 480px) {
-  .snapshot { display: none; }
+  .snapshot, .header-actions > a { display: none; }
   .brand h1 { font-size: .9rem; }
   .field-grid, .detail-grid { grid-template-columns: 1fr; }
   .map-shell { min-height: 370px; }
