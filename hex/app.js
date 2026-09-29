@@ -80,14 +80,16 @@
     const values = filtered.map(c => c[key]).filter(Number.isFinite).sort((a,b)=>a-b);
     const positives = values.filter(v => v > 0);
     if (values.length && positives.length && values.filter(v => v === 0).length / values.length > .15) {
-      return [0, .25, .5, .75, 1].map((p, i) => i === 0 ? 0 : quantile(positives, p));
+      return [...new Set([0, .25, .5, .75, 1].map((p, i) => i === 0 ? 0 : quantile(positives, p)))].sort((a,b)=>a-b);
     }
-    return [.2,.4,.6,.8,1].map(p => quantile(values,p));
+    return [...new Set([.2,.4,.6,.8,1].map(p => quantile(values,p)))].sort((a,b)=>a-b);
   }
+  function rampFor(length) { return Array.from({length}, (_,i) => palette[Math.round(i*(palette.length-1)/Math.max(1,length-1))]); }
   function binColor(value, breaks) {
     if (!Number.isFinite(value)) return "#172938";
     const i = breaks.findIndex(limit => value <= limit);
-    return palette[i < 0 ? palette.length - 1 : i];
+    const ramp = rampFor(breaks.length);
+    return ramp[i < 0 ? ramp.length - 1 : i];
   }
   function renderStates() {
     els.stateLayer.innerHTML = base.states.map(s => `<path class="state" d="${s.path}"><title>${escapeHtml(s.name)}</title></path>`).join("");
@@ -122,7 +124,7 @@
       return;
     }
     const v=varByKey.get(key);
-    els.legend.innerHTML = `<div class="legend-title">${escapeHtml(v.label)}</div>${palette.map((color,i)=>`<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span>${breaks[i]===0?`0 ${escapeHtml(v.unit)}`:`≤ ${escapeHtml(number(breaks[i],v.unit))}`}</div>`).join("")}<div class="legend-item"><span class="legend-swatch" style="background:#172938"></span>Missing</div>`;
+    els.legend.innerHTML = `<div class="legend-title">${escapeHtml(v.label)}</div>${rampFor(breaks.length).map((color,i)=>`<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span>${breaks[i]===0?`0 ${escapeHtml(v.unit)}`:`≤ ${escapeHtml(number(breaks[i],v.unit))}`}</div>`).join("")}<div class="legend-item"><span class="legend-swatch" style="background:#172938"></span>Missing</div>`;
   }
   function showTooltip(event,c) {
     if (!c) return;
@@ -175,7 +177,7 @@
     const keys=["id","region","state","countyFips","countyName","xAea","yAea","lon","lat","landFraction","facilityCount","reportedMw","knownMwCount","operatingCount","pipelineCount","directOppositionCount","plantCount","plantOperatingMw","plantNameplateMw","hvLineKm","queueActiveMw","waterFactor","waterClass","waterWithdrawalMgd","riskScore","droughtScore","wildfireScore","floodScore","heatScore","cbpEstablishments","incentive","electricityTax","moratoriums","policyBills","policyPassed","localActionCount","neighbors"];
     const rows=[keys,...filtered.map(c=>keys.map(k=>Array.isArray(c[k])?c[k].join(";"):c[k]))];
     const csv=rows.map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
-    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="us_hex_grid_100km_filtered.csv";a.click();URL.revokeObjectURL(a.href);
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`us_hex_grid_${meta.cellWidthKm}km_filtered.csv`;a.click();URL.revokeObjectURL(a.href);
   }
   els.outcomeSelect.addEventListener("change",()=>{outcome=els.outcomeSelect.value;update();});
   els.compareSelect.addEventListener("change",()=>{comparison=els.compareSelect.value;update();});
