@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const { cells, variables, meta } = window.HEX_DASHBOARD_DATA;
+  const { cells, variables, meta, facilityHex = [] } = window.HEX_DASHBOARD_DATA;
   const base = window.DASHBOARD_DATA;
   cells.forEach(c => { c.neighbors = Array.isArray(c.neighbors) ? c.neighbors : (typeof c.neighbors === "string" && c.neighbors ? [c.neighbors] : []); });
   const fmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
@@ -9,17 +9,27 @@
   const palette = ["#102333", "#15505b", "#188d8a", "#2dd4bf", "#a7f3d0"];
   const bivar = { LL:"#304b5c", LH:"#6f62a6", HL:"#cf8f42", HH:"#16a393", missing:"#172938" };
   const outcomeKeys = new Set(["facilityCount", "reportedMw", "operatingCount", "pipelineCount"]);
+  const facilityHexById = new Map(facilityHex.map(row => [row.id, row.hexId]));
+  const allFacilities = base.facilities.map(f => ({ ...f, hexId:facilityHexById.get(f.id) })).filter(f => f.hexId && byId.has(f.hexId));
+  const filterGroupDefs = {
+    status: { key:f=>f.phase||"Unknown", categories:[["Operating","#2dd4bf"],["Development","#60a5fa"],["Expanding","#a78bfa"],["Proposed","#f5b942"],["Pre-proposal","#eab676"],["Suspended","#fb7185"],["Cancelled","#e11d48"],["Unknown","#718096"]] },
+    activity: { key:f=>f.activity||"Unknown", categories:[["Existing","#2dd4bf"],["Existing / expansion","#a78bfa"],["Active pipeline","#60a5fa"],["Paused / cancelled","#fb7185"],["Unknown","#718096"]] },
+    capacity: { key:f=>f.capacity||"Unknown", categories:[["Mega campus (1,000+ MW)","#7c3aed"],["Hyperscale (100-999 MW)","#2563eb"],["Large (51-99 MW)","#0891b2"],["Medium (11-50 MW)","#14b8a6"],["Small (0-10 MW)","#84cc16"],["Unknown","#64748b"]] },
+    power: { key:f=>f.power||"Unknown", categories:[["Grid","#60a5fa"],["Natural gas","#f59e0b"],["Renewable","#22c55e"],["Nuclear","#a78bfa"],["Mixed","#f97316"],["Other fossil","#ef4444"],["Storage or fuel cell","#06b6d4"],["Other","#94a3b8"],["Unknown","#475569"]] }
+  };
   const els = Object.fromEntries([
     "outcomeSelect","compareSelect","stateFilter","landFilter","pointToggle","sampleCount","coverageText","exportButton",
     "metricHexes","metricOccupied","metricMoran","metricSpatial","mapTitle","mapShell","map","mapViewport","stateLayer",
     "hexLayer","facilityLayer","outlineLayer","tooltip","legend","zoomOut","zoomReset","zoomIn","scatterplot","scatterTitle",
     "pearsonStat","interpretTitle","interpretText","cellArea","pairCount","detailPanel","resetButton","outcomeHelp","compareHelp",
-    "guideButton","guideModal","guideClose","guideNav","guideContent"
+    "guideButton","guideModal","guideClose","guideNav","guideContent","statusChecks","activityChecks","capacityChecks","powerChecks",
+    "statusSelection","activitySelection","capacitySelection","powerSelection"
   ].map(id => [id, document.getElementById(id)]));
   let outcome = "facilityCount";
   let comparison = "hvLineKm";
   let display = "outcome";
   let filtered = cells;
+  let selectedFacilities = allFacilities;
   let selectedId = null;
   let transform = { x:0, y:0, scale:1 };
   let dragging = false;
@@ -39,6 +49,62 @@
   els.compareSelect.value = comparison;
   [...new Set(cells.map(c => c.state).filter(Boolean))].sort().forEach(s => els.stateFilter.insertAdjacentHTML("beforeend", `<option value="${s}">${s}</option>`));
   els.cellArea.textContent = `${fmt.format(meta.cellAreaSqKm)} km²`;
+
+  const filterGroups = {};
+  function initializeFilterGroups() {
+    Object.entries(filterGroupDefs).forEach(([name, def]) => {
+      const present = new Set(allFacilities.map(def.key));
+      const categories = def.categories.filter(([label]) => present.has(label));
+      [...present].filter(label => !categories.some(([known]) => known === label)).sort().forEach(label => categories.push([label,"#64748b"]));
+      const container = els[`${name}Checks`];
+      container.innerHTML = categories.map(([label,color], index) => {
+        const id=`hex${name}Choice${index}`;
+        return `<label class="choice-checkbox" for="${id}"><input id="${id}" type="checkbox" value="${escapeHtml(label)}" checked><span class="choice-dot" style="--choice-color:${color}"></span><span class="choice-label">${escapeHtml(label)}</span><span class="choice-count" data-choice-count="${escapeHtml(label)}">0</span></label>`;
+      }).join("");
+      filterGroups[name]={...def,categories,container,summary:els[`${name}Selection`]};
+      container.querySelectorAll("input").forEach(input=>input.addEventListener("change",()=>update({reaggregate:true})));
+    });
+  }
+  function selectedValues(name) { return [...filterGroups[name].container.querySelectorAll("input:checked")].map(input=>input.value); }
+  function setGroupSelection(name, values) {
+    const wanted=new Set(values);
+    filterGroups[name].container.querySelectorAll("input").forEach(input=>{input.checked=wanted.has(input.value);});
+  }
+  function currentFacilityFilters() {
+    return { statuses:selectedValues("status"), activities:selectedValues("activity"), capacities:selectedValues("capacity"), powerSources:selectedValues("power") };
+  }
+  function matchesFacilityFilters(f,q,omitGroup=null) {
+    if (omitGroup!=="status"&&!q.statuses.includes(filterGroupDefs.status.key(f))) return false;
+    if (omitGroup!=="activity"&&!q.activities.includes(filterGroupDefs.activity.key(f))) return false;
+    if (omitGroup!=="capacity"&&!q.capacities.includes(filterGroupDefs.capacity.key(f))) return false;
+    if (omitGroup!=="power"&&!q.powerSources.includes(filterGroupDefs.power.key(f))) return false;
+    return true;
+  }
+  function reaggregateFacilities() {
+    const q=currentFacilityFilters();
+    selectedFacilities=allFacilities.filter(f=>matchesFacilityFilters(f,q));
+    cells.forEach(c=>{c.facilityCount=0;c.reportedMw=0;c.knownMwCount=0;c.operatingCount=0;c.pipelineCount=0;c.directOppositionCount=0;});
+    selectedFacilities.forEach(f=>{
+      const c=byId.get(f.hexId); if(!c)return;
+      c.facilityCount+=1;
+      if(Number.isFinite(f.mw)){c.reportedMw+=f.mw;c.knownMwCount+=1;}
+      if(f.phase==="Operating")c.operatingCount+=1;
+      if(f.activity==="Active pipeline")c.pipelineCount+=1;
+      if(f.directOpposition===1)c.directOppositionCount+=1;
+    });
+  }
+  function updateCheckboxCounts() {
+    const q=currentFacilityFilters(), visibleIds=new Set(filtered.map(c=>c.id));
+    Object.entries(filterGroups).forEach(([name,group])=>{
+      const counts=new Map(group.categories.map(([label])=>[label,0]));
+      allFacilities.filter(f=>visibleIds.has(f.hexId)&&matchesFacilityFilters(f,q,name)).forEach(f=>{
+        const label=group.key(f);counts.set(label,(counts.get(label)||0)+1);
+      });
+      group.container.querySelectorAll("[data-choice-count]").forEach(span=>{span.textContent=fmt.format(counts.get(span.dataset.choiceCount)||0);});
+      group.summary.textContent=`${selectedValues(name).length} of ${group.categories.length}`;
+    });
+  }
+  initializeFilterGroups();
 
   function groupId(group) { return `guide-${group.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`; }
   function renderGuide() {
@@ -156,7 +222,7 @@
       path.addEventListener("pointerleave", () => els.tooltip.hidden=true);
       path.addEventListener("click", e => { e.stopPropagation(); selectCell(path.dataset.id); });
     });
-    els.facilityLayer.innerHTML = els.pointToggle.checked ? base.facilities.filter(f => !els.stateFilter.value || f.state===els.stateFilter.value).map(f => `<circle class="facility-point" cx="${f.x}" cy="${f.y}" r="1.6"><title>${escapeHtml(f.name)}</title></circle>`).join("") : "";
+    els.facilityLayer.innerHTML = els.pointToggle.checked ? selectedFacilities.filter(f=>selectedSet.has(f.hexId)).map(f => `<circle class="facility-point" cx="${f.x}" cy="${f.y}" r="1.6"><title>${escapeHtml(f.name)}</title></circle>`).join("") : "";
     renderLegend(key, breaks);
   }
   function renderLegend(key, breaks) {
@@ -177,8 +243,10 @@
   function renderSummary() {
     stats=computeStats();
     const occupied=filtered.filter(c=>c.facilityCount>0).length;
+    const visibleIds=new Set(filtered.map(c=>c.id));
+    const visibleFacilities=selectedFacilities.filter(f=>visibleIds.has(f.hexId)).length;
     els.sampleCount.textContent=`${fmt.format(filtered.length)} hexagons`;
-    els.coverageText.textContent=`${fmt.format(occupied)} occupied · ${fmt.format(stats.pairs)} complete pairs`;
+    els.coverageText.textContent=`${fmt.format(visibleFacilities)} selected facilities · ${fmt.format(occupied)} occupied · ${fmt.format(stats.pairs)} complete pairs`;
     els.metricHexes.textContent=fmt.format(filtered.length);
     els.metricOccupied.textContent=fmt.format(occupied);
     els.metricMoran.textContent=Number.isFinite(stats.moran)?stats.moran.toFixed(3):"—";
@@ -211,7 +279,13 @@
     els.detailPanel.innerHTML=`<div class="detail-content"><span class="eyebrow">Analysis cell</span><h2>${escapeHtml(c.id)}</h2><p class="detail-location">${escapeHtml(c.countyName||"County unavailable")}, ${escapeHtml(c.stateName||c.state||"")}</p><span class="detail-badge">${number(c.landFraction*100,"% land")}</span>${section("Selected analysis",[item(ov.label,number(c[outcome],ov.unit)),item(cv.label,number(c[comparison],cv.unit)),item("Neighbor cells",fmt.format(c.neighbors.length)),item("Centroid",`${c.lat.toFixed(3)}, ${c.lon.toFixed(3)}`)])}${section("Data centers",[item("Facilities",number(c.facilityCount)),item("Reported MW",number(c.reportedMw,"MW")),item("Operating",number(c.operatingCount)),item("Active pipeline",number(c.pipelineCount)),item("Known MW records",`${c.knownMwCount} of ${c.facilityCount}`),item("Direct opposition",number(c.directOppositionCount))])}${section("Power",[item("Operating generation",number(c.plantOperatingMw,"MW")),item("Power plants",number(c.plantCount)),item("≥200 kV lines",number(c.hvLineKm,"km")),item("Active queue",number(c.queueActiveMw,"MW"))])}${section("Resources & policy",[item("Water scarcity",number(c.waterFactor)),item("Drought risk",number(c.droughtScore)),item("State bills",number(c.policyBills)),item("Dedicated incentive",c.incentive===1?"Yes":c.incentive===0?"No":"Unknown"),item("Moratorium records",number(c.moratoriums)),item("Local actions",number(c.localActionCount))])}</div>`;
     els.detailPanel.classList.add("open"); renderMap();
   }
-  function update() { filtered=currentCells(); renderSummary(); renderMap(); renderScatter(); }
+  function update(options={}) {
+    if(options.reaggregate)reaggregateFacilities();
+    filtered=currentCells();
+    updateCheckboxCounts();
+    renderSummary();renderMap();renderScatter();
+    if(selectedId)selectCell(selectedId);
+  }
   function updateTransform(){els.mapViewport.setAttribute("transform",`translate(${transform.x} ${transform.y}) scale(${transform.scale})`);}
   function zoom(factor,cx=500,cy=300){const old=transform.scale,next=Math.max(1,Math.min(6,old*factor));transform.x=cx-(cx-transform.x)*(next/old);transform.y=cy-(cy-transform.y)*(next/old);transform.scale=next;updateTransform();}
   function resetView(){transform={x:0,y:0,scale:1};updateTransform();}
@@ -224,8 +298,13 @@
   els.outcomeSelect.addEventListener("change",()=>{outcome=els.outcomeSelect.value;update();});
   els.compareSelect.addEventListener("change",()=>{comparison=els.compareSelect.value;update();});
   els.stateFilter.addEventListener("change",update); els.landFilter.addEventListener("change",update); els.pointToggle.addEventListener("change",renderMap);
+  document.querySelectorAll("[data-filter-action]").forEach(button=>button.addEventListener("click",()=>{
+    const group=filterGroups[button.dataset.filterGroup];
+    setGroupSelection(button.dataset.filterGroup,button.dataset.filterAction==="all"?group.categories.map(([label])=>label):[]);
+    update({reaggregate:true});
+  }));
   document.querySelectorAll(".display-button").forEach(b=>b.addEventListener("click",()=>{display=b.dataset.display;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x===b));update();}));
-  els.resetButton.addEventListener("click",()=>{outcome="facilityCount";comparison="hvLineKm";display="outcome";els.outcomeSelect.value=outcome;els.compareSelect.value=comparison;els.stateFilter.value="";els.landFilter.value="0";els.pointToggle.checked=false;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display==="outcome"));selectedId=null;els.detailPanel.classList.remove("open");els.detailPanel.innerHTML='<div class="detail-empty"><span class="detail-hex"></span><h2>Select a hexagon</h2><p>Choose a cell to inspect its outcome, context measures, source geography, and neighbors.</p></div>';resetView();update();});
+  els.resetButton.addEventListener("click",()=>{outcome="facilityCount";comparison="hvLineKm";display="outcome";els.outcomeSelect.value=outcome;els.compareSelect.value=comparison;els.stateFilter.value="";els.landFilter.value="0";els.pointToggle.checked=false;Object.entries(filterGroups).forEach(([name,group])=>setGroupSelection(name,group.categories.map(([label])=>label)));document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display==="outcome"));selectedId=null;els.detailPanel.classList.remove("open");els.detailPanel.innerHTML='<div class="detail-empty"><span class="detail-hex"></span><h2>Select a hexagon</h2><p>Choose a cell to inspect its outcome, context measures, source geography, and neighbors.</p></div>';resetView();update({reaggregate:true});});
   els.exportButton.addEventListener("click",exportCsv); els.zoomIn.addEventListener("click",()=>zoom(1.35));els.zoomOut.addEventListener("click",()=>zoom(1/1.35));els.zoomReset.addEventListener("click",resetView);
   els.guideButton.addEventListener("click",openGuide); els.guideClose.addEventListener("click",closeGuide);
   els.guideModal.addEventListener("click",event=>{if(event.target===els.guideModal)closeGuide();});
@@ -238,9 +317,9 @@
   function registerWebMcp(){
     const context=document.modelContext;if(!context?.registerTool)return;
     const register=t=>{try{Promise.resolve(context.registerTool(t)).catch(()=>{});}catch(_){}};
-    register({name:"set_hex_analysis",title:"Set hex-grid analysis",description:"Choose the visible outcome, comparison variable, optional state, and map display.",inputSchema:{type:"object",properties:{outcome:{type:"string",enum:[...outcomeKeys]},comparison:{type:"string",enum:variables.filter(v=>!outcomeKeys.has(v.key)).map(v=>v.key)},state:{type:"string"},display:{type:"string",enum:["outcome","comparison","bivariate"]}},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){const allowed=new Set(["outcome","comparison","state","display"]);if(!input||typeof input!=="object"||Array.isArray(input)||Object.keys(input).some(k=>!allowed.has(k)))throw new Error("Invalid analysis inputs.");if(input.outcome){outcome=input.outcome;els.outcomeSelect.value=outcome}if(input.comparison){comparison=input.comparison;els.compareSelect.value=comparison}if(input.state!==undefined){els.stateFilter.value=input.state}if(input.display){display=input.display;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display===display))}update();return{hexagons:filtered.length,outcome,comparison,display,pearson:stats.pearson,moransI:stats.moran,spatialLagR:stats.spatial};}});
+    register({name:"set_hex_analysis",title:"Set hex-grid analysis",description:"Choose variables, geography, display, and facility categories; the selected facilities are re-aggregated into the grid.",inputSchema:{type:"object",properties:{outcome:{type:"string",enum:[...outcomeKeys]},comparison:{type:"string",enum:variables.filter(v=>!outcomeKeys.has(v.key)).map(v=>v.key)},state:{type:"string"},display:{type:"string",enum:["outcome","comparison","bivariate"]},statuses:{type:"array",items:{type:"string",enum:filterGroups.status.categories.map(x=>x[0])}},activities:{type:"array",items:{type:"string",enum:filterGroups.activity.categories.map(x=>x[0])}},capacities:{type:"array",items:{type:"string",enum:filterGroups.capacity.categories.map(x=>x[0])}},powerSources:{type:"array",items:{type:"string",enum:filterGroups.power.categories.map(x=>x[0])}}},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){const allowed=new Set(["outcome","comparison","state","display","statuses","activities","capacities","powerSources"]);if(!input||typeof input!=="object"||Array.isArray(input)||Object.keys(input).some(k=>!allowed.has(k)))throw new Error("Invalid analysis inputs.");if(input.outcome){outcome=input.outcome;els.outcomeSelect.value=outcome}if(input.comparison){comparison=input.comparison;els.compareSelect.value=comparison}if(input.state!==undefined){els.stateFilter.value=input.state}if(input.display){display=input.display;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display===display))}if(input.statuses)setGroupSelection("status",input.statuses);if(input.activities)setGroupSelection("activity",input.activities);if(input.capacities)setGroupSelection("capacity",input.capacities);if(input.powerSources)setGroupSelection("power",input.powerSources);const changed=["statuses","activities","capacities","powerSources"].some(k=>Object.prototype.hasOwnProperty.call(input,k));update({reaggregate:changed});return{hexagons:filtered.length,selectedFacilities:selectedFacilities.filter(f=>new Set(filtered.map(c=>c.id)).has(f.hexId)).length,outcome,comparison,display,pearson:stats.pearson,moransI:stats.moran,spatialLagR:stats.spatial};}});
     register({name:"select_hexagon",title:"Select hexagon",description:"Open details for one exact analysis-cell ID.",inputSchema:{type:"object",properties:{hexId:{type:"string"}},required:["hexId"],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){if(!input||Object.keys(input).length!==1||typeof input.hexId!=="string"||!byId.has(input.hexId))throw new Error("Unknown hexagon ID.");selectCell(input.hexId);return{selected:input.hexId};}});
-    register({name:"read_spatial_summary",title:"Read spatial summary",description:"Return the current grid selection and descriptive spatial statistics.",inputSchema:{type:"object",properties:{},additionalProperties:false},annotations:{readOnlyHint:true,untrustedContentHint:false},execute(input){if(input&&Object.keys(input).length)throw new Error("This tool takes no inputs.");return{hexagons:filtered.length,occupied:filtered.filter(c=>c.facilityCount>0).length,outcome,comparison,pearson:stats.pearson,moransI:stats.moran,spatialLagR:stats.spatial,snapshot:meta.snapshot};}});
+    register({name:"read_spatial_summary",title:"Read spatial summary",description:"Return the current grid selection, facility filters, and descriptive spatial statistics.",inputSchema:{type:"object",properties:{},additionalProperties:false},annotations:{readOnlyHint:true,untrustedContentHint:false},execute(input){if(input&&Object.keys(input).length)throw new Error("This tool takes no inputs.");const visibleIds=new Set(filtered.map(c=>c.id));return{hexagons:filtered.length,occupied:filtered.filter(c=>c.facilityCount>0).length,selectedFacilities:selectedFacilities.filter(f=>visibleIds.has(f.hexId)).length,facilityFilters:currentFacilityFilters(),outcome,comparison,pearson:stats.pearson,moransI:stats.moran,spatialLagR:stats.spatial,snapshot:meta.snapshot};}});
   }
-  renderStates();update();registerWebMcp();
+  renderStates();update({reaggregate:true});registerWebMcp();
 })();
