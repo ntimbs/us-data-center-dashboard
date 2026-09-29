@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Analysis-ready 100 km equal-area hex grid for exploring spatial relationships between U.S. data centers, power, resources, legislation, and local opposition.">
+  <title>U.S. Hexagon Spatial Explorer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M32 9l19 11v22L32 53 13 42V20z' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="hex-mark" aria-hidden="true"></div>
+      <div><h1>U.S. Hexagon Spatial Explorer</h1><p>100 km equal-area cells · spatial association workspace</p></div>
+    </div>
+    <div class="header-actions">
+      <a href="../index.html">Facility view</a>
+      <div class="snapshot"><span>Snapshot</span><strong>28 Sep 2026</strong></div>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="controls" aria-label="Spatial analysis controls">
+      <div class="panel-heading">
+        <div><span class="eyebrow">Model setup</span><h2>Compare variables</h2></div>
+        <button id="resetButton" class="text-button" type="button">Reset</button>
+      </div>
+
+      <label class="field"><span>Outcome</span><select id="outcomeSelect"></select></label>
+      <label class="field"><span>Comparison variable</span><select id="compareSelect"></select></label>
+      <label class="field"><span>State</span><select id="stateFilter"><option value="">All states</option></select></label>
+      <label class="field"><span>Minimum land share</span><select id="landFilter"><option value="0">Any land share</option><option value="0.25">25% or more</option><option value="0.5">50% or more</option></select></label>
+
+      <fieldset class="layer-choice">
+        <legend>Map display</legend>
+        <div class="segmented" role="group" aria-label="Map display">
+          <button class="display-button active" data-display="outcome" type="button">Outcome</button>
+          <button class="display-button" data-display="comparison" type="button">Comparison</button>
+          <button class="display-button" data-display="bivariate" type="button">Bivariate</button>
+        </div>
+      </fieldset>
+
+      <label class="check-row"><input id="pointToggle" type="checkbox"><span>Show facility points</span></label>
+
+      <div class="selection-card">
+        <span>Analysis sample</span>
+        <strong id="sampleCount">—</strong>
+        <small id="coverageText">—</small>
+        <button id="exportButton" class="secondary-button" type="button">Export current cells</button>
+        <div class="download-row"><a href="downloads/us_hex_grid_100km.csv" download>Full CSV</a><a href="downloads/us_hex_grid_100km.geojson" download>GeoJSON</a></div>
+      </div>
+
+      <div class="method-note"><span>i</span><p>Correlations are descriptive. County and state measures repeat across cells using the cell centroid; point and line measures are aggregated within each cell.</p></div>
+    </aside>
+
+    <section class="main-panel">
+      <div class="metric-strip" aria-label="Spatial statistics">
+        <article><span>Hexagons</span><strong id="metricHexes">—</strong><small>Cells in current sample</small></article>
+        <article><span>Occupied cells</span><strong id="metricOccupied">—</strong><small>At least one data center</small></article>
+        <article><span>Outcome Moran’s I</span><strong id="metricMoran">—</strong><small>Queen-contiguity clustering</small></article>
+        <article><span>Spatial-lag r</span><strong id="metricSpatial">—</strong><small>Outcome vs. neighbors’ comparison</small></article>
+      </div>
+
+      <article class="map-card">
+        <div class="map-toolbar">
+          <div><span class="eyebrow">Equal-area grid</span><h2 id="mapTitle">Data-center count</h2></div>
+          <div class="map-actions"><button id="zoomOut" type="button" aria-label="Zoom out">−</button><button id="zoomReset" type="button">Reset view</button><button id="zoomIn" type="button" aria-label="Zoom in">+</button></div>
+        </div>
+        <div id="mapShell" class="map-shell">
+          <svg id="map" viewBox="0 0 1000 600" role="img" aria-label="Hexagonal grid map of the United States">
+            <g id="mapViewport"><g id="stateLayer"></g><g id="hexLayer"></g><g id="facilityLayer"></g><g id="outlineLayer"></g></g>
+          </svg>
+          <div id="tooltip" class="tooltip" hidden></div>
+          <div class="map-caption"><span>Equal-area</span><span>100 km cell width · drag to pan · scroll to zoom</span></div>
+          <div id="legend" class="legend" aria-label="Map legend"></div>
+        </div>
+      </article>
+
+      <div class="analysis-row">
+        <article class="scatter-card">
+          <div class="card-heading"><div><span class="eyebrow">Cell-level relationship</span><h2 id="scatterTitle">—</h2></div><strong id="pearsonStat">—</strong></div>
+          <svg id="scatterplot" viewBox="0 0 560 210" role="img" aria-label="Scatterplot of selected hex-grid variables"></svg>
+        </article>
+        <article class="read-card">
+          <span class="eyebrow">Interpretation</span>
+          <h2 id="interpretTitle">Read the measures together</h2>
+          <p id="interpretText">The map and scatterplot update from the same set of land cells. Moran’s I measures clustering in the outcome; spatial-lag r compares each outcome value with neighboring cells’ comparison values.</p>
+          <dl><div><dt>Cell area</dt><dd id="cellArea">—</dd></div><div><dt>Complete pairs</dt><dd id="pairCount">—</dd></div><div><dt>Adjacency</dt><dd>Queen</dd></div></dl>
+        </article>
+      </div>
+    </section>
+
+    <aside id="detailPanel" class="detail-panel" aria-label="Selected hexagon details">
+      <div class="detail-empty"><span class="detail-hex"></span><h2>Select a hexagon</h2><p>Choose a cell to inspect its outcome, context measures, source geography, and neighbors.</p></div>
+    </aside>
+  </main>
+
+  <script src="../dashboard-data.js"></script>
+  <script src="hex-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
