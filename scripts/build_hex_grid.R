@@ -18,7 +18,9 @@ county_file <- file.path(root, "Resources", "US Resources Layer", "Layer 06 Land
 actions_file <- file.path(root, "QGIS", "FracTracker_Local_Actions.gpkg")
 
 target_crs <- "ESRI:102008"
-cell_size <- 100000
+cell_size_km <- 50
+cell_size <- cell_size_km * 1000
+grid_slug <- paste0(cell_size_km, "km")
 
 states <- st_read(state_file, layer = "state_legislation_summary", quiet = TRUE)
 states <- st_make_valid(st_transform(states, target_crs))
@@ -130,7 +132,7 @@ lines <- st_read(
   quiet = TRUE
 )
 lines <- st_transform(lines, target_crs)
-message("Intersecting high-voltage lines with the 100 km grid...")
+message(sprintf("Intersecting high-voltage lines with the %d km grid...", cell_size_km))
 pieces <- suppressWarnings(st_intersection(grid[, "hex_id"], lines))
 grid$hv_line_km <- 0
 if (nrow(pieces)) {
@@ -188,9 +190,9 @@ export_fields <- c(
   "local_action_count"
 )
 
-write.csv(st_drop_geometry(grid[, export_fields]), file.path(out_dir, "downloads", "us_hex_grid_100km.csv"), row.names = FALSE, na = "")
+write.csv(st_drop_geometry(grid[, export_fields]), file.path(out_dir, "downloads", paste0("us_hex_grid_", grid_slug, ".csv")), row.names = FALSE, na = "")
 geo <- st_transform(grid[, export_fields], 4326)
-st_write(geo, file.path(out_dir, "downloads", "us_hex_grid_100km.geojson"), delete_dsn = TRUE, quiet = TRUE)
+st_write(geo, file.path(out_dir, "downloads", paste0("us_hex_grid_", grid_slug, ".geojson")), delete_dsn = TRUE, quiet = TRUE)
 
 short_map <- c(
   hex_id="id", region="region", state="state", state_name="stateName", county_fips="countyFips", county_name="countyName",
@@ -235,7 +237,7 @@ payload <- list(
   meta = list(
     snapshot = "28 September 2026",
     crs = "ESRI:102008 / North America Albers Equal Area Conic",
-    cellWidthKm = 100,
+    cellWidthKm = cell_size_km,
     cellAreaSqKm = round(as.numeric(st_area(grid[1, ])) / 1e6, 1),
     cellCount = nrow(grid),
     facilityCount = nrow(facilities),

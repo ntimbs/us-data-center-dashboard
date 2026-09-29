@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Analysis-ready 100 km equal-area hex grid for exploring spatial relationships between U.S. data centers, power, resources, legislation, and local opposition.">
+  <meta name="description" content="Analysis-ready 50 km equal-area hex grid for exploring spatial relationships between U.S. data centers, power, resources, legislation, and local opposition.">
   <title>U.S. Hexagon Spatial Explorer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M32 9l19 11v22L32 53 13 42V20z' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
@@ -12,7 +12,7 @@
   <header class="topbar">
     <div class="brand">
       <div class="hex-mark" aria-hidden="true"></div>
-      <div><h1>U.S. Hexagon Spatial Explorer</h1><p>100 km equal-area cells · spatial association workspace</p></div>
+      <div><h1>U.S. Hexagon Spatial Explorer</h1><p>50 km equal-area cells · spatial association workspace</p></div>
     </div>
     <div class="header-actions">
       <a href="../index.html">Facility view</a>
@@ -48,7 +48,7 @@
         <strong id="sampleCount">—</strong>
         <small id="coverageText">—</small>
         <button id="exportButton" class="secondary-button" type="button">Export current cells</button>
-        <div class="download-row"><a href="downloads/us_hex_grid_100km.csv" download>Full CSV</a><a href="downloads/us_hex_grid_100km.geojson" download>GeoJSON</a></div>
+        <div class="download-row"><a href="downloads/us_hex_grid_50km.csv" download>50 km CSV</a><a href="downloads/us_hex_grid_50km.geojson" download>50 km GeoJSON</a><a href="downloads/us_hex_grid_100km.csv" download>100 km CSV</a></div>
       </div>
 
       <div class="method-note"><span>i</span><p>Correlations are descriptive. County and state measures repeat across cells using the cell centroid; point and line measures are aggregated within each cell.</p></div>
@@ -72,7 +72,7 @@
             <g id="mapViewport"><g id="stateLayer"></g><g id="hexLayer"></g><g id="facilityLayer"></g><g id="outlineLayer"></g></g>
           </svg>
           <div id="tooltip" class="tooltip" hidden></div>
-          <div class="map-caption"><span>Equal-area</span><span>100 km cell width · drag to pan · scroll to zoom</span></div>
+          <div class="map-caption"><span>Equal-area</span><span>50 km cell width · drag to pan · scroll to zoom</span></div>
           <div id="legend" class="legend" aria-label="Map legend"></div>
         </div>
       </article>
