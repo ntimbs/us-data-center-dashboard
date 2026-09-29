@@ -6,7 +6,7 @@
   <meta name="description" content="Analysis-ready 50 km equal-area hex grid for exploring spatial relationships between U.S. data centers, power, resources, legislation, and local opposition.">
   <title>U.S. Hexagon Spatial Explorer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M32 9l19 11v22L32 53 13 42V20z' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1.2">
+  <link rel="stylesheet" href="styles.css?v=1.3">
 </head>
 <body>
   <header class="topbar">
@@ -32,6 +32,28 @@
       <label class="field"><span>Comparison variable</span><select id="compareSelect" aria-describedby="compareHelp"></select><small id="compareHelp" class="variable-help"></small></label>
       <label class="field"><span>State</span><select id="stateFilter"><option value="">All states</option></select></label>
       <label class="field"><span>Minimum land share</span><select id="landFilter"><option value="0">Any land share</option><option value="0.25">25% or more</option><option value="0.5">50% or more</option></select></label>
+
+      <p class="filter-instruction">All facility categories begin selected. These filters rebuild the data-center measures inside every visible hexagon.</p>
+      <details class="multi-filter" open>
+        <summary><span>Project status</span><strong id="statusSelection">—</strong></summary>
+        <div class="multi-actions"><button type="button" data-filter-group="status" data-filter-action="all">Select all</button><button type="button" data-filter-group="status" data-filter-action="none">Clear</button></div>
+        <div id="statusChecks" class="checkbox-options"></div>
+      </details>
+      <details class="multi-filter">
+        <summary><span>Activity group</span><strong id="activitySelection">—</strong></summary>
+        <div class="multi-actions"><button type="button" data-filter-group="activity" data-filter-action="all">Select all</button><button type="button" data-filter-group="activity" data-filter-action="none">Clear</button></div>
+        <div id="activityChecks" class="checkbox-options"></div>
+      </details>
+      <details class="multi-filter" open>
+        <summary><span>Reported capacity</span><strong id="capacitySelection">—</strong></summary>
+        <div class="multi-actions"><button type="button" data-filter-group="capacity" data-filter-action="all">Select all</button><button type="button" data-filter-group="capacity" data-filter-action="none">Clear</button></div>
+        <div id="capacityChecks" class="checkbox-options"></div>
+      </details>
+      <details class="multi-filter">
+        <summary><span>Reported power source</span><strong id="powerSelection">—</strong></summary>
+        <div class="multi-actions"><button type="button" data-filter-group="power" data-filter-action="all">Select all</button><button type="button" data-filter-group="power" data-filter-action="none">Clear</button></div>
+        <div id="powerChecks" class="checkbox-options"></div>
+      </details>
 
       <fieldset class="layer-choice">
         <legend>Map display</legend>
@@ -105,7 +127,7 @@
       </header>
       <div class="guide-scroll">
         <div class="guide-intro">
-          <p>Every map value is calculated for a 50 km equal-area hexagon. Point and line features are aggregated inside cells; county and state measures are assigned using the cell centroid.</p>
+          <p>Every map value is calculated for a 50 km equal-area hexagon. Point and line features are aggregated inside cells; county and state measures are assigned using the cell centroid. Facility-type filters re-aggregate data-center outcomes and direct-opposition counts; power, resource, legislation, and local-action context stays fixed.</p>
           <dl>
             <div><dt>Projection</dt><dd>North America Albers Equal Area</dd></div>
             <div><dt>Full-cell area</dt><dd>2,165.1 km²</dd></div>
@@ -129,8 +151,8 @@
     </section>
   </div>
 
-  <script src="../dashboard-data.js?v=1.2"></script>
-  <script src="hex-data.js?v=1.2"></script>
-  <script src="app.js?v=1.2"></script>
+  <script src="../dashboard-data.js?v=1.3"></script>
+  <script src="hex-data.js?v=1.3"></script>
+  <script src="app.js?v=1.3"></script>
 </body>
 </html>

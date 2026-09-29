@@ -213,6 +213,12 @@ names(cells) <- unname(short_map)
 cells$neighbors <- strsplit(cells$neighbors, ";", fixed = TRUE)
 cells$neighbors <- lapply(cells$neighbors, function(x) x[nzchar(x)])
 
+facility_hex <- data.frame(
+  id = as.character(fj$facility_id),
+  hexId = as.character(fj$hex_id),
+  stringsAsFactors = FALSE
+)
+
 variables <- list(
   list(
     key="facilityCount", label="Data-center count", group="Data centers", unit="facilities",
@@ -390,7 +396,8 @@ payload <- list(
     note = "Descriptive screening grid. Correlations are not causal estimates; county and state values are repeated across cells by centroid assignment."
   ),
   variables = variables,
-  cells = cells
+  cells = cells,
+  facilityHex = facility_hex
 )
 
 writeLines(
