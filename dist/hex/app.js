@@ -9,6 +9,7 @@
   const palette = ["#102333", "#15505b", "#188d8a", "#2dd4bf", "#a7f3d0"];
   const bivar = { LL:"#304b5c", LH:"#6f62a6", HL:"#cf8f42", HH:"#16a393", missing:"#172938" };
   const outcomeKeys = new Set(["facilityCount", "reportedMw", "operatingCount", "pipelineCount"]);
+  const fixedFacilityCountKeys = new Set(["facilityCount", "operatingCount", "pipelineCount", "directOppositionCount"]);
   const facilityHexById = new Map(facilityHex.map(row => [row.id, row.hexId]));
   const allFacilities = base.facilities.map(f => ({ ...f, hexId:facilityHexById.get(f.id) })).filter(f => f.hexId && byId.has(f.hexId));
   const filterGroupDefs = {
@@ -184,6 +185,7 @@
     return sorted[lo] + (sorted[hi]-sorted[lo])*(i-lo);
   }
   function breaksFor(key) {
+    if (fixedFacilityCountKeys.has(key)) return [0,1,4,14,Infinity];
     const values = filtered.map(c => c[key]).filter(Number.isFinite).sort((a,b)=>a-b);
     const positives = values.filter(v => v > 0);
     if (values.length && positives.length && values.filter(v => v === 0).length / values.length > .15) {
@@ -231,7 +233,8 @@
       return;
     }
     const v=varByKey.get(key);
-    els.legend.innerHTML = `<div class="legend-title">${escapeHtml(v.label)}</div>${rampFor(breaks.length).map((color,i)=>`<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span>${breaks[i]===0?`0 ${escapeHtml(v.unit)}`:`≤ ${escapeHtml(number(breaks[i],v.unit))}`}</div>`).join("")}<div class="legend-item"><span class="legend-swatch" style="background:#172938"></span>Missing</div>`;
+    const labels=fixedFacilityCountKeys.has(key)?["0 facilities","1 facility","2–4 facilities","5–14 facilities","15+ facilities"]:breaks.map(limit=>limit===0?`0 ${v.unit}`:`≤ ${number(limit,v.unit)}`);
+    els.legend.innerHTML = `<div class="legend-title">${escapeHtml(v.label)}</div>${rampFor(breaks.length).map((color,i)=>`<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span>${escapeHtml(labels[i])}</div>`).join("")}<div class="legend-item"><span class="legend-swatch" style="background:#172938"></span>Missing</div>`;
   }
   function showTooltip(event,c) {
     if (!c) return;
