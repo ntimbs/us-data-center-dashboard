@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Virginia county-level explorer for data centers, power, resources, and local opposition.">
+  <title>Virginia County Data Center Explorer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M14 13h36v38H14z' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css?v=1.2">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="hex-mark county-mark" aria-hidden="true"></div>
+      <div><h1>Virginia County Data Center Explorer</h1><p>133 counties and independent cities · county-level spatial analysis</p></div>
+    </div>
+    <div class="header-actions">
+      <a href="../hex/">U.S. hex view</a>
+      <a href="../index.html">Facility view</a>
+      <div class="snapshot"><span>Snapshot</span><strong>28 Sep 2026</strong></div>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="controls" aria-label="Virginia county analysis controls">
+      <div class="panel-heading">
+        <div><span class="eyebrow">Model setup</span><h2>Compare variables</h2></div>
+        <div class="panel-actions"><button id="guideButton" class="text-button" type="button">Measure guide</button><button id="resetButton" class="text-button" type="button">Reset</button></div>
+      </div>
+
+      <label class="control"><span>Outcome</span><select id="outcomeSelect" aria-describedby="outcomeHelp"></select><small id="outcomeHelp" class="variable-help"></small></label>
+      <label class="control"><span>Comparison variable</span><select id="compareSelect" aria-describedby="compareHelp"></select><small id="compareHelp" class="variable-help"></small></label>
+      <label class="control county-picker"><span>Inspect a county or city</span><select id="countySelect"><option value="">Select a geography</option></select></label>
+
+      <fieldset class="control display-control"><legend>Map display</legend><div class="segmented">
+        <button type="button" class="display-button active" data-display="outcome">Outcome</button>
+        <button type="button" class="display-button" data-display="comparison">Comparison</button>
+        <button type="button" class="display-button" data-display="bivariate">Bivariate</button>
+      </div></fieldset>
+      <label class="toggle"><input id="pointToggle" type="checkbox"><span>Show facility points</span></label>
+
+      <div class="sample-card">
+        <span>Analysis sample</span><strong id="sampleCount">—</strong><small id="coverageText">—</small>
+        <button id="exportButton" type="button">Export county data</button>
+        <div class="download-links"><a href="downloads/virginia_county_data.csv">County CSV</a><a href="downloads/virginia_county_data.geojson">County GeoJSON</a></div>
+      </div>
+      <div class="method-note"><span>i</span><p>County resources are native county measures. Points and lines are aggregated inside county boundaries. Virginia policy measures are statewide context because they do not vary across counties.</p></div>
+    </aside>
+
+    <section class="main-stage">
+      <div class="metrics" aria-label="Spatial statistics">
+        <article><span>County equivalents</span><strong id="metricHexes">—</strong><small>Counties and independent cities</small></article>
+        <article><span>Occupied counties</span><strong id="metricOccupied">—</strong><small>At least one data center</small></article>
+        <article><span>Outcome Moran’s I</span><strong id="metricMoran">—</strong><small>Queen-contiguity clustering</small></article>
+        <article><span>Spatial-lag r</span><strong id="metricSpatial">—</strong><small>Outcome vs. neighbors’ comparison</small></article>
+      </div>
+
+      <article class="map-card">
+        <header><div><span class="eyebrow">Virginia counties</span><h2 id="mapTitle">Data-center count</h2></div><div class="map-actions"><button id="zoomOut" type="button" aria-label="Zoom out">−</button><button id="zoomReset" type="button">Reset view</button><button id="zoomIn" type="button" aria-label="Zoom in">+</button></div></header>
+        <div id="mapShell" class="map-shell">
+          <svg id="map" viewBox="0 0 1000 600" role="img" aria-label="County map of Virginia">
+            <g id="mapViewport"><g id="countyLayer"></g><g id="facilityLayer"></g></g>
+          </svg>
+          <div class="map-caption"><strong>County equivalents</strong><span>drag to pan · scroll to zoom</span></div>
+          <div id="legend" class="legend" aria-label="Map legend"></div>
+          <div id="tooltip" class="tooltip" hidden></div>
+        </div>
+      </article>
+
+      <div class="analysis-row">
+        <article class="scatter-card"><header><div><span class="eyebrow">County-level relationship</span><h2 id="scatterTitle">—</h2></div><strong id="pearsonStat">r = —</strong></header><svg id="scatterplot" viewBox="0 0 560 215" role="img" aria-label="Scatterplot of selected county variables"></svg></article>
+        <article class="read-card"><span class="eyebrow">Interpretation</span><h2 id="interpretTitle">Read the measures together</h2><p id="interpretText"></p><dl><div><dt>County equivalents</dt><dd id="cellArea">133</dd></div><div><dt>Complete pairs</dt><dd id="pairCount">—</dd></div><div><dt>Adjacency</dt><dd>Queen</dd></div></dl></article>
+      </div>
+    </section>
+
+    <aside id="detailPanel" class="detail-panel" aria-label="Selected county details"><div class="detail-empty"><span class="detail-hex county-detail-mark"></span><h2>Select a county</h2><p>Choose a county or independent city to inspect its data centers, power context, resources, and neighboring geographies.</p></div></aside>
+  </main>
+
+  <div id="guideModal" class="guide-backdrop" hidden>
+    <section class="guide-dialog" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+      <header class="guide-header"><div><span class="eyebrow">Data dictionary</span><h2 id="guideTitle">Virginia county measures</h2></div><button id="guideClose" class="guide-close" type="button" aria-label="Close measure guide">×</button></header>
+      <div class="guide-scroll">
+        <div class="guide-intro">
+          <p>Every map value represents one Virginia county or independent city. Point and line features are aggregated inside boundaries; water, hazard, business, and interconnection-queue measures are native county attributes.</p>
+          <dl><div><dt>Geography</dt><dd>133 county equivalents</dd></div><div><dt>Projection</dt><dd>North America Albers Equal Area</dd></div><div><dt>Snapshot</dt><dd>28 September 2026</dd></div></dl>
+        </div>
+        <div class="policy-context"><span class="eyebrow">Statewide legislation context</span><p id="policySummary"></p><small>These values are not comparison variables because every Virginia county would receive the same value.</small></div>
+        <nav id="guideNav" class="guide-nav" aria-label="Measure groups"></nav>
+        <div id="guideContent" class="guide-content"></div>
+        <section class="statistics-guide">
+          <span class="eyebrow">Statistics</span><h2>How the county comparisons work</h2>
+          <div class="stat-guide-grid">
+            <article><h3>Pearson r</h3><p>Correlation between the outcome and comparison variable in the same counties with both values. It ranges from −1 to 1 and does not adjust for spatial dependence.</p></article>
+            <article><h3>Outcome Moran’s I</h3><p>Global clustering of the selected outcome using row-standardized queen neighbors. Positive values indicate similar values tend to be adjacent. No permutation p-value is reported.</p></article>
+            <article><h3>Spatial-lag r</h3><p>Correlation between each county’s outcome and the average comparison value among adjacent counties. It is descriptive and is not a causal estimator.</p></article>
+            <article><h3>Bivariate map</h3><p>Classifies counties as high or low relative to the Virginia mean for both selected variables.</p></article>
+            <article><h3>Complete pairs</h3><p>Counties with numeric values for both selected variables. Unknown values are excluded; valid zeros remain in the calculation.</p></article>
+            <article><h3>Independent cities</h3><p>Virginia independent cities are county equivalents. Small city polygons can be difficult to select; facility points and the detail panel help reveal them.</p></article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script src="county-data.js?v=1.2"></script>
+  <script src="app.js?v=1.2"></script>
+</body>
+</html>
