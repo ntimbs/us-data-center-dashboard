@@ -6,7 +6,7 @@
   <meta name="description" content="Interactive U.S. data-center map with power, resource, policy, and opposition context.">
   <title>U.S. Data Center Research Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M14 18h36v10H14zm0 18h36v10H14z' fill='%2314b8a6'/%3E%3Ccircle cx='44' cy='23' r='2' fill='white'/%3E%3Ccircle cx='44' cy='41' r='2' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1.1">
+  <link rel="stylesheet" href="styles.css?v=1.3">
 </head>
 <body>
   <header class="topbar">
@@ -33,11 +33,35 @@
       </label>
 
       <div class="field-grid">
-        <label class="field"><span>Status</span><select id="phaseFilter"><option value="">All statuses</option></select></label>
         <label class="field"><span>State</span><select id="stateFilter"><option value="">All states</option></select></label>
-        <label class="field"><span>Capacity</span><select id="capacityFilter"><option value="">All capacity classes</option></select></label>
         <label class="field"><span>Water scarcity</span><select id="waterFilter"><option value="">All scarcity classes</option></select></label>
       </div>
+
+      <p class="filter-instruction">All categories begin selected. Clear a group, then check the types you want to compare.</p>
+
+      <details class="multi-filter" open>
+        <summary><span>Project status</span><strong id="statusSelection">—</strong></summary>
+        <div class="multi-actions"><button type="button" data-filter-group="status" data-filter-action="all">Select all</button><button type="button" data-filter-group="status" data-filter-action="none">Clear</button></div>
+        <div id="statusChecks" class="checkbox-options" role="group" aria-label="Project status"></div>
+      </details>
+
+      <details class="multi-filter">
+        <summary><span>Activity group</span><strong id="activitySelection">—</strong></summary>
+        <div class="multi-actions"><button type="button" data-filter-group="activity" data-filter-action="all">Select all</button><button type="button" data-filter-group="activity" data-filter-action="none">Clear</button></div>
+        <div id="activityChecks" class="checkbox-options" role="group" aria-label="Activity group"></div>
+      </details>
+
+      <details class="multi-filter" open>
+        <summary><span>Reported capacity</span><strong id="capacitySelection">—</strong></summary>
+        <div class="multi-actions"><button type="button" data-filter-group="capacity" data-filter-action="all">Select all</button><button type="button" data-filter-group="capacity" data-filter-action="none">Clear</button></div>
+        <div id="capacityChecks" class="checkbox-options" role="group" aria-label="Reported capacity"></div>
+      </details>
+
+      <details class="multi-filter">
+        <summary><span>Reported power source</span><strong id="powerSelection">—</strong></summary>
+        <div class="multi-actions"><button type="button" data-filter-group="power" data-filter-action="all">Select all</button><button type="button" data-filter-group="power" data-filter-action="none">Clear</button></div>
+        <div id="powerChecks" class="checkbox-options" role="group" aria-label="Reported power source"></div>
+      </details>
 
       <fieldset class="flag-filters">
         <legend>Evidence filters</legend>
@@ -117,7 +141,7 @@
     </aside>
   </main>
 
-  <script src="dashboard-data.js"></script>
-  <script src="app.js"></script>
+  <script src="dashboard-data.js?v=1.3"></script>
+  <script src="app.js?v=1.3"></script>
 </body>
 </html>
