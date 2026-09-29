@@ -17,7 +17,7 @@
     capacity: {
       title: "Reported MW capacity",
       insight: ["Capacity coverage is incomplete", "Point size and color use reported MW or the midpoint of a reported range. Unknown values remain visible and are never converted to zero."],
-      categories: [["Mega campus (1,000+ MW)", "#7c3aed"], ["Hyperscale (100–999 MW)", "#2563eb"], ["Large (51–99 MW)", "#0891b2"], ["Medium (11–50 MW)", "#14b8a6"], ["Small (0–10 MW)", "#84cc16"], ["Unknown", "#64748b"]],
+      categories: [["Mega campus (1,000+ MW)", "#7c3aed"], ["Hyperscale (100-999 MW)", "#2563eb"], ["Large (51-99 MW)", "#0891b2"], ["Medium (11-50 MW)", "#14b8a6"], ["Small (0-10 MW)", "#84cc16"], ["Unknown", "#64748b"]],
       key: f => f.capacity || "Unknown"
     },
     power: {
@@ -46,8 +46,16 @@
     }
   };
 
+  const filterGroupDefs = {
+    status: { key: f => f.phase || "Unknown", categories: config.status.categories },
+    activity: { key: f => f.activity || "Unknown", categories: [["Existing", "#2dd4bf"], ["Existing / expansion", "#a78bfa"], ["Active pipeline", "#60a5fa"], ["Paused / cancelled", "#fb7185"], ["Unknown", "#718096"]] },
+    capacity: { key: f => f.capacity || "Unknown", categories: config.capacity.categories },
+    power: { key: f => f.power || "Unknown", categories: config.power.categories }
+  };
+
   const els = Object.fromEntries([
-    "searchInput", "phaseFilter", "stateFilter", "capacityFilter", "waterFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
+    "searchInput", "stateFilter", "waterFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
+    "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText",
     "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset"
@@ -62,14 +70,39 @@
 
   const unique = (key) => [...new Set(facilities.map(f => f[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
   const populate = (select, values) => values.forEach(v => select.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
-  populate(els.phaseFilter, unique("phase"));
   populate(els.stateFilter, unique("state"));
-  populate(els.capacityFilter, unique("capacity"));
   populate(els.waterFilter, unique("waterClass"));
 
   function escapeHtml(input) {
     return String(input ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
   }
+
+  const filterGroups = {};
+  function initializeFilterGroups() {
+    Object.entries(filterGroupDefs).forEach(([name, def]) => {
+      const present = new Set(facilities.map(def.key));
+      const categories = def.categories.filter(([label]) => present.has(label));
+      [...present].filter(label => !categories.some(([known]) => known === label)).sort().forEach(label => categories.push([label, "#64748b"]));
+      const container = els[`${name}Checks`];
+      container.innerHTML = categories.map(([label, color], index) => {
+        const id = `${name}Choice${index}`;
+        return `<label class="choice-checkbox" for="${id}"><input id="${id}" type="checkbox" value="${escapeHtml(label)}" checked><span class="choice-dot" style="--choice-color:${color}"></span><span class="choice-label">${escapeHtml(label)}</span><span class="choice-count" data-choice-count="${escapeHtml(label)}">0</span></label>`;
+      }).join("");
+      filterGroups[name] = { ...def, categories, container, summary: els[`${name}Selection`] };
+      container.querySelectorAll("input").forEach(input => input.addEventListener("change", applyFilters));
+    });
+  }
+
+  function selectedValues(name) {
+    return [...filterGroups[name].container.querySelectorAll("input:checked")].map(input => input.value);
+  }
+
+  function setGroupSelection(name, values) {
+    const wanted = new Set(values);
+    filterGroups[name].container.querySelectorAll("input").forEach(input => { input.checked = wanted.has(input.value); });
+  }
+
+  initializeFilterGroups();
 
   function stateFill(s) {
     if (currentView !== "policy") return "";
@@ -118,23 +151,48 @@
 
   function currentFilters() {
     return {
-      query: els.searchInput.value.trim().toLowerCase(), phase: els.phaseFilter.value, state: els.stateFilter.value,
-      capacity: els.capacityFilter.value, water: els.waterFilter.value, incentive: els.incentiveFilter.checked,
-      opposition: els.oppositionFilter.checked, moratorium: els.moratoriumFilter.checked
+      query: els.searchInput.value.trim().toLowerCase(), state: els.stateFilter.value, water: els.waterFilter.value,
+      incentive: els.incentiveFilter.checked, opposition: els.oppositionFilter.checked, moratorium: els.moratoriumFilter.checked,
+      statuses: selectedValues("status"), activities: selectedValues("activity"), capacities: selectedValues("capacity"),
+      powerSources: selectedValues("power")
     };
+  }
+
+  function matchesFilters(f, q, omitGroup = null) {
+    const haystack = [f.name, f.operator, f.city, f.county, f.state].filter(Boolean).join(" ").toLowerCase();
+    if (q.query && !haystack.includes(q.query)) return false;
+    if (q.state && f.state !== q.state) return false;
+    if (q.water && f.waterClass !== q.water) return false;
+    if (q.incentive && f.incentive !== 1) return false;
+    if (q.opposition && f.directOpposition !== 1) return false;
+    if (q.moratorium && !(f.moratoriumCount > 0)) return false;
+    if (omitGroup !== "status" && !q.statuses.includes(filterGroupDefs.status.key(f))) return false;
+    if (omitGroup !== "activity" && !q.activities.includes(filterGroupDefs.activity.key(f))) return false;
+    if (omitGroup !== "capacity" && !q.capacities.includes(filterGroupDefs.capacity.key(f))) return false;
+    if (omitGroup !== "power" && !q.powerSources.includes(filterGroupDefs.power.key(f))) return false;
+    return true;
+  }
+
+  function updateCheckboxCounts(q) {
+    Object.entries(filterGroups).forEach(([name, group]) => {
+      const counts = new Map(group.categories.map(([label]) => [label, 0]));
+      facilities.filter(f => matchesFilters(f, q, name)).forEach(f => {
+        const label = group.key(f);
+        counts.set(label, (counts.get(label) || 0) + 1);
+      });
+      group.container.querySelectorAll("[data-choice-count]").forEach(span => { span.textContent = fmt.format(counts.get(span.dataset.choiceCount) || 0); });
+      const selected = selectedValues(name).length;
+      group.summary.textContent = `${selected} of ${group.categories.length}`;
+    });
   }
 
   function applyFilters() {
     const q = currentFilters();
-    filtered = facilities.filter(f => {
-      const haystack = [f.name, f.operator, f.city, f.county, f.state].filter(Boolean).join(" ").toLowerCase();
-      return (!q.query || haystack.includes(q.query)) && (!q.phase || f.phase === q.phase) && (!q.state || f.state === q.state)
-        && (!q.capacity || f.capacity === q.capacity) && (!q.water || f.waterClass === q.water)
-        && (!q.incentive || f.incentive === 1) && (!q.opposition || f.directOpposition === 1) && (!q.moratorium || f.moratoriumCount > 0);
-    });
+    filtered = facilities.filter(f => matchesFilters(f, q));
     if (selectedId && !filtered.some(f => f.id === selectedId)) clearSelection();
     renderFacilities();
     renderSummary();
+    updateCheckboxCounts(q);
   }
 
   function renderSummary() {
@@ -227,8 +285,18 @@
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
   }
 
-  [els.searchInput, els.phaseFilter, els.stateFilter, els.capacityFilter, els.waterFilter, els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
-  els.resetFilters.addEventListener("click", () => { [els.searchInput, els.phaseFilter, els.stateFilter, els.capacityFilter, els.waterFilter].forEach(el => el.value = ""); [els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.checked = false); applyFilters(); });
+  [els.searchInput, els.stateFilter, els.waterFilter, els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
+  document.querySelectorAll("[data-filter-action]").forEach(button => button.addEventListener("click", () => {
+    const group = filterGroups[button.dataset.filterGroup];
+    group.container.querySelectorAll("input").forEach(input => { input.checked = button.dataset.filterAction === "all"; });
+    applyFilters();
+  }));
+  els.resetFilters.addEventListener("click", () => {
+    [els.searchInput, els.stateFilter, els.waterFilter].forEach(el => el.value = "");
+    [els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.checked = false);
+    Object.keys(filterGroups).forEach(name => setGroupSelection(name, filterGroups[name].categories.map(([label]) => label)));
+    applyFilters();
+  });
   els.exportButton.addEventListener("click", exportCsv);
   document.querySelectorAll(".view-button").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
   els.zoomIn.addEventListener("click", () => zoom(1.35)); els.zoomOut.addEventListener("click", () => zoom(1/1.35)); els.zoomReset.addEventListener("click", resetView);
@@ -242,14 +310,19 @@
     const context = document.modelContext;
     if (!context?.registerTool) return;
     const register = tool => { try { Promise.resolve(context.registerTool(tool)).catch(() => {}); } catch (_) {} };
-    register({ name: "filter_facilities", title: "Filter facilities", description: "Apply visible dashboard filters for state, project status, or search text.", inputSchema: { type: "object", properties: { state: { type: "string" }, phase: { type: "string" }, query: { type: "string" } }, additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false }, execute(input) {
+    register({ name: "filter_facilities", title: "Filter facilities", description: "Apply visible dashboard filters for state, project status, activity group, capacity class, power source, or search text.", inputSchema: { type: "object", properties: { state: { type: "string" }, phase: { type: "string" }, query: { type: "string" }, statuses: { type: "array", items: { type: "string" } }, activities: { type: "array", items: { type: "string" } }, capacities: { type: "array", items: { type: "string" } }, powerSources: { type: "array", items: { type: "string" } } }, additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false }, execute(input) {
       if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Input must be an object");
-      const allowed = new Set(["state", "phase", "query"]);
+      const allowed = new Set(["state", "phase", "query", "statuses", "activities", "capacities", "powerSources"]);
       if (Object.keys(input).some(key => !allowed.has(key))) throw new Error("Unsupported filter field");
-      if (Object.values(input).some(entry => typeof entry !== "string")) throw new Error("Filter values must be strings");
+      if (["state", "phase", "query"].some(key => input[key] !== undefined && typeof input[key] !== "string")) throw new Error("State, phase, and query must be strings");
+      if (["statuses", "activities", "capacities", "powerSources"].some(key => input[key] !== undefined && (!Array.isArray(input[key]) || input[key].some(value => typeof value !== "string")))) throw new Error("Category filters must be arrays of strings");
       if (input.state !== undefined) els.stateFilter.value = input.state;
-      if (input.phase !== undefined) els.phaseFilter.value = input.phase;
       if (input.query !== undefined) els.searchInput.value = input.query;
+      if (input.phase !== undefined) setGroupSelection("status", input.phase ? [input.phase] : filterGroups.status.categories.map(([label]) => label));
+      if (input.statuses !== undefined) setGroupSelection("status", input.statuses);
+      if (input.activities !== undefined) setGroupSelection("activity", input.activities);
+      if (input.capacities !== undefined) setGroupSelection("capacity", input.capacities);
+      if (input.powerSources !== undefined) setGroupSelection("power", input.powerSources);
       applyFilters();
       return { facilities: filtered.length, filters: currentFilters() };
     } });
@@ -263,5 +336,5 @@
     register({ name: "read_dashboard_summary", title: "Read dashboard summary", description: "Return counts for the current filtered selection.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: false }, execute() { return { selectedFacilities: filtered.length, totalFacilities: facilities.length, mapView: currentView, filters: currentFilters(), snapshot: meta.snapshot }; } });
   }
 
-  renderStates(); renderLegend(); renderFacilities(); renderSummary(); registerWebMcp();
+  renderStates(); renderLegend(); applyFilters(); registerWebMcp();
 })();
