@@ -2,6 +2,8 @@
 
 An interactive research dashboard for exploring U.S. data-center facilities and their relationships with power, resource, policy, and local-opposition measures.
 
+**Live dashboard:** https://ntimbs.github.io/us-data-center-dashboard/
+
 ## Dashboard views
 
 - **National facility dashboard:** facility status, reported capacity, power source, grid context, resources, legislation, and local opposition.
