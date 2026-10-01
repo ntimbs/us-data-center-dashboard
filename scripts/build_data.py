@@ -4,6 +4,8 @@ import json
 import math
 import sqlite3
 import struct
+import csv
+from collections import Counter, defaultdict
 from pathlib import Path
 
 
@@ -12,6 +14,7 @@ SITE = Path(__file__).resolve().parents[1]
 OUT = SITE / "dist" / "dashboard-data.js"
 SOURCE = ROOT / "Local Opposition" / "US Opposition Layer" / "Layer 08 Local Opposition" / "US_Data_Centers_Local_Opposition.gpkg"
 POLICY = ROOT / "Legislation" / "US Legislation Layer" / "Layer 07 State Policy" / "US_Data_Centers_State_Policy.gpkg"
+POLICY_BILLS = ROOT / "Analysis" / "State_Legislation" / "state_legislation_bills.csv"
 
 
 def wkb_offset(blob: bytes) -> int:
@@ -169,6 +172,24 @@ def build():
         facilities.append(item)
     con.close()
 
+    bills_by_state = defaultdict(list)
+    national_type_counts = Counter()
+    with POLICY_BILLS.open(newline="", encoding="utf-8-sig") as source:
+        for row in csv.DictReader(source):
+            if row.get("state") == "US":
+                continue
+            bill_types = [item.strip() for item in (row.get("category") or "").split(";") if item.strip()]
+            national_type_counts.update(bill_types)
+            bills_by_state[row["state"]].append({
+                "bill": row.get("bill") or "Unknown",
+                "year": int(row["year"]) if row.get("year", "").isdigit() else row.get("year"),
+                "status": row.get("status") or "Unknown",
+                "title": row.get("summary_title") or "Untitled bill",
+                "types": bill_types,
+                "lastActionDate": row.get("last_action_date") or None,
+                "sourceUrl": row.get("source_url") or None,
+            })
+
     states = []
     con = sqlite3.connect(POLICY)
     for row in con.execute(
@@ -176,6 +197,10 @@ def build():
         "policy_moratorium_tracker_count,policy_total_bills FROM state_legislation_summary ORDER BY state"
     ):
         geom, abbr, name, incentive, electricity, moratoria, bills = row
+        state_bills = bills_by_state.get(abbr, [])
+        status_counts = Counter(bill["status"] for bill in state_bills)
+        type_counts = Counter(item for bill in state_bills for item in bill["types"])
+        state_bills.sort(key=lambda bill: (bill["lastActionDate"] or "", bill["year"] or 0, bill["bill"]), reverse=True)
         states.append({
             "abbr": abbr,
             "name": name,
@@ -183,7 +208,10 @@ def build():
             "incentive": incentive,
             "electricityTax": electricity,
             "moratoriumCount": moratoria,
-            "billCount": bills,
+            "billCount": len(state_bills),
+            "billStatus": {key: status_counts.get(key, 0) for key in ("Active", "Pass", "Fail", "Veto")},
+            "billTypes": dict(sorted(type_counts.items(), key=lambda item: (-item[1], item[0]))),
+            "bills": state_bills,
         })
     con.close()
 
@@ -195,6 +223,7 @@ def build():
             "note": "Screening and research context; proximity and policy exposure do not establish causation or service relationships.",
         },
         "states": states,
+        "policyTypes": [item for item, _ in national_type_counts.most_common()],
         "facilities": facilities,
     }
     OUT.write_text("window.DASHBOARD_DATA=" + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")

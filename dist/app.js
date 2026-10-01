@@ -1,8 +1,16 @@
 (() => {
-  const { facilities, states, meta } = window.DASHBOARD_DATA;
+  const { facilities, states, meta, policyTypes = [] } = window.DASHBOARD_DATA;
   const fmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
   const pct = value => Number.isFinite(value) ? `${value.toFixed(1)}%` : "—";
   const value = (v, suffix = "") => v === null || v === undefined || v === "" ? "Unknown" : `${typeof v === "number" ? fmt.format(v) : v}${suffix}`;
+  const policyColors = ["#102436", "#16435a", "#1f6475", "#a87532", "#c45c59"];
+  const policyBins = [
+    { label: "0 bills", min: 0, max: 0 },
+    { label: "1–4 bills", min: 1, max: 4 },
+    { label: "5–9 bills", min: 5, max: 9 },
+    { label: "10–19 bills", min: 10, max: 19 },
+    { label: "20+ bills", min: 20, max: Infinity }
+  ];
 
   const config = {
     status: {
@@ -33,8 +41,8 @@
       key: f => f.waterClass || "Unknown"
     },
     policy: {
-      title: "State policy context",
-      insight: ["Policy concepts stay separate", "Incentive availability does not prove receipt. Moratorium-tracker entries are not necessarily enacted restrictions, and bill counts measure attention rather than stringency."],
+      title: "Tracked state legislation",
+      insight: ["Bill activity varies by topic and status", "Use the measure menu to map total bills, legislative status, or one of 22 policy types. Click a state for counts and bill-level records."],
       categories: [["Dedicated incentive", "#2dd4bf"], ["Moratorium tracker entry", "#fb7185"], ["Other state context", "#60a5fa"]],
       key: f => f.incentive ? "Dedicated incentive" : f.moratoriumCount > 0 ? "Moratorium tracker entry" : "Other state context"
     },
@@ -58,12 +66,15 @@
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText",
-    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset"
+    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyMetric",
+    "profileEyebrow", "profileTitle"
   ].map(id => [id, document.getElementById(id)]));
 
   let currentView = "status";
   let filtered = facilities;
   let selectedId = null;
+  let selectedStateAbbr = null;
+  let policyMetric = "total";
   let transform = { x: 0, y: 0, scale: 1 };
   let dragging = false;
   let dragStart = null;
@@ -75,6 +86,32 @@
 
   function escapeHtml(input) {
     return String(input ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+  }
+
+  const policyMetricOptions = [
+    ["total", "Total tracked bills"],
+    ["status:Active", "Status: Active"],
+    ["status:Pass", "Status: Passed"],
+    ["status:Fail", "Status: Failed"],
+    ["status:Veto", "Status: Vetoed"]
+  ];
+  els.policyMetric.innerHTML = `<optgroup label="Bill counts">${policyMetricOptions.map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("")}</optgroup><optgroup label="Bill topic / type">${policyTypes.map(type => `<option value="type:${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("")}</optgroup>`;
+
+  function policyMeasure(state) {
+    if (policyMetric === "total") return Number(state.billCount) || 0;
+    const [kind, key] = policyMetric.split(":");
+    if (kind === "status") return Number(state.billStatus?.[key]) || 0;
+    if (kind === "type") return Number(state.billTypes?.[key]) || 0;
+    return 0;
+  }
+
+  function policyMetricLabel() {
+    return policyMetricOptions.find(([key]) => key === policyMetric)?.[1] || policyMetric.replace(/^type:/, "Type: ");
+  }
+
+  function policyColor(count) {
+    const index = policyBins.findIndex(bin => count >= bin.min && count <= bin.max);
+    return policyColors[Math.max(0, index)];
   }
 
   const filterGroups = {};
@@ -106,13 +143,27 @@
 
   function stateFill(s) {
     if (currentView !== "policy") return "";
-    if (s.moratoriumCount > 0) return "#3a2631";
-    if (s.incentive) return "#123a3a";
-    return "#152a3d";
+    return policyColor(policyMeasure(s));
   }
 
   function renderStates() {
-    els.stateLayer.innerHTML = states.map(s => `<path class="state" data-state="${s.abbr}" d="${s.path}" style="fill:${stateFill(s)}"><title>${escapeHtml(s.name)}</title></path>`).join("");
+    els.stateLayer.innerHTML = states.map(s => `<path class="state${s.abbr === selectedStateAbbr ? " selected" : ""}" data-state="${s.abbr}" d="${s.path}" style="fill:${stateFill(s)}" ${currentView === "policy" ? `role="button" tabindex="0" aria-label="Open ${escapeHtml(s.name)} legislation details"` : ""}><title>${escapeHtml(s.name)}</title></path>`).join("");
+    els.stateLayer.querySelectorAll(".state").forEach(path => {
+      const state = states.find(item => item.abbr === path.dataset.state);
+      path.addEventListener("pointerenter", event => showStateTooltip(event, state));
+      path.addEventListener("pointermove", positionTooltip);
+      path.addEventListener("pointerleave", hideTooltip);
+      path.addEventListener("click", event => {
+        if (currentView !== "policy") return;
+        event.stopPropagation();
+        selectState(state.abbr);
+      });
+      path.addEventListener("keydown", event => {
+        if (currentView !== "policy" || !["Enter", " "].includes(event.key)) return;
+        event.preventDefault();
+        selectState(state.abbr);
+      });
+    });
   }
 
   function colorFor(f) {
@@ -139,6 +190,12 @@
 
   function showTooltip(event, f) {
     els.tooltip.innerHTML = `<strong>${escapeHtml(f.name)}</strong><span>${escapeHtml([f.city, f.state].filter(Boolean).join(", "))} · ${escapeHtml(f.phase || "Unknown status")} · ${escapeHtml(value(f.mw, " MW"))}</span>`;
+    els.tooltip.hidden = false;
+    positionTooltip(event);
+  }
+  function showStateTooltip(event, state) {
+    if (currentView !== "policy") return;
+    els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>${escapeHtml(policyMetricLabel())}: ${fmt.format(policyMeasure(state))}<br>Total bills: ${fmt.format(state.billCount || 0)} · Active: ${fmt.format(state.billStatus?.Active || 0)} · Passed: ${fmt.format(state.billStatus?.Pass || 0)}</span>`;
     els.tooltip.hidden = false;
     positionTooltip(event);
   }
@@ -207,18 +264,36 @@
     els.metricMw.textContent = mwValues.length ? `${fmt.format(mwTotal)} MW` : "—";
     els.metricOperating.textContent = count ? pct(operating / count * 100) : "—";
     els.metricOpposition.textContent = count ? pct(opposition / count * 100) : "—";
-    els.chartTotal.textContent = `${fmt.format(count)} records`;
-    renderStatusChart();
+    renderProfileChart();
     const knownMw = count ? pct(mwValues.length / count * 100) : "—";
     const utilityMatches = filtered.filter(f => f.utilityMatch && f.utilityMatch.includes("Unique")).length;
-    els.coverageLine.textContent = `Reported capacity coverage: ${knownMw}. Unique candidate-utility match: ${count ? pct(utilityMatches / count * 100) : "—"}.`;
+    if (currentView === "policy") {
+      const stateCount = states.filter(state => (state.billCount || 0) > 0).length;
+      els.coverageLine.textContent = `${fmt.format(stateCount)} states have tracked bills. Topic counts are non-exclusive because one bill may address several policy types; counts measure legislative attention, not stringency.`;
+    } else {
+      els.coverageLine.textContent = `Reported capacity coverage: ${knownMw}. Unique candidate-utility match: ${count ? pct(utilityMatches / count * 100) : "—"}.`;
+    }
   }
 
-  function renderStatusChart() {
+  function renderProfileChart() {
+    if (currentView === "policy") {
+      const counts = {};
+      states.forEach(state => Object.entries(state.billTypes || {}).forEach(([type, count]) => { counts[type] = (counts[type] || 0) + count; }));
+      const rows = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      const max = Math.max(...rows.map(row => row[1]), 1);
+      els.profileEyebrow.textContent = "National legislation profile";
+      els.profileTitle.textContent = "Most common bill types";
+      els.chartTotal.textContent = `${fmt.format(states.reduce((sum, state) => sum + (state.billCount || 0), 0))} bills`;
+      els.statusChart.innerHTML = rows.map(([label, count]) => `<div class="bar-row"><span title="${escapeHtml(label)}">${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill policy" style="width:${count/max*100}%"></div></div><strong>${fmt.format(count)}</strong></div>`).join("");
+      return;
+    }
     const counts = {};
     filtered.forEach(f => counts[f.phase || "Unknown"] = (counts[f.phase || "Unknown"] || 0) + 1);
     const rows = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
     const max = Math.max(...rows.map(r => r[1]), 1);
+    els.profileEyebrow.textContent = "Selection profile";
+    els.profileTitle.textContent = "Status distribution";
+    els.chartTotal.textContent = `${fmt.format(filtered.length)} records`;
     els.statusChart.innerHTML = rows.length ? rows.map(([label, count]) => `<div class="bar-row"><span>${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${count/max*100}%"></div></div><strong>${fmt.format(count)}</strong></div>`).join("") : `<p class="detail-location">No facilities match these filters.</p>`;
   }
 
@@ -227,14 +302,55 @@
     els.viewTitle.textContent = cfg.title;
     els.insightTitle.textContent = cfg.insight[0];
     els.insightText.textContent = cfg.insight[1];
-    els.legend.innerHTML = cfg.categories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("");
+    if (currentView === "policy") {
+      els.viewTitle.textContent = policyMetricLabel();
+      els.legend.innerHTML = policyBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch" style="background:${policyColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-note">${escapeHtml(policyMetricLabel())}<br>Click a state for bill types and records.</div>`;
+    } else {
+      els.legend.innerHTML = cfg.categories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("");
+    }
   }
 
   function detailItem(label, val) { return `<div class="detail-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value(val))}</strong></div>`; }
   function detailSection(title, items) { return `<section class="detail-section"><h3>${escapeHtml(title)}</h3><div class="detail-grid">${items.join("")}</div></section>`; }
 
+  function selectState(abbr) {
+    const state = states.find(item => item.abbr === abbr);
+    if (!state) return;
+    selectedStateAbbr = abbr;
+    selectedId = null;
+    const typeRows = Object.entries(state.billTypes || {}).sort((a, b) => b[1] - a[1]);
+    const maxType = Math.max(...typeRows.map(([, count]) => count), 1);
+    const bills = state.bills || [];
+    els.detailPanel.innerHTML = `<div class="detail-content">
+      <div class="detail-top"><div><span class="eyebrow">${escapeHtml(state.abbr)} legislation</span><h2>${escapeHtml(state.name)}</h2><p class="detail-location">${fmt.format(state.billCount || 0)} tracked state bills · 2024–2026 snapshot</p></div><button class="close-detail" type="button" aria-label="Close state details">×</button></div>
+      <div class="policy-summary">
+        <article><span>Active</span><strong>${fmt.format(state.billStatus?.Active || 0)}</strong></article>
+        <article><span>Passed</span><strong>${fmt.format(state.billStatus?.Pass || 0)}</strong></article>
+        <article><span>Failed</span><strong>${fmt.format(state.billStatus?.Fail || 0)}</strong></article>
+        <article><span>Vetoed</span><strong>${fmt.format(state.billStatus?.Veto || 0)}</strong></article>
+      </div>
+      <section class="detail-section"><h3>Bill types</h3><div class="policy-type-list">${typeRows.length ? typeRows.map(([type, count]) => `<div class="policy-type-row"><span title="${escapeHtml(type)}">${escapeHtml(type)}</span><strong>${fmt.format(count)}</strong><div class="policy-type-track"><i style="width:${count/maxType*100}%"></i></div></div>`).join("") : `<p class="detail-location">No tracked bill types.</p>`}</div><p class="policy-note">Types are non-exclusive. A multi-topic bill is counted once in each applicable category.</p></section>
+      <section class="detail-section"><h3>Tracked bills</h3><div class="bill-list">${bills.length ? bills.slice(0, 10).map(bill => `<article class="bill-card"><div class="bill-card-top">${bill.sourceUrl ? `<a href="${escapeHtml(bill.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(bill.bill)} · ${escapeHtml(bill.year)}</a>` : `<strong>${escapeHtml(bill.bill)} · ${escapeHtml(bill.year)}</strong>`}<span class="bill-status">${escapeHtml(bill.status)}</span></div><p>${escapeHtml(bill.title)}</p><div class="bill-types">${escapeHtml((bill.types || []).join(" · ") || "No type recorded")}${bill.lastActionDate ? ` · Last action ${escapeHtml(bill.lastActionDate)}` : ""}</div></article>`).join("") : `<p class="detail-location">No tracked bills for this state.</p>`}</div>${bills.length > 10 ? `<p class="policy-note">Showing 10 of ${fmt.format(bills.length)} bills. Export the state file for the full list.</p>` : ""}<button id="exportStateBills" class="secondary-button state-export" type="button" ${bills.length ? "" : "disabled"}>Export ${escapeHtml(state.abbr)} bills CSV</button></section>
+      ${detailSection("Other policy context", [detailItem("Dedicated incentive", state.incentive ? "Yes" : "No"), detailItem("Electricity-tax incentive", state.electricityTax ? "Yes" : "No"), detailItem("Moratorium tracker entries", state.moratoriumCount)])}
+    </div>`;
+    els.detailPanel.classList.add("open");
+    els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
+    els.detailPanel.querySelector("#exportStateBills")?.addEventListener("click", () => exportStateBills(state));
+    renderStates();
+    renderFacilities();
+  }
+
+  function exportStateBills(state) {
+    const headers = ["state", "bill", "year", "status", "bill_types", "summary_title", "last_action_date", "source_url"];
+    const rows = (state.bills || []).map(bill => [state.abbr, bill.bill, bill.year, bill.status, (bill.types || []).join("; "), bill.title, bill.lastActionDate, bill.sourceUrl]);
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${state.abbr.toLowerCase()}_data_center_bills.csv`; link.click(); URL.revokeObjectURL(link.href);
+  }
+
   function selectFacility(id) {
     selectedId = id;
+    selectedStateAbbr = null;
     const f = facilities.find(item => item.id === id);
     if (!f) return;
     els.detailPanel.innerHTML = `<div class="detail-content">
@@ -253,8 +369,10 @@
 
   function clearSelection() {
     selectedId = null;
+    selectedStateAbbr = null;
     els.detailPanel.classList.remove("open");
-    els.detailPanel.innerHTML = `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a facility</h2><p>Choose a point on the map to review evidence from every layer.</p></div>`;
+    els.detailPanel.innerHTML = currentView === "policy" ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a state</h2><p>Choose a state to review bill counts, statuses, policy types, and bill-level records.</p></div>` : `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a facility</h2><p>Choose a point on the map to review evidence from every layer.</p></div>`;
+    renderStates();
     renderFacilities();
   }
 
@@ -262,7 +380,10 @@
     if (!config[view]) return;
     currentView = view;
     document.querySelectorAll(".view-button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
-    renderStates(); renderLegend(); renderFacilities();
+    els.policyControls.hidden = view !== "policy";
+    els.mapShell.classList.toggle("policy-mode", view === "policy");
+    clearSelection();
+    renderLegend(); renderSummary();
   }
 
   function updateTransform() {
@@ -298,13 +419,18 @@
     applyFilters();
   });
   els.exportButton.addEventListener("click", exportCsv);
+  els.policyMetric.addEventListener("change", () => {
+    policyMetric = els.policyMetric.value;
+    renderStates();
+    renderLegend();
+  });
   document.querySelectorAll(".view-button").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
   els.zoomIn.addEventListener("click", () => zoom(1.35)); els.zoomOut.addEventListener("click", () => zoom(1/1.35)); els.zoomReset.addEventListener("click", resetView);
   els.map.addEventListener("wheel", event => { event.preventDefault(); const rect = els.map.getBoundingClientRect(); zoom(event.deltaY < 0 ? 1.18 : 1/1.18, (event.clientX-rect.left)/rect.width*1000, (event.clientY-rect.top)/rect.height*600); }, { passive: false });
-  els.map.addEventListener("pointerdown", event => { if (event.target.classList.contains("facility")) return; dragging = true; dragStart = { x: event.clientX, y: event.clientY, tx: transform.x, ty: transform.y }; els.map.classList.add("dragging"); els.map.setPointerCapture(event.pointerId); });
+  els.map.addEventListener("pointerdown", event => { if (event.target.classList.contains("facility") || (currentView === "policy" && event.target.classList.contains("state"))) return; dragging = true; dragStart = { x: event.clientX, y: event.clientY, tx: transform.x, ty: transform.y }; els.map.classList.add("dragging"); els.map.setPointerCapture(event.pointerId); });
   els.map.addEventListener("pointermove", event => { if (!dragging) return; const rect = els.map.getBoundingClientRect(); transform.x = dragStart.tx + (event.clientX-dragStart.x)/rect.width*1000; transform.y = dragStart.ty + (event.clientY-dragStart.y)/rect.height*600; updateTransform(); });
   els.map.addEventListener("pointerup", () => { dragging = false; els.map.classList.remove("dragging"); });
-  els.map.addEventListener("click", event => { if (event.target === els.map || event.target.classList.contains("state")) clearSelection(); });
+  els.map.addEventListener("click", event => { if (event.target === els.map || (currentView !== "policy" && event.target.classList.contains("state"))) clearSelection(); });
 
   function registerWebMcp() {
     const context = document.modelContext;
