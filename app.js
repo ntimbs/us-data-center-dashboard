@@ -16,6 +16,8 @@
     status: {
       title: "Operating status",
       insight: ["Project status is the outcome anchor", "Use proposed, development, operating, suspended, and cancelled records to define comparison groups. Preserve the snapshot date before modeling transitions."],
+      source: "U.S. Data Centers Tracker (ArcGIS), reported project-status field.",
+      sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [
         ["Operating", "#2dd4bf"], ["Development", "#60a5fa"], ["Expanding", "#a78bfa"],
         ["Proposed", "#f5b942"], ["Pre-proposal", "#eab676"], ["Suspended", "#fb7185"], ["Cancelled", "#e11d48"], ["Unknown", "#718096"]
@@ -25,30 +27,37 @@
     capacity: {
       title: "Reported MW capacity",
       insight: ["Capacity coverage is incomplete", "Point size and color use reported MW or the midpoint of a reported range. Unknown values remain visible and are never converted to zero."],
+      source: "U.S. Data Centers Tracker (ArcGIS), reported MW capacity field.",
+      sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [["Mega campus (1,000+ MW)", "#7c3aed"], ["Hyperscale (100-999 MW)", "#2563eb"], ["Large (51-99 MW)", "#0891b2"], ["Medium (11-50 MW)", "#14b8a6"], ["Small (0-10 MW)", "#84cc16"], ["Unknown", "#64748b"]],
       key: f => f.capacity || "Unknown"
     },
     power: {
       title: "Reported power source",
       insight: ["Reported sourcing is sparse", "Power categories describe source text and announced arrangements. They do not identify the hourly delivered mix or prove a physical grid connection."],
+      source: "U.S. Data Centers Tracker (ArcGIS), reported power-source field.",
+      sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [["Grid", "#60a5fa"], ["Natural gas", "#f59e0b"], ["Renewable", "#22c55e"], ["Nuclear", "#a78bfa"], ["Mixed", "#f97316"], ["Other fossil", "#ef4444"], ["Storage or fuel cell", "#06b6d4"], ["Other", "#94a3b8"], ["Unknown", "#475569"]],
       key: f => f.power || "Unknown"
     },
     water: {
       title: "County water-scarcity screening",
       insight: ["Water context belongs at several scales", "The AWARE factor, historical withdrawals, hazard ratings, and cooling technology remain separate. County measures do not establish water rights or site-level availability."],
+      source: "AWARE annual-average water-scarcity factor and U.S. Geological Survey county water-use data, with FEMA National Risk Index hazard context.",
       categories: [["Under 0.5", "#2dd4bf"], ["0.5–0.99", "#84cc16"], ["1–4.99", "#f5b942"], ["5 or more", "#fb7185"], ["Unknown", "#64748b"]],
       key: f => f.waterClass || "Unknown"
     },
     policy: {
       title: "Tracked state legislation",
       insight: ["Bill activity varies by topic and status", "Use the measure menu to map total bills, legislative status, or one of 22 policy types. Click a state for counts and bill-level records."],
+      source: "State legislative tracking of data-center-related bills (NCSL-derived), reviewed 28 September 2026.",
       categories: [["Dedicated incentive", "#2dd4bf"], ["Moratorium tracker entry", "#fb7185"], ["Other state context", "#60a5fa"]],
       key: f => f.incentive ? "Dedicated incentive" : f.moratoriumCount > 0 ? "Moratorium tracker entry" : "Other state context"
     },
     opposition: {
       title: "Opposition evidence hierarchy",
       insight: ["Evidence strength varies", "Direct facility records are project-level evidence. County and state tracker matches describe the surrounding environment, while absence from a tracker remains unknown."],
+      source: "FracTracker local-action records and compiled facility-level opposition-event tracking.",
       categories: [["Direct facility record", "#fb7185"], ["County tracker context only", "#f5b942"], ["State tracker context only", "#60a5fa"], ["No tracker match; opposition unknown", "#64748b"]],
       key: f => f.oppositionClass || "No tracker match; opposition unknown"
     }
@@ -62,10 +71,10 @@
   };
 
   const els = Object.fromEntries([
-    "searchInput", "stateFilter", "waterFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
+    "searchInput", "stateFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
-    "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText",
+    "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
     "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyMetric",
     "profileEyebrow", "profileTitle"
   ].map(id => [id, document.getElementById(id)]));
@@ -82,7 +91,6 @@
   const unique = (key) => [...new Set(facilities.map(f => f[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
   const populate = (select, values) => values.forEach(v => select.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
   populate(els.stateFilter, unique("state"));
-  populate(els.waterFilter, unique("waterClass"));
 
   function escapeHtml(input) {
     return String(input ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -208,7 +216,7 @@
 
   function currentFilters() {
     return {
-      query: els.searchInput.value.trim().toLowerCase(), state: els.stateFilter.value, water: els.waterFilter.value,
+      query: els.searchInput.value.trim().toLowerCase(), state: els.stateFilter.value,
       incentive: els.incentiveFilter.checked, opposition: els.oppositionFilter.checked, moratorium: els.moratoriumFilter.checked,
       statuses: selectedValues("status"), activities: selectedValues("activity"), capacities: selectedValues("capacity"),
       powerSources: selectedValues("power")
@@ -219,7 +227,6 @@
     const haystack = [f.name, f.operator, f.city, f.county, f.state].filter(Boolean).join(" ").toLowerCase();
     if (q.query && !haystack.includes(q.query)) return false;
     if (q.state && f.state !== q.state) return false;
-    if (q.water && f.waterClass !== q.water) return false;
     if (q.incentive && f.incentive !== 1) return false;
     if (q.opposition && f.directOpposition !== 1) return false;
     if (q.moratorium && !(f.moratoriumCount > 0)) return false;
@@ -302,6 +309,13 @@
     els.viewTitle.textContent = cfg.title;
     els.insightTitle.textContent = cfg.insight[0];
     els.insightText.textContent = cfg.insight[1];
+    if (!cfg.source) {
+      els.insightSource.textContent = "";
+    } else if (cfg.sourceUrl) {
+      els.insightSource.innerHTML = `Data source: <a href="${escapeHtml(cfg.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(cfg.source)}</a>`;
+    } else {
+      els.insightSource.textContent = `Data source: ${cfg.source}`;
+    }
     if (currentView === "policy") {
       els.viewTitle.textContent = policyMetricLabel();
       els.legend.innerHTML = policyBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch" style="background:${policyColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-note">${escapeHtml(policyMetricLabel())}<br>Click a state for bill types and records.</div>`;
@@ -406,14 +420,14 @@
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
   }
 
-  [els.searchInput, els.stateFilter, els.waterFilter, els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
+  [els.searchInput, els.stateFilter, els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
   document.querySelectorAll("[data-filter-action]").forEach(button => button.addEventListener("click", () => {
     const group = filterGroups[button.dataset.filterGroup];
     group.container.querySelectorAll("input").forEach(input => { input.checked = button.dataset.filterAction === "all"; });
     applyFilters();
   }));
   els.resetFilters.addEventListener("click", () => {
-    [els.searchInput, els.stateFilter, els.waterFilter].forEach(el => el.value = "");
+    [els.searchInput, els.stateFilter].forEach(el => el.value = "");
     [els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.checked = false);
     Object.keys(filterGroups).forEach(name => setGroupSelection(name, filterGroups[name].categories.map(([label]) => label)));
     applyFilters();
