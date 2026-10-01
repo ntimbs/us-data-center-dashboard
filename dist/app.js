@@ -16,7 +16,8 @@
     status: {
       title: "Operating status",
       insight: ["Project status is the outcome anchor", "Use proposed, development, operating, suspended, and cancelled records to define comparison groups. Preserve the snapshot date before modeling transitions."],
-      source: "Project-compiled U.S. data-center facility inventory, reported project-status field.",
+      source: "U.S. Data Centers Tracker (ArcGIS), reported project-status field.",
+      sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [
         ["Operating", "#2dd4bf"], ["Development", "#60a5fa"], ["Expanding", "#a78bfa"],
         ["Proposed", "#f5b942"], ["Pre-proposal", "#eab676"], ["Suspended", "#fb7185"], ["Cancelled", "#e11d48"], ["Unknown", "#718096"]
@@ -26,14 +27,16 @@
     capacity: {
       title: "Reported MW capacity",
       insight: ["Capacity coverage is incomplete", "Point size and color use reported MW or the midpoint of a reported range. Unknown values remain visible and are never converted to zero."],
-      source: "Project-compiled U.S. data-center facility inventory, reported MW capacity field.",
+      source: "U.S. Data Centers Tracker (ArcGIS), reported MW capacity field.",
+      sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [["Mega campus (1,000+ MW)", "#7c3aed"], ["Hyperscale (100-999 MW)", "#2563eb"], ["Large (51-99 MW)", "#0891b2"], ["Medium (11-50 MW)", "#14b8a6"], ["Small (0-10 MW)", "#84cc16"], ["Unknown", "#64748b"]],
       key: f => f.capacity || "Unknown"
     },
     power: {
       title: "Reported power source",
       insight: ["Reported sourcing is sparse", "Power categories describe source text and announced arrangements. They do not identify the hourly delivered mix or prove a physical grid connection."],
-      source: "Project-compiled U.S. data-center facility inventory, reported power-source field.",
+      source: "U.S. Data Centers Tracker (ArcGIS), reported power-source field.",
+      sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [["Grid", "#60a5fa"], ["Natural gas", "#f59e0b"], ["Renewable", "#22c55e"], ["Nuclear", "#a78bfa"], ["Mixed", "#f97316"], ["Other fossil", "#ef4444"], ["Storage or fuel cell", "#06b6d4"], ["Other", "#94a3b8"], ["Unknown", "#475569"]],
       key: f => f.power || "Unknown"
     },
@@ -306,7 +309,13 @@
     els.viewTitle.textContent = cfg.title;
     els.insightTitle.textContent = cfg.insight[0];
     els.insightText.textContent = cfg.insight[1];
-    els.insightSource.textContent = cfg.source ? `Data source: ${cfg.source}` : "";
+    if (!cfg.source) {
+      els.insightSource.textContent = "";
+    } else if (cfg.sourceUrl) {
+      els.insightSource.innerHTML = `Data source: <a href="${escapeHtml(cfg.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(cfg.source)}</a>`;
+    } else {
+      els.insightSource.textContent = `Data source: ${cfg.source}`;
+    }
     if (currentView === "policy") {
       els.viewTitle.textContent = policyMetricLabel();
       els.legend.innerHTML = policyBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch" style="background:${policyColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-note">${escapeHtml(policyMetricLabel())}<br>Click a state for bill types and records.</div>`;
