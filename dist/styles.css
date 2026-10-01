@@ -92,7 +92,8 @@ h2 { margin: 3px 0 0; font-size: 1rem; line-height: 1.25; }
 .map-toolbar:has(.policy-controls:not([hidden])) .policy-controls { flex:1 1 auto; margin-left:0; }
 .policy-controls { display:flex; align-items:center; gap:7px; margin-left:auto; color:var(--muted); font-size:.68rem; white-space:nowrap; }
 .policy-controls[hidden] { display:none; }
-.policy-controls select { min-height:32px; max-width:220px; padding:0 26px 0 9px; border:1px solid var(--line); border-radius:6px; background:#0a1420; font-size:.71rem; }
+.policy-controls select { min-height:32px; max-width:190px; padding:0 26px 0 9px; border:1px solid var(--line); border-radius:6px; background:#0a1420; font-size:.71rem; }
+.policy-controls-divider { color:var(--subtle); font-size:.66rem; }
 .view-button, .map-actions button { min-height: 32px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; font-size: .74rem; font-weight: 650; }
 .view-button { padding: 0 11px; }
 .view-button:hover, .view-button.active { color: var(--text); background: #12283a; border-color: #24445b; }
@@ -187,8 +188,8 @@ h2 { margin: 3px 0 0; font-size: 1rem; line-height: 1.25; }
   .main-panel { overflow: visible; padding: 12px; }
   .metric-strip { grid-template-columns: 1fr 1fr; }
   .map-toolbar { align-items: flex-start; flex-direction: column; }
-  .policy-controls { width:100%; margin-left:0; justify-content:space-between; }
-  .policy-controls select { max-width:65%; }
+  .policy-controls { width:100%; margin-left:0; flex-wrap:wrap; }
+  .policy-controls select { max-width:none; flex:1 1 120px; }
   .map-actions { align-self: flex-end; }
   .map-shell { min-height: 420px; }
   .analysis-row { grid-template-columns: 1fr; }

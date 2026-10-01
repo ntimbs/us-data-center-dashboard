@@ -75,7 +75,7 @@
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
-    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyMetric",
+    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyCountMetric", "policyTypeMetric",
     "profileEyebrow", "profileTitle"
   ].map(id => [id, document.getElementById(id)]));
 
@@ -103,7 +103,8 @@
     ["status:Fail", "Status: Failed"],
     ["status:Veto", "Status: Vetoed"]
   ];
-  els.policyMetric.innerHTML = `<optgroup label="Bill counts">${policyMetricOptions.map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("")}</optgroup><optgroup label="Bill topic / type">${policyTypes.map(type => `<option value="type:${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("")}</optgroup>`;
+  els.policyCountMetric.innerHTML = policyMetricOptions.map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("");
+  els.policyTypeMetric.innerHTML = `<option value="">All topics (use bill-count dropdown)</option>${policyTypes.map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("")}`;
 
   function policyMeasure(state) {
     if (policyMetric === "total") return Number(state.billCount) || 0;
@@ -433,8 +434,18 @@
     applyFilters();
   });
   els.exportButton.addEventListener("click", exportCsv);
-  els.policyMetric.addEventListener("change", () => {
-    policyMetric = els.policyMetric.value;
+  els.policyCountMetric.addEventListener("change", () => {
+    policyMetric = els.policyCountMetric.value;
+    els.policyTypeMetric.value = "";
+    renderStates();
+    renderLegend();
+  });
+  els.policyTypeMetric.addEventListener("change", () => {
+    if (els.policyTypeMetric.value) {
+      policyMetric = `type:${els.policyTypeMetric.value}`;
+    } else {
+      policyMetric = els.policyCountMetric.value;
+    }
     renderStates();
     renderLegend();
   });
