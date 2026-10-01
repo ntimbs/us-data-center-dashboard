@@ -6,7 +6,7 @@
   <meta name="description" content="Interactive U.S. data-center map with power, resource, policy, and opposition context.">
   <title>U.S. Data Center Research Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M14 18h36v10H14zm0 18h36v10H14z' fill='%2314b8a6'/%3E%3Ccircle cx='44' cy='23' r='2' fill='white'/%3E%3Ccircle cx='44' cy='41' r='2' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1.5">
+  <link rel="stylesheet" href="styles.css?v=1.6">
 </head>
 <body>
   <header class="topbar">
@@ -32,10 +32,7 @@
         <input id="searchInput" type="search" placeholder="Name, operator, city, county" autocomplete="off">
       </label>
 
-      <div class="field-grid">
-        <label class="field"><span>State</span><select id="stateFilter"><option value="">All states</option></select></label>
-        <label class="field"><span>Water scarcity</span><select id="waterFilter"><option value="">All scarcity classes</option></select></label>
-      </div>
+      <label class="field"><span>State</span><select id="stateFilter"><option value="">All states</option></select></label>
 
       <p class="filter-instruction">All categories begin selected. Clear a group, then check the types you want to compare.</p>
 
@@ -146,6 +143,6 @@
   </main>
 
   <script src="dashboard-data.js?v=1.4"></script>
-  <script src="app.js?v=1.4"></script>
+  <script src="app.js?v=1.5"></script>
 </body>
 </html>

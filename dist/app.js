@@ -62,7 +62,7 @@
   };
 
   const els = Object.fromEntries([
-    "searchInput", "stateFilter", "waterFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
+    "searchInput", "stateFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText",
@@ -82,7 +82,6 @@
   const unique = (key) => [...new Set(facilities.map(f => f[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
   const populate = (select, values) => values.forEach(v => select.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
   populate(els.stateFilter, unique("state"));
-  populate(els.waterFilter, unique("waterClass"));
 
   function escapeHtml(input) {
     return String(input ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -208,7 +207,7 @@
 
   function currentFilters() {
     return {
-      query: els.searchInput.value.trim().toLowerCase(), state: els.stateFilter.value, water: els.waterFilter.value,
+      query: els.searchInput.value.trim().toLowerCase(), state: els.stateFilter.value,
       incentive: els.incentiveFilter.checked, opposition: els.oppositionFilter.checked, moratorium: els.moratoriumFilter.checked,
       statuses: selectedValues("status"), activities: selectedValues("activity"), capacities: selectedValues("capacity"),
       powerSources: selectedValues("power")
@@ -219,7 +218,6 @@
     const haystack = [f.name, f.operator, f.city, f.county, f.state].filter(Boolean).join(" ").toLowerCase();
     if (q.query && !haystack.includes(q.query)) return false;
     if (q.state && f.state !== q.state) return false;
-    if (q.water && f.waterClass !== q.water) return false;
     if (q.incentive && f.incentive !== 1) return false;
     if (q.opposition && f.directOpposition !== 1) return false;
     if (q.moratorium && !(f.moratoriumCount > 0)) return false;
@@ -406,14 +404,14 @@
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
   }
 
-  [els.searchInput, els.stateFilter, els.waterFilter, els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
+  [els.searchInput, els.stateFilter, els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
   document.querySelectorAll("[data-filter-action]").forEach(button => button.addEventListener("click", () => {
     const group = filterGroups[button.dataset.filterGroup];
     group.container.querySelectorAll("input").forEach(input => { input.checked = button.dataset.filterAction === "all"; });
     applyFilters();
   }));
   els.resetFilters.addEventListener("click", () => {
-    [els.searchInput, els.stateFilter, els.waterFilter].forEach(el => el.value = "");
+    [els.searchInput, els.stateFilter].forEach(el => el.value = "");
     [els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.checked = false);
     Object.keys(filterGroups).forEach(name => setGroupSelection(name, filterGroups[name].categories.map(([label]) => label)));
     applyFilters();
