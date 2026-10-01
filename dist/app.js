@@ -16,6 +16,7 @@
     status: {
       title: "Operating status",
       insight: ["Project status is the outcome anchor", "Use proposed, development, operating, suspended, and cancelled records to define comparison groups. Preserve the snapshot date before modeling transitions."],
+      source: "Project-compiled U.S. data-center facility inventory, reported project-status field.",
       categories: [
         ["Operating", "#2dd4bf"], ["Development", "#60a5fa"], ["Expanding", "#a78bfa"],
         ["Proposed", "#f5b942"], ["Pre-proposal", "#eab676"], ["Suspended", "#fb7185"], ["Cancelled", "#e11d48"], ["Unknown", "#718096"]
@@ -25,30 +26,35 @@
     capacity: {
       title: "Reported MW capacity",
       insight: ["Capacity coverage is incomplete", "Point size and color use reported MW or the midpoint of a reported range. Unknown values remain visible and are never converted to zero."],
+      source: "Project-compiled U.S. data-center facility inventory, reported MW capacity field.",
       categories: [["Mega campus (1,000+ MW)", "#7c3aed"], ["Hyperscale (100-999 MW)", "#2563eb"], ["Large (51-99 MW)", "#0891b2"], ["Medium (11-50 MW)", "#14b8a6"], ["Small (0-10 MW)", "#84cc16"], ["Unknown", "#64748b"]],
       key: f => f.capacity || "Unknown"
     },
     power: {
       title: "Reported power source",
       insight: ["Reported sourcing is sparse", "Power categories describe source text and announced arrangements. They do not identify the hourly delivered mix or prove a physical grid connection."],
+      source: "Project-compiled U.S. data-center facility inventory, reported power-source field.",
       categories: [["Grid", "#60a5fa"], ["Natural gas", "#f59e0b"], ["Renewable", "#22c55e"], ["Nuclear", "#a78bfa"], ["Mixed", "#f97316"], ["Other fossil", "#ef4444"], ["Storage or fuel cell", "#06b6d4"], ["Other", "#94a3b8"], ["Unknown", "#475569"]],
       key: f => f.power || "Unknown"
     },
     water: {
       title: "County water-scarcity screening",
       insight: ["Water context belongs at several scales", "The AWARE factor, historical withdrawals, hazard ratings, and cooling technology remain separate. County measures do not establish water rights or site-level availability."],
+      source: "AWARE annual-average water-scarcity factor and U.S. Geological Survey county water-use data, with FEMA National Risk Index hazard context.",
       categories: [["Under 0.5", "#2dd4bf"], ["0.5–0.99", "#84cc16"], ["1–4.99", "#f5b942"], ["5 or more", "#fb7185"], ["Unknown", "#64748b"]],
       key: f => f.waterClass || "Unknown"
     },
     policy: {
       title: "Tracked state legislation",
       insight: ["Bill activity varies by topic and status", "Use the measure menu to map total bills, legislative status, or one of 22 policy types. Click a state for counts and bill-level records."],
+      source: "State legislative tracking of data-center-related bills (NCSL-derived), reviewed 28 September 2026.",
       categories: [["Dedicated incentive", "#2dd4bf"], ["Moratorium tracker entry", "#fb7185"], ["Other state context", "#60a5fa"]],
       key: f => f.incentive ? "Dedicated incentive" : f.moratoriumCount > 0 ? "Moratorium tracker entry" : "Other state context"
     },
     opposition: {
       title: "Opposition evidence hierarchy",
       insight: ["Evidence strength varies", "Direct facility records are project-level evidence. County and state tracker matches describe the surrounding environment, while absence from a tracker remains unknown."],
+      source: "FracTracker local-action records and compiled facility-level opposition-event tracking.",
       categories: [["Direct facility record", "#fb7185"], ["County tracker context only", "#f5b942"], ["State tracker context only", "#60a5fa"], ["No tracker match; opposition unknown", "#64748b"]],
       key: f => f.oppositionClass || "No tracker match; opposition unknown"
     }
@@ -65,7 +71,7 @@
     "searchInput", "stateFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
-    "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText",
+    "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
     "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyMetric",
     "profileEyebrow", "profileTitle"
   ].map(id => [id, document.getElementById(id)]));
@@ -300,6 +306,7 @@
     els.viewTitle.textContent = cfg.title;
     els.insightTitle.textContent = cfg.insight[0];
     els.insightText.textContent = cfg.insight[1];
+    els.insightSource.textContent = cfg.source ? `Data source: ${cfg.source}` : "";
     if (currentView === "policy") {
       els.viewTitle.textContent = policyMetricLabel();
       els.legend.innerHTML = policyBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch" style="background:${policyColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-note">${escapeHtml(policyMetricLabel())}<br>Click a state for bill types and records.</div>`;

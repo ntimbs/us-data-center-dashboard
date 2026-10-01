@@ -132,6 +132,7 @@ h2 { margin: 3px 0 0; font-size: 1rem; line-height: 1.25; }
 .bar-row strong { color: #d7e2ea; font-size: .7rem; text-align: right; }
 .insight-card h2 { margin-top: 6px; font-size: 1.05rem; }
 .insight-card p { margin: 10px 0 14px; color: var(--muted); font-size: .79rem; line-height: 1.55; }
+.insight-card p.insight-source { margin: -8px 0 12px; color: var(--subtle); font-size: .68rem; line-height: 1.4; }
 .coverage-line { padding-top: 10px; border-top: 1px solid var(--line-soft); color: var(--subtle); font-size: .7rem; line-height: 1.45; }
 
 .detail-empty { min-height: 100%; display: grid; place-content: center; justify-items: center; padding: 30px; text-align: center; }
