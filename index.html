@@ -6,7 +6,7 @@
   <meta name="description" content="Interactive U.S. data-center map with power, resource, policy, and opposition context.">
   <title>U.S. Data Center Research Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M14 18h36v10H14zm0 18h36v10H14z' fill='%2314b8a6'/%3E%3Ccircle cx='44' cy='23' r='2' fill='white'/%3E%3Ccircle cx='44' cy='41' r='2' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1.8">
+  <link rel="stylesheet" href="styles.css?v=1.9">
 </head>
 <body>
   <header class="topbar">
@@ -97,10 +97,12 @@
             <button class="view-button" data-view="policy" type="button">Policy</button>
             <button class="view-button" data-view="opposition" type="button">Opposition</button>
           </div>
-          <label id="policyControls" class="policy-controls" hidden>
+          <div id="policyControls" class="policy-controls" hidden>
             <span>Map state by</span>
-            <select id="policyMetric" aria-label="Legislative measure"></select>
-          </label>
+            <select id="policyCountMetric" aria-label="Bill count measure"></select>
+            <span class="policy-controls-divider" aria-hidden="true">or</span>
+            <select id="policyTypeMetric" aria-label="Bill topic or type"></select>
+          </div>
           <div class="map-actions">
             <button id="zoomOut" type="button" aria-label="Zoom out">−</button>
             <button id="zoomReset" type="button">Reset view</button>
@@ -144,6 +146,6 @@
   </main>
 
   <script src="dashboard-data.js?v=1.4"></script>
-  <script src="app.js?v=1.7"></script>
+  <script src="app.js?v=1.8"></script>
 </body>
 </html>
