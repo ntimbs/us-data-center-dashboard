@@ -160,3 +160,9 @@ body.guide-open { overflow:hidden; }
 @media (max-width:1200px){.workspace{grid-template-columns:292px minmax(500px,1fr)}.detail-panel{position:fixed;z-index:20;right:0;top:68px;bottom:0;width:320px;transform:translateX(101%);transition:transform .2s ease;box-shadow:-20px 0 45px rgba(0,0,0,.4)}.detail-panel.open{transform:translateX(0)}}
 @media (max-width:830px){body{overflow:auto}.topbar{height:auto;min-height:68px;padding:12px 15px}.brand p,.snapshot{display:none}.workspace{height:auto;display:block}.controls{border-right:0;border-bottom:1px solid var(--line)}.main-panel{overflow:visible;padding:12px}.metric-strip{grid-template-columns:1fr 1fr}.map-shell{min-height:430px}.analysis-row{grid-template-columns:1fr}.map-caption span:last-child{display:none}.guide-backdrop{padding:10px}.guide-dialog{width:100%;height:94vh}.guide-intro{grid-template-columns:1fr}.measure-grid,.stat-guide-grid{grid-template-columns:1fr}}
 @media (max-width:500px){.header-actions>a{display:none}.brand h1{font-size:.9rem}.detail-grid{grid-template-columns:1fr}.legend{width:158px}}
+
+/* Keyboard-navigation focus ring, added for accessibility audit. */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}

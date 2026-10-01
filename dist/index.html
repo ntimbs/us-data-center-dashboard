@@ -6,7 +6,7 @@
   <meta name="description" content="Interactive U.S. data-center map with power, resource, policy, and opposition context.">
   <title>U.S. Data Center Research Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M14 18h36v10H14zm0 18h36v10H14z' fill='%2314b8a6'/%3E%3Ccircle cx='44' cy='23' r='2' fill='white'/%3E%3Ccircle cx='44' cy='41' r='2' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1.4">
+  <link rel="stylesheet" href="styles.css?v=1.5">
 </head>
 <body>
   <header class="topbar">
@@ -83,7 +83,7 @@
     </aside>
 
     <section class="main-panel">
-      <div class="metric-strip" aria-label="Selection summary">
+      <div class="metric-strip" aria-label="Selection summary" aria-live="polite">
         <article><span>Facilities</span><strong id="metricFacilities">1,669</strong><small id="metricShare">100% of inventory</small></article>
         <article><span>Reported capacity</span><strong id="metricMw">—</strong><small>Known MW, selected records</small></article>
         <article><span>Operating</span><strong id="metricOperating">—</strong><small>Share of selection</small></article>

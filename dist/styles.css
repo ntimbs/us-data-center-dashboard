@@ -201,3 +201,9 @@ h2 { margin: 3px 0 0; font-size: 1rem; line-height: 1.25; }
   .map-shell { min-height: 370px; }
   .legend { width: 150px; }
 }
+
+/* Keyboard-navigation focus ring, added for accessibility audit. */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
