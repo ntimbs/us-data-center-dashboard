@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive research platform for examining how U.S. data-center development intersects with power systems, natural resources, policy, and local opposition.">
+  <title>U.S. Data Center Infrastructure Explorer | UVA National Security Institute</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=1.0">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://nationalsecurity.virginia.edu/" aria-label="UVA National Security Institute home">
+      <span class="uva-mark" aria-hidden="true">V</span>
+      <span class="wordmark-uva">University of Virginia</span>
+      <span class="wordmark-rule" aria-hidden="true"></span>
+      <span class="wordmark-nsi">National Security<br>Institute</span>
+    </a>
+    <nav aria-label="Page navigation">
+      <a href="#about">About</a>
+      <a href="#explorer">Explorer</a>
+      <a href="#methodology">Methodology</a>
+      <a class="nav-cta" href="../" target="_blank" rel="noopener">Open dashboard <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="signal-map" aria-hidden="true">
+        <span class="signal signal-a"></span>
+        <span class="signal signal-b"></span>
+        <span class="signal signal-c"></span>
+        <span class="signal signal-d"></span>
+        <span class="signal signal-e"></span>
+        <svg viewBox="0 0 540 360" preserveAspectRatio="none">
+          <path d="M56 287 C132 228, 148 258, 216 189 S330 116, 472 64"></path>
+          <path d="M35 82 C142 114, 194 96, 266 158 S393 256, 516 236"></path>
+        </svg>
+      </div>
+      <div class="hero-content">
+        <p class="eyebrow">Interactive research platform</p>
+        <h1>Mapping the infrastructure behind American AI</h1>
+        <p class="hero-lead">Explore how data-center development intersects with electricity systems, water and land constraints, state policy, and local opposition across the United States.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#explorer">Explore the platform</a>
+          <a class="button button-secondary" href="#methodology">Review the methodology</a>
+        </div>
+        <p class="snapshot">U.S. research release <span></span> Data snapshot 28 September 2026</p>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Research platform coverage">
+      <article><strong>1,669</strong><span>mapped data-center facilities and proposed sites</span></article>
+      <article><strong>13,491</strong><span>mapped power plants providing regional context</span></article>
+      <article><strong>547</strong><span>tracked state bills from 2024–2026</span></article>
+      <article><strong>8</strong><span>integrated infrastructure and policy layers</span></article>
+    </section>
+
+    <section id="about" class="section section-intro">
+      <div>
+        <p class="section-label">Why this matters</p>
+        <h2>Data centers are becoming strategic infrastructure.</h2>
+      </div>
+      <div class="intro-copy">
+        <p>Advanced computing depends on more than servers and chips. Data-center growth also requires large, reliable power supplies; transmission and utility coordination; access to land and water; workable permitting and policy environments; and durable relationships with host communities.</p>
+        <p>This platform brings those systems into a common geographic frame. It helps researchers and decision-makers identify concentrations, compare development contexts, test spatial relationships, and find places that warrant deeper investigation.</p>
+        <p>The current release focuses on the United States. It establishes the analytical foundation for a broader comparative assessment of U.S. and People’s Republic of China data-center ecosystems, dependencies, and strategic vulnerabilities.</p>
+      </div>
+    </section>
+
+    <section class="section questions">
+      <div class="section-heading">
+        <p class="section-label">Questions the platform supports</p>
+        <h2>From facility location to system-level constraints</h2>
+      </div>
+      <div class="question-grid">
+        <article>
+          <span>01</span>
+          <h3>Where is development concentrating?</h3>
+          <p>Compare operating, proposed, expanding, suspended, and cancelled projects by location and reported scale.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>What power context surrounds each site?</h3>
+          <p>Examine grid regions, candidate utilities, generation, transmission proximity, substations, and queue pressure.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Where could resources shape growth?</h3>
+          <p>Screen county water scarcity, historical water use, physical hazards, land context, and development intensity.</p>
+        </article>
+        <article>
+          <span>04</span>
+          <h3>How does the policy environment differ?</h3>
+          <p>Explore state bill activity, incentives, moratorium records, and evidence of community or local-government action.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="explorer" class="explorer-section">
+      <div class="explorer-heading">
+        <div>
+          <p class="section-label">Interactive explorer</p>
+          <h2>Choose a geographic lens</h2>
+          <p id="viewDescription">Map individual facilities and compare their status, capacity, power, resource, policy, and opposition context.</p>
+        </div>
+        <a id="openView" class="text-link" href="../" target="_blank" rel="noopener">Open this view full screen <span aria-hidden="true">↗</span></a>
+      </div>
+
+      <div class="view-tabs" role="tablist" aria-label="Dashboard view">
+        <button type="button" role="tab" aria-selected="true" data-src="../" data-title="National facility map" data-description="Map individual facilities and compare their status, capacity, power, resource, policy, and opposition context.">National facilities</button>
+        <button type="button" role="tab" aria-selected="false" data-src="../hex/" data-title="U.S. spatial explorer" data-description="Compare equal-area hexagonal cells and inspect descriptive correlations, bivariate patterns, and spatial clustering.">U.S. spatial explorer</button>
+        <button type="button" role="tab" aria-selected="false" data-src="../virginia/" data-title="Virginia county view" data-description="Examine facilities and contextual measures across Virginia counties and independent cities.">Virginia counties</button>
+      </div>
+
+      <div class="embed-frame">
+        <div class="embed-bar">
+          <span class="live-dot" aria-hidden="true"></span>
+          <strong id="viewTitle">National facility map</strong>
+          <span>Interactive research environment</span>
+        </div>
+        <iframe id="dashboardFrame" src="../" title="U.S. Data Center Research Dashboard" loading="lazy" allow="fullscreen"></iframe>
+      </div>
+      <p class="embed-note">For the best experience on a phone or tablet, open the selected view full screen.</p>
+    </section>
+
+    <section id="methodology" class="section methodology">
+      <div class="section-heading narrow">
+        <p class="section-label">Research design</p>
+        <h2>Eight layers, one auditable evidence base</h2>
+        <p>The platform distinguishes reported facts, derived measures, spatial context, and unresolved fields. Missing information remains visible rather than being converted to zero or “no.”</p>
+      </div>
+      <div class="layer-list">
+        <article><span>01</span><div><h3>Facility inventory</h3><p>Locations, project status, reported capacity, power source, cooling, ownership, and timing.</p></div></article>
+        <article><span>02</span><div><h3>Power supply</h3><p>EPA eGRID generation, fuel mix, capacity, output, emissions, and regional grid geography.</p></div></article>
+        <article><span>03</span><div><h3>Grid geography</h3><p>Candidate utility territories, eGRID subregions, balancing-area context, and utility characteristics.</p></div></article>
+        <article><span>04</span><div><h3>Infrastructure pressure</h3><p>Transmission and substation proximity, nearby generation, interconnection queues, and utility-relative scale.</p></div></article>
+        <article><span>05</span><div><h3>Water and hazards</h3><p>Water scarcity, historical withdrawals, drought, flood, heat, wildfire, and overall physical risk.</p></div></article>
+        <article><span>06</span><div><h3>Land and development</h3><p>Reported acreage, county facility concentration, and employment and payroll context.</p></div></article>
+        <article><span>07</span><div><h3>Legislation and policy</h3><p>State incentives, moratorium records, bill status, and 22 non-exclusive policy topics.</p></div></article>
+        <article><span>08</span><div><h3>Local response</h3><p>Direct facility evidence, county tracker context, local-government actions, and evidence status.</p></div></article>
+      </div>
+    </section>
+
+    <section class="interpretation">
+      <div class="interpretation-inner">
+        <p class="section-label">How to interpret the evidence</p>
+        <h2>Context supports inquiry. It does not replace verification.</h2>
+        <div class="principles">
+          <article><h3>Proximity is contextual</h3><p>A nearby line, substation, generator, or water source does not establish a physical connection, available capacity, or a service agreement.</p></article>
+          <article><h3>Coverage varies</h3><p>Capacity, power-source, cooling, utility, and opposition fields depend on public reporting. “Unknown” is retained as a substantive category.</p></article>
+          <article><h3>Relationships are descriptive</h3><p>Correlations, spatial clusters, policy exposure, and tracker matches identify patterns for follow-up; they do not establish causal effects.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section publication-note">
+      <div>
+        <p class="section-label">A living research platform</p>
+        <h2>Built for transparent iteration</h2>
+      </div>
+      <div>
+        <p>Each layer retains source information, measurement rules, match quality, and interpretation limits. The platform will evolve as facility records change, additional evidence becomes available, and the comparative research expands.</p>
+        <div class="publication-links">
+          <a class="button button-dark" href="../" target="_blank" rel="noopener">Launch the dashboard <span aria-hidden="true">↗</span></a>
+          <a class="text-link dark" href="https://nationalsecurity.virginia.edu/research" target="_blank" rel="noopener">View Institute research <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-brand">
+      <strong>University of Virginia</strong>
+      <span>National Security Data and Policy Institute</span>
+    </div>
+    <div class="footer-meta">
+      <span>U.S. Data Center Infrastructure Explorer</span>
+      <a href="https://nationalsecurity.virginia.edu/" target="_blank" rel="noopener">nationalsecurity.virginia.edu <span aria-hidden="true">↗</span></a>
+    </div>
+  </footer>
+
+  <script src="app.js?v=1.0"></script>
+</body>
+</html>
