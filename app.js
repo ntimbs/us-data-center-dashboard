@@ -75,7 +75,7 @@
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
-    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyCountMetric", "policyTypeMetric",
+    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyTopic", "policyStatusGroup",
     "profileEyebrow", "profileTitle"
   ].map(id => [id, document.getElementById(id)]));
 
@@ -83,7 +83,8 @@
   let filtered = facilities;
   let selectedId = null;
   let selectedStateAbbr = null;
-  let policyMetric = "total";
+  let policyTopic = "";
+  let policyStatuses = new Set(["Active", "Pass", "Fail", "Veto"]);
   let transform = { x: 0, y: 0, scale: 1 };
   let dragging = false;
   let dragStart = null;
@@ -96,26 +97,26 @@
     return String(input ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
   }
 
-  const policyMetricOptions = [
-    ["total", "Total tracked bills"],
-    ["status:Active", "Status: Active"],
-    ["status:Pass", "Status: Passed"],
-    ["status:Fail", "Status: Failed"],
-    ["status:Veto", "Status: Vetoed"]
-  ];
-  els.policyCountMetric.innerHTML = policyMetricOptions.map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("");
-  els.policyTypeMetric.innerHTML = `<option value="">All topics (use bill-count dropdown)</option>${policyTypes.map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("")}`;
+  const statusLabels = { Active: "Active", Pass: "Passed", Fail: "Failed", Veto: "Vetoed" };
+  els.policyTopic.innerHTML = `<option value="">All topics</option>${policyTypes.map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("")}`;
+  const policyStatusChecks = () => Array.from(els.policyStatusGroup.querySelectorAll('input[type="checkbox"]'));
 
   function policyMeasure(state) {
-    if (policyMetric === "total") return Number(state.billCount) || 0;
-    const [kind, key] = policyMetric.split(":");
-    if (kind === "status") return Number(state.billStatus?.[key]) || 0;
-    if (kind === "type") return Number(state.billTypes?.[key]) || 0;
-    return 0;
+    const bills = state.bills || [];
+    return bills.filter(bill => {
+      const matchesTopic = !policyTopic || (bill.types || []).includes(policyTopic);
+      const matchesStatus = policyStatuses.has(bill.status);
+      return matchesTopic && matchesStatus;
+    }).length;
   }
 
   function policyMetricLabel() {
-    return policyMetricOptions.find(([key]) => key === policyMetric)?.[1] || policyMetric.replace(/^type:/, "Type: ");
+    const topicLabel = policyTopic || "All topics";
+    const allStatuses = ["Active", "Pass", "Fail", "Veto"];
+    const statusLabel = policyStatuses.size === allStatuses.length
+      ? "all statuses"
+      : allStatuses.filter(s => policyStatuses.has(s)).map(s => statusLabels[s]).join(" or ") || "no status selected";
+    return `${topicLabel}, ${statusLabel}`;
   }
 
   function policyColor(count) {
@@ -434,20 +435,17 @@
     applyFilters();
   });
   els.exportButton.addEventListener("click", exportCsv);
-  els.policyCountMetric.addEventListener("change", () => {
-    policyMetric = els.policyCountMetric.value;
-    els.policyTypeMetric.value = "";
+  els.policyTopic.addEventListener("change", () => {
+    policyTopic = els.policyTopic.value;
     renderStates();
     renderLegend();
   });
-  els.policyTypeMetric.addEventListener("change", () => {
-    if (els.policyTypeMetric.value) {
-      policyMetric = `type:${els.policyTypeMetric.value}`;
-    } else {
-      policyMetric = els.policyCountMetric.value;
-    }
-    renderStates();
-    renderLegend();
+  policyStatusChecks().forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+      policyStatuses = new Set(policyStatusChecks().filter(c => c.checked).map(c => c.value));
+      renderStates();
+      renderLegend();
+    });
   });
   document.querySelectorAll(".view-button").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
   els.zoomIn.addEventListener("click", () => zoom(1.35)); els.zoomOut.addEventListener("click", () => zoom(1/1.35)); els.zoomReset.addEventListener("click", resetView);
