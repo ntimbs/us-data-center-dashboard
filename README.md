@@ -1,6 +1,8 @@
 # U.S. Data Center Ecosystem Tracker
 
-The U.S. Data Center Ecosystem Tracker brings together three interactive research dashboards for exploring data centers and the infrastructure, resources, policies, and communities connected to them.
+The UVA National Security Institute’s U.S. Data Center Dashboard is a living ecosystem tracker of the infrastructure behind AI. Currently, we map data centers alongside a variety of energy, water, climate, and policy considerations. Its interactive interface helps researchers and the public explore how material constraints and community concerns may shape U.S. AI infrastructure. 
+
+Designed to be a living and customizable tool ,the U.S. Data Center Ecosystem Tracker can evolve with feedback from researchers, community organizers, and others working to understand these impacts. The project will also provide a foundation for future comparative analysis of U.S. and Chinese capabilities as that work develops. 
 
 **Live dashboard:** https://ntimbs.github.io/us-data-center-dashboard/
 
