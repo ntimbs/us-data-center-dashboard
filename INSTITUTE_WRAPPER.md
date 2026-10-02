@@ -1,6 +1,6 @@
-# UVA National Security Institute dashboard wrapper
+# U.S. Data Center Ecosystem Tracker — UVA National Security Institute wrapper
 
-The publication-ready wrapper is in `dist/institute/`. It is a standalone static page that embeds the three public dashboard views and adds research context, coverage metrics, methodology, and interpretation guidance.
+The publication-ready wrapper is in `dist/institute/`. It is a standalone static page for the U.S. Data Center Ecosystem Tracker, embedding its three public dashboard views and adding research context, coverage metrics, methodology, and interpretation guidance.
 
 ## Preview
 
@@ -18,7 +18,7 @@ The Institute web team can use either of these approaches:
 ```html
 <iframe
   src="https://ntimbs.github.io/us-data-center-dashboard/"
-  title="U.S. Data Center Research Dashboard"
+  title="U.S. Data Center Ecosystem Tracker"
   loading="lazy"
   style="width:100%;height:820px;border:0;"
   allow="fullscreen">
