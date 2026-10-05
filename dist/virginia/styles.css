@@ -12,6 +12,8 @@ button,input,select { font:inherit; color:inherit; }
 .county-mark { clip-path:polygon(8% 17%,84% 4%,97% 23%,88% 89%,30% 97%,4% 72%); }
 .header-actions { display:flex; align-items:center; gap:18px; }
 .header-actions > a { padding:7px 10px; border:1px solid #2b5368; border-radius:6px; color:#bfe9e4; text-decoration:none; font-size:.76rem; }
+.institutional-logos { display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:6px; background:#fff; }
+.institutional-logos img { display:block; width:auto; height:30px; }
 .snapshot { display:flex; gap:8px; align-items:baseline; color:var(--muted); font-size:.76rem; }
 .snapshot strong { color:var(--text); font-size:.82rem; }
 .workspace { height:calc(100vh - 68px); display:grid; grid-template-columns:280px minmax(650px,1fr) 300px; }
@@ -149,9 +151,9 @@ h2 { margin:3px 0 0; font-size:1rem; line-height:1.3; }
 .stat-guide-grid h3 { margin:0; color:#dce7ed; font-size:.8rem; }
 .stat-guide-grid p { margin:6px 0 0; color:var(--muted); font-size:.7rem; line-height:1.48; }
 body.guide-open { overflow:hidden; }
-@media (max-width:1200px){.workspace{grid-template-columns:260px minmax(590px,1fr)}.detail-panel{position:fixed;z-index:20;right:0;top:68px;bottom:0;width:320px;transform:translateX(101%);transition:transform .2s ease;box-shadow:-20px 0 45px rgba(0,0,0,.4)}.detail-panel.open{transform:translateX(0)}}
-@media (max-width:830px){body{overflow:auto}.topbar{height:auto;min-height:68px;padding:12px 15px}.brand p,.snapshot{display:none}.workspace{height:auto;display:block}.controls{border-right:0;border-bottom:1px solid var(--line)}.main-panel,.main-stage{overflow:visible;padding:12px}.metric-strip,.metrics{grid-template-columns:1fr 1fr}.map-shell{min-height:430px}.analysis-row{grid-template-columns:1fr}.map-caption span:last-child{display:none}.guide-backdrop{padding:10px}.guide-dialog{width:100%;height:94vh}.guide-intro{grid-template-columns:1fr}.measure-grid,.stat-guide-grid{grid-template-columns:1fr}}
-@media (max-width:500px){.header-actions>a{display:none}.brand h1{font-size:.9rem}.detail-grid{grid-template-columns:1fr}.legend{width:158px}}
+@media (max-width:1200px){.topbar{height:auto;min-height:68px;padding:10px 15px;flex-wrap:wrap;gap:8px}.header-actions{width:100%;justify-content:flex-end}.brand p{display:none}.workspace{height:calc(100vh - 118px);grid-template-columns:260px minmax(590px,1fr)}.detail-panel{position:fixed;z-index:20;right:0;top:118px;bottom:0;width:320px;transform:translateX(101%);transition:transform .2s ease;box-shadow:-20px 0 45px rgba(0,0,0,.4)}.detail-panel.open{transform:translateX(0)}}
+@media (max-width:830px){body{overflow:auto}.topbar{height:auto;min-height:68px;padding:12px 15px;flex-wrap:wrap;gap:10px}.header-actions{width:100%;justify-content:flex-end;flex-wrap:wrap;gap:8px}.brand p,.snapshot{display:none}.workspace{height:auto;display:block}.controls{border-right:0;border-bottom:1px solid var(--line)}.main-panel,.main-stage{overflow:visible;padding:12px}.metric-strip,.metrics{grid-template-columns:1fr 1fr}.map-shell{min-height:430px}.analysis-row{grid-template-columns:1fr}.map-caption span:last-child{display:none}.guide-backdrop{padding:10px}.guide-dialog{width:100%;height:94vh}.guide-intro{grid-template-columns:1fr}.measure-grid,.stat-guide-grid{grid-template-columns:1fr}}
+@media (max-width:500px){.header-actions>a{display:none}.header-actions{justify-content:flex-start}.institutional-logos img{height:24px}.brand h1{font-size:.9rem}.detail-grid{grid-template-columns:1fr}.legend{width:158px}}
 
 /* Keyboard-navigation focus ring, added for accessibility audit. */
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
