@@ -1,5 +1,8 @@
 (() => {
   const { facilities, states, meta, policyTypes = [] } = window.DASHBOARD_DATA;
+  let powerPlants = [];
+  let plantById = new Map();
+  let powerPlantLoadPromise = null;
   const fmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
   const pct = value => Number.isFinite(value) ? `${value.toFixed(1)}%` : "—";
   const value = (v, suffix = "") => v === null || v === undefined || v === "" ? "Unknown" : `${typeof v === "number" ? fmt.format(v) : v}${suffix}`;
@@ -40,6 +43,19 @@
       categories: [["Grid", "#60a5fa"], ["Natural gas", "#f59e0b"], ["Renewable", "#22c55e"], ["Nuclear", "#a78bfa"], ["Mixed", "#f97316"], ["Other fossil", "#ef4444"], ["Storage or fuel cell", "#06b6d4"], ["Other", "#94a3b8"], ["Unknown", "#475569"]],
       key: f => f.power || "Unknown"
     },
+    generation: {
+      title: "Power plants by generation source",
+      insight: ["Generation infrastructure is a separate evidence layer", "Plant markers show eGRID facilities by primary generation source. Data-center markers remain visible as subdued context; proximity does not establish that a plant serves a facility."],
+      source: "EPA eGRID 2024 provisional development snapshot, reviewed 25 September 2026.",
+      sourceUrl: "https://github.com/USEPA/egrid",
+      categories: [
+        ["Solar", "#facc15"], ["Natural gas", "#fb923c"], ["Hydro", "#38bdf8"],
+        ["Wind", "#2dd4bf"], ["Oil", "#f87171"], ["Biomass", "#84cc16"],
+        ["Coal", "#a3a3a3"], ["Nuclear", "#c084fc"], ["Geothermal", "#f472b6"],
+        ["Other fossil", "#b45309"], ["Other", "#94a3b8"], ["Unknown", "#475569"]
+      ],
+      key: plant => plant.fuel || "Unknown"
+    },
     water: {
       title: "County water-scarcity screening",
       insight: ["Water context belongs at several scales", "The AWARE factor, historical withdrawals, hazard ratings, and cooling technology remain separate. County measures do not establish water rights or site-level availability."],
@@ -74,14 +90,15 @@
     "searchInput", "stateFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
-    "stateLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
-    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyTopic", "policyStatusGroup",
+    "stateLayer", "plantLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
+    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyTopic", "policyStatusGroup", "generationControls", "generationSource",
     "profileEyebrow", "profileTitle"
   ].map(id => [id, document.getElementById(id)]));
 
   let currentView = "status";
   let filtered = facilities;
   let selectedId = null;
+  let selectedPlantId = null;
   let selectedStateAbbr = null;
   let policyTopic = "";
   let policyStatuses = new Set(["Active", "Pass", "Fail", "Veto"]);
@@ -95,6 +112,34 @@
 
   function escapeHtml(input) {
     return String(input ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+  }
+
+  function loadPowerPlants() {
+    if (powerPlants.length || meta.powerPlants === 0) return Promise.resolve(powerPlants);
+    if (powerPlantLoadPromise) return powerPlantLoadPromise;
+    els.generationSource.disabled = true;
+    els.generationSource.innerHTML = `<option value="">Loading plant data…</option>`;
+    powerPlantLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "power-plant-data.js?v=1.0";
+      script.onload = () => {
+        const dataset = window.POWER_PLANT_DATA || {};
+        const fields = dataset.fields || [];
+        powerPlants = (dataset.plants || []).map(row => Object.fromEntries(fields.map((field, index) => [field, row[index]])));
+        plantById = new Map(powerPlants.map(plant => [plant.id, plant]));
+        els.generationSource.innerHTML = `<option value="">All sources</option>`;
+        const plantSources = config.generation.categories.map(([label]) => label).filter(label => powerPlants.some(plant => config.generation.key(plant) === label));
+        populate(els.generationSource, plantSources);
+        els.generationSource.disabled = false;
+        resolve(powerPlants);
+      };
+      script.onerror = () => {
+        els.generationSource.innerHTML = `<option value="">Plant data unavailable</option>`;
+        reject(new Error("Could not load power-plant data"));
+      };
+      document.head.appendChild(script);
+    });
+    return powerPlantLoadPromise;
   }
 
   const statusLabels = { Active: "Active", Pass: "Passed", Fail: "Failed", Veto: "Vetoed" };
@@ -177,6 +222,7 @@
   }
 
   function colorFor(f) {
+    if (currentView === "generation") return "#e2e8f0";
     const cfg = config[currentView];
     const key = cfg.key(f);
     return cfg.categories.find(c => c[0] === key)?.[1] || "#64748b";
@@ -185,6 +231,30 @@
   function radiusFor(f) {
     if (!f.mw) return 2.7;
     return Math.max(3, Math.min(8.5, 2.6 + Math.log10(f.mw + 1) * 1.8));
+  }
+
+  function visiblePowerPlants() {
+    const source = els.generationSource.value;
+    const state = els.stateFilter.value;
+    return powerPlants.filter(plant => (!source || plant.fuel === source) && (!state || plant.state === state));
+  }
+
+  function plantRadius(plant) {
+    if (!plant.capacityMw) return 1.35;
+    return Math.max(1.5, Math.min(5.6, 1.25 + Math.log10(plant.capacityMw + 1) * 1.25));
+  }
+
+  function plantColor(plant) {
+    return config.generation.categories.find(([label]) => label === config.generation.key(plant))?.[1] || "#475569";
+  }
+
+  function renderPlants() {
+    hideTooltip();
+    if (currentView !== "generation") {
+      els.plantLayer.innerHTML = "";
+      return;
+    }
+    els.plantLayer.innerHTML = visiblePowerPlants().map(plant => `<circle class="power-plant${plant.id === selectedPlantId ? " selected" : ""}" data-id="${escapeHtml(plant.id)}" cx="${plant.x}" cy="${plant.y}" r="${plantRadius(plant)}" fill="${plantColor(plant)}"><title>${escapeHtml(plant.name)}</title></circle>`).join("");
   }
 
   function renderFacilities() {
@@ -196,6 +266,12 @@
       circle.addEventListener("pointerleave", hideTooltip);
       circle.addEventListener("click", event => { event.stopPropagation(); selectFacility(circle.dataset.id); });
     });
+  }
+
+  function showPlantTooltip(event, plant) {
+    els.tooltip.innerHTML = `<strong>${escapeHtml(plant.name)}</strong><span>${escapeHtml([plant.county, plant.state].filter(Boolean).join(", "))} · ${escapeHtml(plant.fuel || "Unknown source")} · ${escapeHtml(value(plant.capacityMw, " MW"))}</span>`;
+    els.tooltip.hidden = false;
+    positionTooltip(event);
   }
 
   function showTooltip(event, f) {
@@ -256,6 +332,8 @@
     const q = currentFilters();
     filtered = facilities.filter(f => matchesFilters(f, q));
     if (selectedId && !filtered.some(f => f.id === selectedId)) clearSelection();
+    if (selectedPlantId && !visiblePowerPlants().some(plant => plant.id === selectedPlantId)) clearSelection();
+    renderPlants();
     renderFacilities();
     renderSummary();
     updateCheckboxCounts(q);
@@ -276,7 +354,12 @@
     renderProfileChart();
     const knownMw = count ? pct(mwValues.length / count * 100) : "—";
     const utilityMatches = filtered.filter(f => f.utilityMatch && f.utilityMatch.includes("Unique")).length;
-    if (currentView === "policy") {
+    if (currentView === "generation") {
+      const plants = visiblePowerPlants();
+      const capacity = plants.map(plant => plant.capacityMw).filter(Number.isFinite).reduce((sum, plantMw) => sum + plantMw, 0);
+      const source = els.generationSource.value || "all generation sources";
+      els.coverageLine.textContent = `${fmt.format(plants.length)} eGRID plants shown for ${source}${els.stateFilter.value ? ` in ${els.stateFilter.value}` : " nationally"}, representing ${fmt.format(capacity)} MW of reported nameplate capacity. Plant proximity does not establish a supply relationship.`;
+    } else if (currentView === "policy") {
       const stateCount = states.filter(state => (state.billCount || 0) > 0).length;
       els.coverageLine.textContent = `${fmt.format(stateCount)} states have tracked bills. Topic counts are non-exclusive because one bill may address several policy types; counts measure legislative attention, not stringency.`;
     } else {
@@ -285,6 +368,17 @@
   }
 
   function renderProfileChart() {
+    if (currentView === "generation") {
+      const counts = {};
+      visiblePowerPlants().forEach(plant => counts[plant.fuel || "Unknown"] = (counts[plant.fuel || "Unknown"] || 0) + 1);
+      const rows = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const max = Math.max(...rows.map(row => row[1]), 1);
+      els.profileEyebrow.textContent = "Power infrastructure profile";
+      els.profileTitle.textContent = "Plants by generation source";
+      els.chartTotal.textContent = `${fmt.format(visiblePowerPlants().length)} plants`;
+      els.statusChart.innerHTML = rows.length ? rows.map(([label, count]) => `<div class="bar-row"><span>${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${count/max*100}%;background:${plantColor({ fuel: label })}"></div></div><strong>${fmt.format(count)}</strong></div>`).join("") : `<p class="detail-location">No power plants match this source and state.</p>`;
+      return;
+    }
     if (currentView === "policy") {
       const counts = {};
       states.forEach(state => Object.entries(state.billTypes || {}).forEach(([type, count]) => { counts[type] = (counts[type] || 0) + count; }));
@@ -321,6 +415,10 @@
     if (currentView === "policy") {
       els.viewTitle.textContent = policyMetricLabel();
       els.legend.innerHTML = policyBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch" style="background:${policyColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-note">${escapeHtml(policyMetricLabel())}<br>Click a state for bill types and records.</div>`;
+    } else if (currentView === "generation") {
+      const source = els.generationSource.value;
+      els.viewTitle.textContent = source ? `${source} power plants` : cfg.title;
+      els.legend.innerHTML = cfg.categories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note"><span class="facility-key"></span> Data centers shown as pale context points.<br>Circle size reflects nameplate capacity.</div>`;
     } else {
       els.legend.innerHTML = cfg.categories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("");
     }
@@ -334,6 +432,7 @@
     if (!state) return;
     selectedStateAbbr = abbr;
     selectedId = null;
+    selectedPlantId = null;
     const typeRows = Object.entries(state.billTypes || {}).sort((a, b) => b[1] - a[1]);
     const maxType = Math.max(...typeRows.map(([, count]) => count), 1);
     const bills = state.bills || [];
@@ -366,6 +465,7 @@
 
   function selectFacility(id) {
     selectedId = id;
+    selectedPlantId = null;
     selectedStateAbbr = null;
     const f = facilities.find(item => item.id === id);
     if (!f) return;
@@ -381,25 +481,68 @@
     els.detailPanel.classList.add("open");
     els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
     renderFacilities();
+    renderPlants();
+  }
+
+  function selectPowerPlant(id) {
+    const plant = plantById.get(id);
+    if (!plant) return;
+    selectedPlantId = id;
+    selectedId = null;
+    selectedStateAbbr = null;
+    const capacityFactor = Number.isFinite(plant.capacityFactor) ? `${fmt.format(plant.capacityFactor * 100)}%` : "Unknown";
+    els.detailPanel.innerHTML = `<div class="detail-content">
+      <div class="detail-top"><div><span class="eyebrow">eGRID plant ${escapeHtml(plant.id)}</span><h2>${escapeHtml(plant.name)}</h2><p class="detail-location">${escapeHtml([plant.county, plant.state].filter(Boolean).join(" · "))}</p></div><button class="close-detail" type="button" aria-label="Close power plant details">×</button></div>
+      <span class="phase-pill plant-source-pill">${escapeHtml(plant.fuel || "Unknown source")}</span>
+      ${detailSection("Generation", [detailItem("Primary source", plant.fuel), detailItem("Nameplate capacity", plant.capacityMw == null ? "Unknown" : `${fmt.format(plant.capacityMw)} MW`), detailItem("Annual net generation", plant.generationMwh == null ? "Unknown" : `${fmt.format(plant.generationMwh)} MWh`), detailItem("Capacity factor", capacityFactor), detailItem("Generating units", plant.units), detailItem("Generators", plant.generators)])}
+      ${detailSection("Ownership and grid", [detailItem("Operator", plant.operator), detailItem("Utility service", plant.utility), detailItem("Sector", plant.sector), detailItem("eGRID subregion", plant.subregion), detailItem("Generator status codes", plant.statusCodes)])}
+      ${detailSection("Evidence", [detailItem("Data year", meta.powerPlantYear || 2024), detailItem("Dataset status", window.POWER_PLANT_DATA?.datasetStatus), detailItem("Latitude", plant.lat), detailItem("Longitude", plant.lon)])}
+    </div>`;
+    els.detailPanel.classList.add("open");
+    els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
+    renderFacilities();
+    renderPlants();
   }
 
   function clearSelection() {
     selectedId = null;
+    selectedPlantId = null;
     selectedStateAbbr = null;
     els.detailPanel.classList.remove("open");
-    els.detailPanel.innerHTML = currentView === "policy" ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a state</h2><p>Choose a state to review bill counts, statuses, policy types, and bill-level records.</p></div>` : `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a facility</h2><p>Choose a point on the map to review evidence from every layer.</p></div>`;
+    els.detailPanel.innerHTML = currentView === "policy"
+      ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a state</h2><p>Choose a state to review bill counts, statuses, policy types, and bill-level records.</p></div>`
+      : currentView === "generation"
+        ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a power plant</h2><p>Choose a colored plant marker to review its generation source, capacity, operator, and grid context.</p></div>`
+        : `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a facility</h2><p>Choose a point on the map to review evidence from every layer.</p></div>`;
     renderStates();
     renderFacilities();
+    renderPlants();
   }
 
-  function setView(view) {
+  async function setView(view) {
     if (!config[view]) return;
     currentView = view;
     document.querySelectorAll(".view-button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
     els.policyControls.hidden = view !== "policy";
+    els.generationControls.hidden = view !== "generation";
     els.mapShell.classList.toggle("policy-mode", view === "policy");
+    els.mapShell.classList.toggle("generation-mode", view === "generation");
     clearSelection();
     renderLegend(); renderSummary();
+    if (view === "generation") {
+      els.viewTitle.textContent = "Loading power plants…";
+      els.coverageLine.textContent = "Loading the eGRID plant layer…";
+      try {
+        await loadPowerPlants();
+        if (currentView !== "generation") return;
+        renderPlants();
+        renderLegend();
+        renderSummary();
+      } catch (_) {
+        els.viewTitle.textContent = "Power-plant layer unavailable";
+        els.coverageLine.textContent = "The power-plant data file could not be loaded. Refresh the page and try again.";
+      }
+    }
   }
 
   function updateTransform() {
@@ -447,10 +590,32 @@
       renderLegend();
     });
   });
+  els.generationSource.addEventListener("change", () => {
+    if (selectedPlantId && !visiblePowerPlants().some(plant => plant.id === selectedPlantId)) clearSelection();
+    renderPlants();
+    renderLegend();
+    renderSummary();
+  });
+  els.plantLayer.addEventListener("pointerover", event => {
+    const marker = event.target.closest?.(".power-plant");
+    if (marker) showPlantTooltip(event, plantById.get(marker.dataset.id));
+  });
+  els.plantLayer.addEventListener("pointermove", event => {
+    if (event.target.closest?.(".power-plant")) positionTooltip(event);
+  });
+  els.plantLayer.addEventListener("pointerout", event => {
+    if (event.target.closest?.(".power-plant")) hideTooltip();
+  });
+  els.plantLayer.addEventListener("click", event => {
+    const marker = event.target.closest?.(".power-plant");
+    if (!marker) return;
+    event.stopPropagation();
+    selectPowerPlant(marker.dataset.id);
+  });
   document.querySelectorAll(".view-button").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
   els.zoomIn.addEventListener("click", () => zoom(1.35)); els.zoomOut.addEventListener("click", () => zoom(1/1.35)); els.zoomReset.addEventListener("click", resetView);
   els.map.addEventListener("wheel", event => { event.preventDefault(); const rect = els.map.getBoundingClientRect(); zoom(event.deltaY < 0 ? 1.18 : 1/1.18, (event.clientX-rect.left)/rect.width*1000, (event.clientY-rect.top)/rect.height*600); }, { passive: false });
-  els.map.addEventListener("pointerdown", event => { if (event.target.classList.contains("facility") || (currentView === "policy" && event.target.classList.contains("state"))) return; dragging = true; dragStart = { x: event.clientX, y: event.clientY, tx: transform.x, ty: transform.y }; els.map.classList.add("dragging"); els.map.setPointerCapture(event.pointerId); });
+  els.map.addEventListener("pointerdown", event => { if (event.target.classList.contains("facility") || event.target.classList.contains("power-plant") || (currentView === "policy" && event.target.classList.contains("state"))) return; dragging = true; dragStart = { x: event.clientX, y: event.clientY, tx: transform.x, ty: transform.y }; els.map.classList.add("dragging"); els.map.setPointerCapture(event.pointerId); });
   els.map.addEventListener("pointermove", event => { if (!dragging) return; const rect = els.map.getBoundingClientRect(); transform.x = dragStart.tx + (event.clientX-dragStart.x)/rect.width*1000; transform.y = dragStart.ty + (event.clientY-dragStart.y)/rect.height*600; updateTransform(); });
   els.map.addEventListener("pointerup", () => { dragging = false; els.map.classList.remove("dragging"); });
   els.map.addEventListener("click", event => { if (event.target === els.map || (currentView !== "policy" && event.target.classList.contains("state"))) clearSelection(); });
@@ -482,7 +647,25 @@
       selectFacility(found.id);
       return { facilityId: found.id, name: found.name };
     } });
-    register({ name: "read_dashboard_summary", title: "Read dashboard summary", description: "Return counts for the current filtered selection.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: false }, execute() { return { selectedFacilities: filtered.length, totalFacilities: facilities.length, mapView: currentView, filters: currentFilters(), snapshot: meta.snapshot }; } });
+    register({ name: "filter_power_plants", title: "Filter power plants", description: "Open the Generation view and filter eGRID plants by state or primary generation source.", inputSchema: { type: "object", properties: { state: { type: "string" }, generationSource: { type: "string" } }, additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false }, async execute(input) {
+      if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).some(key => !["state", "generationSource"].includes(key))) throw new Error("Input must contain only state or generationSource");
+      if (["state", "generationSource"].some(key => input[key] !== undefined && typeof input[key] !== "string")) throw new Error("State and generationSource must be strings");
+      await setView("generation");
+      if (input.state !== undefined) els.stateFilter.value = input.state;
+      if (input.generationSource !== undefined) els.generationSource.value = input.generationSource;
+      applyFilters();
+      renderLegend();
+      return { powerPlants: visiblePowerPlants().length, state: els.stateFilter.value, generationSource: els.generationSource.value || "All sources" };
+    } });
+    register({ name: "select_power_plant", title: "Select power plant", description: "Open eGRID generation details for a power plant by its ORIS plant code.", inputSchema: { type: "object", properties: { plantId: { type: "string" } }, required: ["plantId"], additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false }, async execute(input) {
+      if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).some(key => key !== "plantId") || typeof input.plantId !== "string" || !input.plantId) throw new Error("A valid plantId is required");
+      await setView("generation");
+      const plant = plantById.get(input.plantId);
+      if (!plant) throw new Error("Power plant not found");
+      selectPowerPlant(plant.id);
+      return { plantId: plant.id, name: plant.name, generationSource: plant.fuel };
+    } });
+    register({ name: "read_dashboard_summary", title: "Read dashboard summary", description: "Return counts for the current filtered selection.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: false }, execute() { return { selectedFacilities: filtered.length, totalFacilities: facilities.length, displayedPowerPlants: currentView === "generation" ? visiblePowerPlants().length : undefined, generationSource: currentView === "generation" ? els.generationSource.value || "All sources" : undefined, mapView: currentView, filters: currentFilters(), snapshot: meta.snapshot }; } });
   }
 
   renderStates(); renderLegend(); applyFilters(); registerWebMcp();

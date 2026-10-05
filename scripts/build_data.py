@@ -12,9 +12,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SITE = Path(__file__).resolve().parents[1]
 OUT = SITE / "dist" / "dashboard-data.js"
+POWER_OUT = SITE / "dist" / "power-plant-data.js"
 SOURCE = ROOT / "Local Opposition" / "US Opposition Layer" / "Layer 08 Local Opposition" / "US_Data_Centers_Local_Opposition.gpkg"
 POLICY = ROOT / "Legislation" / "US Legislation Layer" / "Layer 07 State Policy" / "US_Data_Centers_State_Policy.gpkg"
 POLICY_BILLS = ROOT / "Analysis" / "State_Legislation" / "state_legislation_bills.csv"
+POWER = ROOT / "Power" / "US Power Layer" / "Layer 04 Infrastructure and Grid Pressure" / "US_Data_Centers_Grid_Pressure.gpkg"
 
 
 def wkb_offset(blob: bytes) -> int:
@@ -172,6 +174,28 @@ def build():
         facilities.append(item)
     con.close()
 
+    plants = []
+    plant_dataset_status = None
+    con = sqlite3.connect(POWER)
+    for row in con.execute(
+        "SELECT ORISPL,PNAME,PSTATABB,CNTYNAME,OPRNAME,UTLSRVNM,SECTOR,SUBRGN,"
+        "fuel_category_label,NAMEPCAP,PLNGENAN,CAPFAC,NUMUNT,NUMGEN,"
+        "generator_status_codes,dataset_status,LAT,LON FROM egrid_power_plants_2024"
+    ):
+        (
+            plant_id, name, state, county, operator, utility, sector, subregion,
+            fuel, capacity_mw, generation_mwh, capacity_factor, units, generators,
+            status_codes, dataset_status, lat, lon,
+        ) = [clean_value(value) for value in row]
+        x, y = project(lon, lat, state)
+        plant_dataset_status = plant_dataset_status or dataset_status
+        plants.append([
+            str(plant_id), name or "Unnamed power plant", state, county, operator, utility,
+            sector, subregion, fuel or "Unknown", capacity_mw, generation_mwh, capacity_factor,
+            units, generators, status_codes, round(lat, 5), round(lon, 5), round(x, 1), round(y, 1),
+        ])
+    con.close()
+
     bills_by_state = defaultdict(list)
     national_type_counts = Counter()
     with POLICY_BILLS.open(newline="", encoding="utf-8-sig") as source:
@@ -219,6 +243,8 @@ def build():
         "meta": {
             "snapshot": "28 September 2026",
             "facilities": len(facilities),
+            "powerPlants": len(plants),
+            "powerPlantYear": 2024,
             "scope": "United States",
             "note": "Screening and research context; proximity and policy exposure do not establish causation or service relationships.",
         },
@@ -227,7 +253,19 @@ def build():
         "facilities": facilities,
     }
     OUT.write_text("window.DASHBOARD_DATA=" + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
+    power_payload = {
+        "year": 2024,
+        "datasetStatus": plant_dataset_status,
+        "fields": [
+            "id", "name", "state", "county", "operator", "utility", "sector", "subregion", "fuel",
+            "capacityMw", "generationMwh", "capacityFactor", "units", "generators", "statusCodes",
+            "lat", "lon", "x", "y",
+        ],
+        "plants": plants,
+    }
+    POWER_OUT.write_text("window.POWER_PLANT_DATA=" + json.dumps(power_payload, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
     print(f"Wrote {OUT} ({OUT.stat().st_size / 1024:.1f} KiB)")
+    print(f"Wrote {POWER_OUT} ({POWER_OUT.stat().st_size / 1024:.1f} KiB)")
 
 
 if __name__ == "__main__":
