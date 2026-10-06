@@ -17,6 +17,7 @@ TRANSMISSION_OUT = SITE / "dist" / "transmission-data.js"
 SOURCE = ROOT / "Local Opposition" / "US Opposition Layer" / "Layer 08 Local Opposition" / "US_Data_Centers_Local_Opposition.gpkg"
 POLICY = ROOT / "Legislation" / "US Legislation Layer" / "Layer 07 State Policy" / "US_Data_Centers_State_Policy.gpkg"
 POLICY_BILLS = ROOT / "Analysis" / "State_Legislation" / "state_legislation_bills.csv"
+ELECTRICITY_PRICES = ROOT / "Data Centers" / "Research Datasets" / "Data-centers-siting-across-U.S.-cities" / "Section 2 and 4" / "Data" / "eia861_state_prices_real_2020_with_volatility.csv"
 POWER = ROOT / "Power" / "US Power Layer" / "Layer 04 Infrastructure and Grid Pressure" / "US_Data_Centers_Grid_Pressure.gpkg"
 GRID = ROOT / "QGIS" / "US_OSM_Power_Grid.gpkg"
 
@@ -251,6 +252,23 @@ def build():
                 "sourceUrl": row.get("source_url") or None,
             })
 
+    electricity_prices = defaultdict(list)
+    with ELECTRICITY_PRICES.open(newline="", encoding="utf-8-sig") as source:
+        for row in csv.DictReader(source):
+            try:
+                electricity_prices[row["state"]].append({
+                    "year": int(row["year"]),
+                    "total": float(row["price_total_cents_per_kwh"]),
+                    "industrial": float(row["price_industrial_cents_per_kwh"]),
+                    "totalReal2020": float(row["price_total_real_2020"]),
+                    "industrialReal2020": float(row["price_industrial_real_2020"]),
+                    "industrialVariance": float(row["var_ind_48"]),
+                })
+            except (KeyError, TypeError, ValueError):
+                continue
+    for history in electricity_prices.values():
+        history.sort(key=lambda item: item["year"])
+
     states = []
     con = sqlite3.connect(POLICY)
     for row in con.execute(
@@ -259,6 +277,8 @@ def build():
     ):
         geom, abbr, name, incentive, electricity, moratoria, bills = row
         state_bills = bills_by_state.get(abbr, [])
+        price_history = electricity_prices.get(abbr, [])
+        latest_price = price_history[-1] if price_history else None
         status_counts = Counter(bill["status"] for bill in state_bills)
         type_counts = Counter(item for bill in state_bills for item in bill["types"])
         state_bills.sort(key=lambda bill: (bill["lastActionDate"] or "", bill["year"] or 0, bill["bill"]), reverse=True)
@@ -273,6 +293,15 @@ def build():
             "billStatus": {key: status_counts.get(key, 0) for key in ("Active", "Pass", "Fail", "Veto")},
             "billTypes": dict(sorted(type_counts.items(), key=lambda item: (-item[1], item[0]))),
             "bills": state_bills,
+            "electricityPrice": {
+                "year": latest_price["year"],
+                "total": latest_price["total"],
+                "industrial": latest_price["industrial"],
+                "totalReal2020": latest_price["totalReal2020"],
+                "industrialReal2020": latest_price["industrialReal2020"],
+                "industrialVariance": latest_price["industrialVariance"],
+                "history": price_history,
+            } if latest_price else None,
         })
     con.close()
 
@@ -282,6 +311,8 @@ def build():
             "facilities": len(facilities),
             "powerPlants": len(plants),
             "powerPlantYear": 2024,
+            "electricityPriceYear": max((item["year"] for history in electricity_prices.values() for item in history), default=None),
+            "electricityPriceStates": len(electricity_prices),
             "scope": "United States",
             "note": "Screening and research context; proximity and policy exposure do not establish causation or service relationships.",
         },

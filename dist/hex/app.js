@@ -4,6 +4,7 @@
   const base = window.DASHBOARD_DATA;
   cells.forEach(c => { c.neighbors = Array.isArray(c.neighbors) ? c.neighbors : (typeof c.neighbors === "string" && c.neighbors ? [c.neighbors] : []); });
   const fmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
+  const priceFmt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const byId = new Map(cells.map(c => [c.id, c]));
   const varByKey = new Map(variables.map(v => [v.key, v]));
   const palette = ["#102333", "#15505b", "#188d8a", "#2dd4bf", "#a7f3d0"];
@@ -38,7 +39,7 @@
   let stats = {};
 
   function escapeHtml(input) { return String(input ?? "").replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch])); }
-  function number(value, unit="") { return Number.isFinite(value) ? `${fmt.format(value)}${unit ? ` ${unit}` : ""}` : "Unknown"; }
+  function number(value, unit="") { return Number.isFinite(value) ? `${unit==="¢/kWh"?priceFmt.format(value):fmt.format(value)}${unit ? ` ${unit}` : ""}` : "Unknown"; }
   function optionGroups(items, select) {
     const groups = {};
     items.forEach(v => (groups[v.group] ||= []).push(v));
@@ -283,7 +284,7 @@
   function selectCell(id) {
     selectedId=id; const c=byId.get(id); if(!c)return;
     const ov=varByKey.get(outcome),cv=varByKey.get(comparison);
-    els.detailPanel.innerHTML=`<div class="detail-content"><span class="eyebrow">Analysis cell</span><h2>${escapeHtml(c.id)}</h2><p class="detail-location">${escapeHtml(c.countyName||"County unavailable")}, ${escapeHtml(c.stateName||c.state||"")}</p><span class="detail-badge">${number(c.landFraction*100,"% land")}</span>${section("Selected analysis",[item(ov.label,number(c[outcome],ov.unit)),item(cv.label,number(c[comparison],cv.unit)),item("Neighbor cells",fmt.format(c.neighbors.length)),item("Centroid",`${c.lat.toFixed(3)}, ${c.lon.toFixed(3)}`)])}${section("Data centers",[item("Facilities",number(c.facilityCount)),item("Reported MW",number(c.reportedMw,"MW")),item("Operating",number(c.operatingCount)),item("Active pipeline",number(c.pipelineCount)),item("Known MW records",`${c.knownMwCount} of ${c.facilityCount}`),item("Direct opposition",number(c.directOppositionCount))])}${section("Power",[item("Operating generation",number(c.plantOperatingMw,"MW")),item("Power plants",number(c.plantCount)),item("≥200 kV lines",number(c.hvLineKm,"km")),item("Active queue",number(c.queueActiveMw,"MW"))])}${section("Resources & policy",[item("Water scarcity",number(c.waterFactor)),item("Drought risk",number(c.droughtScore)),item("State bills",number(c.policyBills)),item("Dedicated incentive",c.incentive===1?"Yes":c.incentive===0?"No":"Unknown"),item("Moratorium records",number(c.moratoriums)),item("Local actions",number(c.localActionCount))])}</div>`;
+    els.detailPanel.innerHTML=`<div class="detail-content"><span class="eyebrow">Analysis cell</span><h2>${escapeHtml(c.id)}</h2><p class="detail-location">${escapeHtml(c.countyName||"County unavailable")}, ${escapeHtml(c.stateName||c.state||"")}</p><span class="detail-badge">${number(c.landFraction*100,"% land")}</span>${section("Selected analysis",[item(ov.label,number(c[outcome],ov.unit)),item(cv.label,number(c[comparison],cv.unit)),item("Neighbor cells",fmt.format(c.neighbors.length)),item("Centroid",`${c.lat.toFixed(3)}, ${c.lon.toFixed(3)}`)])}${section("Data centers",[item("Facilities",number(c.facilityCount)),item("Reported MW",number(c.reportedMw,"MW")),item("Operating",number(c.operatingCount)),item("Active pipeline",number(c.pipelineCount)),item("Known MW records",`${c.knownMwCount} of ${c.facilityCount}`),item("Direct opposition",number(c.directOppositionCount))])}${section("Power",[item("Operating generation",number(c.plantOperatingMw,"MW")),item("Power plants",number(c.plantCount)),item("≥200 kV lines",number(c.hvLineKm,"km")),item("Active queue",number(c.queueActiveMw,"MW")),item("Industrial price",number(c.industrialPrice2024,"¢/kWh"))])}${section("Resources & policy",[item("Water scarcity",number(c.waterFactor)),item("Drought risk",number(c.droughtScore)),item("State bills",number(c.policyBills)),item("Dedicated incentive",c.incentive===1?"Yes":c.incentive===0?"No":"Unknown"),item("Moratorium records",number(c.moratoriums)),item("Local actions",number(c.localActionCount))])}</div>`;
     els.detailPanel.classList.add("open"); renderMap();
   }
   function update(options={}) {
@@ -297,7 +298,7 @@
   function zoom(factor,cx=500,cy=300){const old=transform.scale,next=Math.max(1,Math.min(6,old*factor));transform.x=cx-(cx-transform.x)*(next/old);transform.y=cy-(cy-transform.y)*(next/old);transform.scale=next;updateTransform();}
   function resetView(){transform={x:0,y:0,scale:1};updateTransform();}
   function exportCsv(){
-    const keys=["id","region","state","countyFips","countyName","xAea","yAea","lon","lat","landFraction","facilityCount","reportedMw","knownMwCount","operatingCount","pipelineCount","directOppositionCount","plantCount","plantOperatingMw","plantNameplateMw","hvLineKm","queueActiveMw","waterFactor","waterClass","waterWithdrawalMgd","riskScore","droughtScore","wildfireScore","floodScore","heatScore","cbpEstablishments","incentive","electricityTax","moratoriums","policyBills","policyPassed","localActionCount","neighbors"];
+    const keys=["id","region","state","countyFips","countyName","xAea","yAea","lon","lat","landFraction","facilityCount","reportedMw","knownMwCount","operatingCount","pipelineCount","directOppositionCount","plantCount","plantOperatingMw","plantNameplateMw","hvLineKm","queueActiveMw","industrialPrice2024","industrialPriceReal2020","industrialPriceVariance","waterFactor","waterClass","waterWithdrawalMgd","riskScore","droughtScore","wildfireScore","floodScore","heatScore","cbpEstablishments","incentive","electricityTax","moratoriums","policyBills","policyPassed","localActionCount","neighbors"];
     const rows=[keys,...filtered.map(c=>keys.map(k=>Array.isArray(c[k])?c[k].join(";"):c[k]))];
     const csv=rows.map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
     const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`us_hex_grid_${meta.cellWidthKm}km_filtered.csv`;a.click();URL.revokeObjectURL(a.href);

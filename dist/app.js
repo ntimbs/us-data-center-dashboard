@@ -6,6 +6,7 @@
   let transmissionData = null;
   let transmissionLoadPromise = null;
   const fmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
+  const priceFmt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const pct = value => Number.isFinite(value) ? `${value.toFixed(1)}%` : "—";
   const value = (v, suffix = "") => v === null || v === undefined || v === "" ? "Unknown" : `${typeof v === "number" ? fmt.format(v) : v}${suffix}`;
   const policyColors = ["#102436", "#16435a", "#1f6475", "#a87532", "#c45c59"];
@@ -15,6 +16,14 @@
     { label: "5–9 bills", min: 5, max: 9 },
     { label: "10–19 bills", min: 10, max: 19 },
     { label: "20+ bills", min: 20, max: Infinity }
+  ];
+  const costColors = ["#12384a", "#17606b", "#1f8a86", "#c28a3d", "#d65f59"];
+  const costBins = [
+    { label: "Under 7 ¢/kWh", min: -Infinity, max: 6.99 },
+    { label: "7–7.99 ¢/kWh", min: 7, max: 7.99 },
+    { label: "8–8.99 ¢/kWh", min: 8, max: 8.99 },
+    { label: "9–11.99 ¢/kWh", min: 9, max: 11.99 },
+    { label: "12+ ¢/kWh", min: 12, max: Infinity }
   ];
 
   const config = {
@@ -56,6 +65,13 @@
         ["Other fossil", "#b45309"], ["Other", "#94a3b8"], ["Unknown", "#475569"]
       ],
       key: plant => plant.fuel || "Unknown"
+    },
+    cost: {
+      title: "2024 industrial electricity price",
+      insight: ["State averages provide market context", "The map shows the 2024 average industrial electricity price in nominal cents per kilowatt-hour. It is useful for broad comparisons but does not represent a utility tariff or a data center’s negotiated contract."],
+      source: "EIA-861 state electricity-price series, 2010–2024, with CPI-adjusted companion values.",
+      categories: costBins.map((bin, index) => [bin.label, costColors[index]]),
+      key: state => state.electricityPrice?.industrial
     },
     water: {
       title: "County water-scarcity screening",
@@ -106,6 +122,7 @@
   let transform = { x: 0, y: 0, scale: 1 };
   let dragging = false;
   let dragStart = null;
+  const stateByAbbr = new Map(states.map(state => [state.abbr, state]));
 
   const unique = (key) => [...new Set(facilities.map(f => f[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
   const populate = (select, values) => values.forEach(v => select.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
@@ -196,6 +213,14 @@
     return policyColors[Math.max(0, index)];
   }
 
+  function electricityPrice(state) { return state?.electricityPrice?.industrial; }
+  function costColor(price) {
+    if (!Number.isFinite(price)) return "#172938";
+    const index = costBins.findIndex(bin => price >= bin.min && price <= bin.max);
+    return costColors[Math.max(0, index)];
+  }
+  function stateIsInteractive() { return currentView === "policy" || currentView === "cost"; }
+
   const filterGroups = {};
   function initializeFilterGroups() {
     Object.entries(filterGroupDefs).forEach(([name, def]) => {
@@ -224,24 +249,25 @@
   initializeFilterGroups();
 
   function stateFill(s) {
-    if (currentView !== "policy") return "";
-    return policyColor(policyMeasure(s));
+    if (currentView === "policy") return policyColor(policyMeasure(s));
+    if (currentView === "cost") return costColor(electricityPrice(s));
+    return "";
   }
 
   function renderStates() {
-    els.stateLayer.innerHTML = states.map(s => `<path class="state${s.abbr === selectedStateAbbr ? " selected" : ""}" data-state="${s.abbr}" d="${s.path}" style="fill:${stateFill(s)}" ${currentView === "policy" ? `role="button" tabindex="0" aria-label="Open ${escapeHtml(s.name)} legislation details"` : ""}><title>${escapeHtml(s.name)}</title></path>`).join("");
+    els.stateLayer.innerHTML = states.map(s => `<path class="state${s.abbr === selectedStateAbbr ? " selected" : ""}" data-state="${s.abbr}" d="${s.path}" style="fill:${stateFill(s)}" ${stateIsInteractive() ? `role="button" tabindex="0" aria-label="Open ${escapeHtml(s.name)} ${currentView === "cost" ? "electricity-price" : "legislation"} details"` : ""}><title>${escapeHtml(s.name)}</title></path>`).join("");
     els.stateLayer.querySelectorAll(".state").forEach(path => {
       const state = states.find(item => item.abbr === path.dataset.state);
       path.addEventListener("pointerenter", event => showStateTooltip(event, state));
       path.addEventListener("pointermove", positionTooltip);
       path.addEventListener("pointerleave", hideTooltip);
       path.addEventListener("click", event => {
-        if (currentView !== "policy") return;
+        if (!stateIsInteractive()) return;
         event.stopPropagation();
         selectState(state.abbr);
       });
       path.addEventListener("keydown", event => {
-        if (currentView !== "policy" || !["Enter", " "].includes(event.key)) return;
+        if (!stateIsInteractive() || !["Enter", " "].includes(event.key)) return;
         event.preventDefault();
         selectState(state.abbr);
       });
@@ -249,7 +275,7 @@
   }
 
   function colorFor(f) {
-    if (currentView === "generation") return "#e2e8f0";
+    if (currentView === "generation" || currentView === "cost") return "#e2e8f0";
     const cfg = config[currentView];
     const key = cfg.key(f);
     return cfg.categories.find(c => c[0] === key)?.[1] || "#64748b";
@@ -318,8 +344,13 @@
     positionTooltip(event);
   }
   function showStateTooltip(event, state) {
-    if (currentView !== "policy") return;
-    els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>${escapeHtml(policyMetricLabel())}: ${fmt.format(policyMeasure(state))}<br>Total bills: ${fmt.format(state.billCount || 0)} · Active: ${fmt.format(state.billStatus?.Active || 0)} · Passed: ${fmt.format(state.billStatus?.Pass || 0)}</span>`;
+    if (!stateIsInteractive()) return;
+    if (currentView === "cost") {
+      const price = state.electricityPrice;
+      els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>${price ? `2024 industrial average: ${priceFmt.format(price.industrial)} ¢/kWh<br>Inflation-adjusted: ${priceFmt.format(price.industrialReal2020)} ¢/kWh in 2020 dollars` : "Electricity-price data unavailable"}</span>`;
+    } else {
+      els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>${escapeHtml(policyMetricLabel())}: ${fmt.format(policyMeasure(state))}<br>Total bills: ${fmt.format(state.billCount || 0)} · Active: ${fmt.format(state.billStatus?.Active || 0)} · Passed: ${fmt.format(state.billStatus?.Pass || 0)}</span>`;
+    }
     els.tooltip.hidden = false;
     positionTooltip(event);
   }
@@ -400,6 +431,11 @@
         ? transmissionData ? ` ${fmt.format(transmissionData.featureCount)} mapped 200+ kV transmission features are overlaid.` : " The transmission overlay is loading."
         : " Turn on the transmission overlay to add mapped 200+ kV lines.";
       els.coverageLine.textContent = `${fmt.format(plants.length)} eGRID plants shown for ${source}${els.stateFilter.value ? ` in ${els.stateFilter.value}` : " nationally"}, representing ${fmt.format(capacity)} MW of reported nameplate capacity.${transmissionNote} Proximity does not establish a supply relationship.`;
+    } else if (currentView === "cost") {
+      const available = states.filter(state => Number.isFinite(electricityPrice(state)));
+      const selectedState = stateByAbbr.get(els.stateFilter.value);
+      const selectedNote = selectedState && Number.isFinite(electricityPrice(selectedState)) ? ` ${selectedState.name}: ${priceFmt.format(electricityPrice(selectedState))} ¢/kWh.` : "";
+      els.coverageLine.textContent = `${fmt.format(available.length)} contiguous states have 2024 industrial-price values.${selectedNote} Alaska and Hawaii are unavailable in this source. State averages do not represent facility-specific tariffs or contracts.`;
     } else if (currentView === "policy") {
       const stateCount = states.filter(state => (state.billCount || 0) > 0).length;
       els.coverageLine.textContent = `${fmt.format(stateCount)} states have tracked bills. Topic counts are non-exclusive because one bill may address several policy types; counts measure legislative attention, not stringency.`;
@@ -418,6 +454,15 @@
       els.profileTitle.textContent = "Plants by generation source";
       els.chartTotal.textContent = `${fmt.format(visiblePowerPlants().length)} plants`;
       els.statusChart.innerHTML = rows.length ? rows.map(([label, count]) => `<div class="bar-row"><span>${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${count/max*100}%;background:${plantColor({ fuel: label })}"></div></div><strong>${fmt.format(count)}</strong></div>`).join("") : `<p class="detail-location">No power plants match this source and state.</p>`;
+      return;
+    }
+    if (currentView === "cost") {
+      const rows = states.filter(state => Number.isFinite(electricityPrice(state))).sort((a, b) => electricityPrice(b) - electricityPrice(a)).slice(0, 8);
+      const max = Math.max(...rows.map(electricityPrice), 1);
+      els.profileEyebrow.textContent = "State price comparison";
+      els.profileTitle.textContent = "Highest 2024 industrial averages";
+      els.chartTotal.textContent = `${fmt.format(meta.electricityPriceStates || rows.length)} states`;
+      els.statusChart.innerHTML = rows.map(state => `<div class="bar-row"><span title="${escapeHtml(state.name)}">${escapeHtml(state.abbr)}</span><div class="bar-track"><div class="bar-fill cost" style="width:${electricityPrice(state)/max*100}%"></div></div><strong>${priceFmt.format(electricityPrice(state))}¢</strong></div>`).join("");
       return;
     }
     if (currentView === "policy") {
@@ -453,7 +498,9 @@
     } else {
       els.insightSource.textContent = `Data source: ${cfg.source}`;
     }
-    if (currentView === "policy") {
+    if (currentView === "cost") {
+      els.legend.innerHTML = costBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${costColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:#172938"></span><span>Unavailable</span></div><div class="legend-note">2024 state industrial average.<br>Facilities are pale context points.</div>`;
+    } else if (currentView === "policy") {
       els.viewTitle.textContent = policyMetricLabel();
       els.legend.innerHTML = policyBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch" style="background:${policyColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-note">${escapeHtml(policyMetricLabel())}<br>Click a state for bill types and records.</div>`;
     } else if (currentView === "generation") {
@@ -471,9 +518,37 @@
   function detailItem(label, val) { return `<div class="detail-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value(val))}</strong></div>`; }
   function detailSection(title, items) { return `<section class="detail-section"><h3>${escapeHtml(title)}</h3><div class="detail-grid">${items.join("")}</div></section>`; }
 
+  function selectCostState(state) {
+    selectedStateAbbr = state.abbr;
+    selectedId = null;
+    selectedPlantId = null;
+    const price = state.electricityPrice;
+    const history = price?.history || [];
+    const first = history[0];
+    const change = first && price ? (price.industrial / first.industrial - 1) * 100 : NaN;
+    const historyRows = history.filter(item => item.year === history[0]?.year || item.year === price?.year || item.year % 3 === 0);
+    els.detailPanel.innerHTML = `<div class="detail-content">
+      <div class="detail-top"><div><span class="eyebrow">${escapeHtml(state.abbr)} electricity cost</span><h2>${escapeHtml(state.name)}</h2><p class="detail-location">EIA-861 state average revenue per kilowatt-hour</p></div><button class="close-detail" type="button" aria-label="Close state details">×</button></div>
+      ${price ? `<div class="policy-summary">
+        <article><span>2024 industrial</span><strong>${priceFmt.format(price.industrial)} ¢/kWh</strong></article>
+        <article><span>All sectors</span><strong>${priceFmt.format(price.total)} ¢/kWh</strong></article>
+        <article><span>Industrial, 2020 dollars</span><strong>${priceFmt.format(price.industrialReal2020)} ¢/kWh</strong></article>
+        <article><span>${first.year}–${price.year} change</span><strong>${Number.isFinite(change) ? `${change >= 0 ? "+" : ""}${fmt.format(change)}%` : "Unknown"}</strong></article>
+      </div>
+      <section class="detail-section"><h3>Industrial price history</h3><div class="cost-history">${historyRows.map(item => `<div><span>${item.year}</span><strong>${priceFmt.format(item.industrial)} ¢/kWh</strong><small>${priceFmt.format(item.industrialReal2020)} ¢ in 2020 dollars</small></div>`).join("")}</div></section>
+      ${detailSection("Dataset context", [detailItem("Latest year", String(price.year)), detailItem("Historical variance", fmt.format(price.industrialVariance)), detailItem("Coverage", "Contiguous 48 states"), detailItem("Measure", "State industrial average")])}` : `<section class="detail-section"><p class="detail-location">This source does not provide an electricity-price value for ${escapeHtml(state.name)}.</p></section>`}
+      <p class="policy-note">This state average is broad market context. It is not a utility tariff, demand charge, negotiated data-center contract, or estimate of a facility’s electricity bill.</p>
+    </div>`;
+    els.detailPanel.classList.add("open");
+    els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
+    renderStates();
+    renderFacilities();
+  }
+
   function selectState(abbr) {
     const state = states.find(item => item.abbr === abbr);
     if (!state) return;
+    if (currentView === "cost") { selectCostState(state); return; }
     selectedStateAbbr = abbr;
     selectedId = null;
     selectedPlantId = null;
@@ -513,11 +588,12 @@
     selectedStateAbbr = null;
     const f = facilities.find(item => item.id === id);
     if (!f) return;
+    const statePrice = stateByAbbr.get(f.state)?.electricityPrice;
     els.detailPanel.innerHTML = `<div class="detail-content">
       <div class="detail-top"><div><span class="eyebrow">${escapeHtml(f.id)}</span><h2>${escapeHtml(f.name)}</h2><p class="detail-location">${escapeHtml([f.city, f.county, f.state].filter(Boolean).join(" · "))}</p></div><button class="close-detail" type="button" aria-label="Close facility details">×</button></div>
       <span class="phase-pill">${escapeHtml(f.phase || "Unknown status")}</span>
       ${detailSection("Facility", [detailItem("Operator", f.operator), detailItem("Purpose", f.purpose), detailItem("Capacity", f.mw == null ? "Unknown" : `${fmt.format(f.mw)} MW`), detailItem("Capacity class", f.capacity), detailItem("Power source", f.power), detailItem("Reported acreage", f.acres == null ? f.acreageClass : `${fmt.format(f.acres)} acres`)])}
-      ${detailSection("Power and grid", [detailItem("Candidate utility", f.utility), detailItem("Utility match", f.utilityMatch), detailItem("eGRID subregion", f.subregion), detailItem("200+ kV line", f.txKm == null ? "Unknown" : `${fmt.format(f.txKm)} km`), detailItem("Nearest substation", f.substationKm == null ? "Unknown" : `${fmt.format(f.substationKm)} km`), detailItem("Active queue MW", f.queueActiveMw == null ? "Unknown" : `${fmt.format(f.queueActiveMw)} MW`)])}
+      ${detailSection("Power and grid", [detailItem("Candidate utility", f.utility), detailItem("Utility match", f.utilityMatch), detailItem("eGRID subregion", f.subregion), detailItem("State industrial price", statePrice ? `${priceFmt.format(statePrice.industrial)} ¢/kWh (${statePrice.year})` : "Unknown"), detailItem("200+ kV line", f.txKm == null ? "Unknown" : `${fmt.format(f.txKm)} km`), detailItem("Nearest substation", f.substationKm == null ? "Unknown" : `${fmt.format(f.substationKm)} km`), detailItem("Active queue MW", f.queueActiveMw == null ? "Unknown" : `${fmt.format(f.queueActiveMw)} MW`)])}
       ${detailSection("Resources", [detailItem("Water scarcity", f.waterClass), detailItem("AWARE factor", f.waterFactor), detailItem("Overall hazard", f.risk), detailItem("Drought", f.drought), detailItem("Flood", f.flood), detailItem("Heat", f.heat)])}
       ${detailSection("Policy and opposition", [detailItem("Dedicated incentive", f.incentive ? "Yes" : "No"), detailItem("Tracked state bills", f.billCount), detailItem("Moratorium entries", f.moratoriumCount), detailItem("Opposition evidence", f.oppositionClass), detailItem("County events", f.countyEvents), detailItem("Local actions", f.localActions)])}
       ${detailSection("Evidence", [detailItem("Location confidence", f.locationConfidence), detailItem("Inventory source", f.source)])}
@@ -555,6 +631,8 @@
     els.detailPanel.classList.remove("open");
     els.detailPanel.innerHTML = currentView === "policy"
       ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a state</h2><p>Choose a state to review bill counts, statuses, policy types, and bill-level records.</p></div>`
+      : currentView === "cost"
+        ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a state</h2><p>Choose a state to review its 2024 industrial electricity price and historical context.</p></div>`
       : currentView === "generation"
         ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a power plant</h2><p>Choose a colored plant marker to review its generation source, capacity, operator, and grid context.</p></div>`
         : `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a facility</h2><p>Choose a point on the map to review evidence from every layer.</p></div>`;
@@ -571,6 +649,7 @@
     els.policyControls.hidden = view !== "policy";
     els.generationControls.hidden = view !== "generation";
     els.mapShell.classList.toggle("policy-mode", view === "policy");
+    els.mapShell.classList.toggle("cost-mode", view === "cost");
     els.mapShell.classList.toggle("generation-mode", view === "generation");
     clearSelection();
     renderLegend(); renderSummary();
@@ -614,8 +693,8 @@
   function resetView() { transform = { x: 0, y: 0, scale: 1 }; updateTransform(); }
 
   function exportCsv() {
-    const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "mw_mid", "capacity_class", "power_source", "water_scarcity", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
-    const rows = filtered.map(f => [f.id, f.name, f.city, f.state, f.county, f.phase, f.mw, f.capacity, f.power, f.waterClass, f.incentive, f.moratoriumCount, f.oppositionClass, f.lat, f.lon]);
+    const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "mw_mid", "capacity_class", "power_source", "state_industrial_price_2024_cents_kwh", "water_scarcity", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
+    const rows = filtered.map(f => [f.id, f.name, f.city, f.state, f.county, f.phase, f.mw, f.capacity, f.power, stateByAbbr.get(f.state)?.electricityPrice?.industrial, f.waterClass, f.incentive, f.moratoriumCount, f.oppositionClass, f.lat, f.lon]);
     const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
@@ -694,10 +773,10 @@
   document.querySelectorAll(".view-button").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
   els.zoomIn.addEventListener("click", () => zoom(1.35)); els.zoomOut.addEventListener("click", () => zoom(1/1.35)); els.zoomReset.addEventListener("click", resetView);
   els.map.addEventListener("wheel", event => { event.preventDefault(); const rect = els.map.getBoundingClientRect(); zoom(event.deltaY < 0 ? 1.18 : 1/1.18, (event.clientX-rect.left)/rect.width*1000, (event.clientY-rect.top)/rect.height*600); }, { passive: false });
-  els.map.addEventListener("pointerdown", event => { if (event.target.classList.contains("facility") || event.target.classList.contains("power-plant") || (currentView === "policy" && event.target.classList.contains("state"))) return; dragging = true; dragStart = { x: event.clientX, y: event.clientY, tx: transform.x, ty: transform.y }; els.map.classList.add("dragging"); els.map.setPointerCapture(event.pointerId); });
+  els.map.addEventListener("pointerdown", event => { if (event.target.classList.contains("facility") || event.target.classList.contains("power-plant") || (stateIsInteractive() && event.target.classList.contains("state"))) return; dragging = true; dragStart = { x:event.clientX, y:event.clientY, tx:transform.x, ty:transform.y }; els.map.classList.add("dragging"); els.map.setPointerCapture(event.pointerId); });
   els.map.addEventListener("pointermove", event => { if (!dragging) return; const rect = els.map.getBoundingClientRect(); transform.x = dragStart.tx + (event.clientX-dragStart.x)/rect.width*1000; transform.y = dragStart.ty + (event.clientY-dragStart.y)/rect.height*600; updateTransform(); });
   els.map.addEventListener("pointerup", () => { dragging = false; els.map.classList.remove("dragging"); });
-  els.map.addEventListener("click", event => { if (event.target === els.map || (currentView !== "policy" && event.target.classList.contains("state"))) clearSelection(); });
+  els.map.addEventListener("click", event => { if (event.target === els.map || (!stateIsInteractive() && event.target.classList.contains("state"))) clearSelection(); });
 
   function registerWebMcp() {
     const context = document.modelContext;
@@ -750,6 +829,17 @@
       if (!plant) throw new Error("Power plant not found");
       selectPowerPlant(plant.id);
       return { plantId: plant.id, name: plant.name, generationSource: plant.fuel };
+    } });
+    register({ name: "show_electricity_costs", title: "Show electricity costs", description: "Open the state industrial electricity-price view and optionally focus on one state.", inputSchema: { type: "object", properties: { state: { type: "string" } }, additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false }, async execute(input) {
+      if (!input || typeof input !== "object" || Array.isArray(input) || Object.keys(input).some(key => key !== "state") || (input.state !== undefined && typeof input.state !== "string")) throw new Error("Input may contain only a state string");
+      await setView("cost");
+      if (input.state !== undefined) {
+        els.stateFilter.value = input.state;
+        applyFilters();
+        if (input.state && stateByAbbr.has(input.state)) selectState(input.state);
+      }
+      const state = input.state ? stateByAbbr.get(input.state) : null;
+      return { year: meta.electricityPriceYear, statesWithData: meta.electricityPriceStates, state: input.state || "All states", industrialCentsPerKwh: state?.electricityPrice?.industrial ?? null };
     } });
     register({ name: "read_dashboard_summary", title: "Read dashboard summary", description: "Return counts for the current filtered selection.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { readOnlyHint: true, untrustedContentHint: false }, execute() { return { selectedFacilities: filtered.length, totalFacilities: facilities.length, displayedPowerPlants: currentView === "generation" ? visiblePowerPlants().length : undefined, generationSource: currentView === "generation" ? els.generationSource.value || "All sources" : undefined, transmissionLines: currentView === "generation" ? els.transmissionToggle.checked : undefined, mapView: currentView, filters: currentFilters(), snapshot: meta.snapshot }; } });
   }

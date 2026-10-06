@@ -16,6 +16,7 @@ plant_file <- file.path(root, "Power", "US Power Layer", "Layer 02 eGRID 2024", 
 grid_file <- file.path(root, "QGIS", "US_OSM_Power_Grid.gpkg")
 county_file <- file.path(root, "Resources", "US Resources Layer", "Layer 06 Land and Development Context", "US_Data_Centers_Land_Development.gpkg")
 actions_file <- file.path(root, "QGIS", "FracTracker_Local_Actions.gpkg")
+electricity_price_file <- file.path(root, "Data Centers", "Research Datasets", "Data-centers-siting-across-U.S.-cities", "Section 2 and 4", "Data", "eia861_state_prices_real_2020_with_volatility.csv")
 
 target_crs <- "ESRI:102008"
 cell_size_km <- 50
@@ -81,6 +82,12 @@ grid$electricity_tax <- as.numeric(state_join$policy_electricity_tax_incentive_f
 grid$moratoriums <- as.numeric(state_join$policy_moratorium_tracker_count)
 grid$policy_bills <- as.numeric(state_join$policy_total_bills)
 grid$policy_passed <- as.numeric(state_join$policy_bills_pass)
+electricity_prices <- read.csv(electricity_price_file, stringsAsFactors = FALSE)
+electricity_prices <- electricity_prices[electricity_prices$year == max(electricity_prices$year, na.rm = TRUE), ]
+price_index <- match(grid$state, electricity_prices$state)
+grid$industrial_price_2024 <- as.numeric(electricity_prices$price_industrial_cents_per_kwh[price_index])
+grid$industrial_price_real_2020 <- as.numeric(electricity_prices$price_industrial_real_2020[price_index])
+grid$industrial_price_variance <- as.numeric(electricity_prices$var_ind_48[price_index])
 grid$county_fips <- county_join$GEOID
 grid$county_name <- county_join$NAME
 grid$water_factor <- as.numeric(county_join$aware_annual_average_cf)
@@ -184,7 +191,8 @@ grid$path <- paths
 numeric_round <- c(
   "center_x_m", "center_y_m", "center_lon", "center_lat", "land_fraction", "reported_mw",
   "plant_operating_mw", "plant_nameplate_mw", "hv_line_km", "water_factor", "water_withdrawal_mgd",
-  "risk_score", "drought_score", "wildfire_score", "flood_score", "heat_score", "queue_active_mw"
+  "risk_score", "drought_score", "wildfire_score", "flood_score", "heat_score", "queue_active_mw",
+  "industrial_price_2024", "industrial_price_real_2020", "industrial_price_variance"
 )
 for (name in numeric_round) grid[[name]] <- round(as.numeric(grid[[name]]), if (name %in% c("center_x_m", "center_y_m")) 0 else 2)
 
@@ -195,7 +203,7 @@ export_fields <- c(
   "plant_nameplate_mw", "hv_line_km", "queue_active_mw", "water_factor", "water_class",
   "water_withdrawal_mgd", "risk_score", "drought_score", "wildfire_score", "flood_score", "heat_score",
   "cbp_establishments", "incentive", "electricity_tax", "moratoriums", "policy_bills", "policy_passed",
-  "local_action_count"
+  "local_action_count", "industrial_price_2024", "industrial_price_real_2020", "industrial_price_variance"
 )
 
 write.csv(st_drop_geometry(grid[, export_fields]), file.path(out_dir, "downloads", paste0("us_hex_grid_", grid_slug, ".csv")), row.names = FALSE, na = "")
@@ -212,7 +220,8 @@ short_map <- c(
   water_withdrawal_mgd="waterWithdrawalMgd", risk_score="riskScore", drought_score="droughtScore",
   wildfire_score="wildfireScore", flood_score="floodScore", heat_score="heatScore", cbp_establishments="cbpEstablishments",
   incentive="incentive", electricity_tax="electricityTax", moratoriums="moratoriums", policy_bills="policyBills",
-  policy_passed="policyPassed", local_action_count="localActionCount", path="path"
+  policy_passed="policyPassed", local_action_count="localActionCount", industrial_price_2024="industrialPrice2024",
+  industrial_price_real_2020="industrialPriceReal2020", industrial_price_variance="industrialPriceVariance", path="path"
 )
 
 cells <- st_drop_geometry(grid[, names(short_map)])
@@ -298,6 +307,15 @@ variables <- list(
     missing="No county queue value is shown as Unknown. A published county value of 0 remains 0.",
     caution="This is a generation queue measure, not a data-center load queue, available grid headroom, or expected completion capacity.",
     basis="County value assigned at the cell centroid"
+  ),
+  list(
+    key="industrialPrice2024", label="Industrial electricity price", group="Power", unit="¢/kWh",
+    definition="Average industrial electricity price reported for the state in 2024, measured in nominal cents per kilowatt-hour.",
+    source="EIA-861 state electricity-price series, 2010–2024, prepared with CPI-adjusted companion values and historical variance.",
+    calculation="The 2024 state industrial average is assigned to each cell by its state. All cells in a state therefore repeat the same value.",
+    missing="The source covers the contiguous 48 states; Alaska and Hawaii are shown as Unknown.",
+    caution="This is a state average revenue measure, not a utility tariff, negotiated data-center contract price, demand charge, or total delivered electricity cost.",
+    basis="2024 state value assigned to each cell"
   ),
   list(
     key="waterFactor", label="Water-scarcity factor", group="Resources", unit="factor",
