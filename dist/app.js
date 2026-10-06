@@ -122,7 +122,7 @@
     els.generationSource.innerHTML = `<option value="">Loading plant data…</option>`;
     powerPlantLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "power-plant-data.js?v=1.0";
+      script.src = "power-plant-data.js?v=1.1";
       script.onload = () => {
         const dataset = window.POWER_PLANT_DATA || {};
         const fields = dataset.fields || [];

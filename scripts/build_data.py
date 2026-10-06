@@ -76,10 +76,12 @@ def gpkg_geometry(blob: bytes):
 
 
 def project(lon: float, lat: float, state: str | None = None):
-    if state == "AK" or lon < -129:
-        return 48 + (lon + 170) * 4.5, 445 + (72 - lat) * 4.3
     if state == "HI" or (lat < 24 and lon < -150):
         return 300 + (lon + 161) * 19, 512 + (23 - lat) * 19
+    if state == "AK" or (lat > 50 and (lon < -129 or lon > 0)):
+        if lon > 0:
+            lon -= 360
+        return 48 + (lon + 170) * 4.5, 445 + (72 - lat) * 4.3
     return 95 + (lon + 125) * 14.15, 45 + (50 - lat) * 20.1
 
 
@@ -122,6 +124,11 @@ def polygon_path(multipolygon, state):
     parts = []
     for polygon in multipolygon:
         for ring in polygon:
+            if state == "HI":
+                ring_lon = sum(point[0] for point in ring) / len(ring)
+                ring_lat = sum(point[1] for point in ring) / len(ring)
+                if ring_lon < -161 or ring_lat > 23:
+                    continue
             projected = [project(lon, lat, state) for lon, lat in ring]
             projected = simplify(projected)
             if len(projected) < 3:

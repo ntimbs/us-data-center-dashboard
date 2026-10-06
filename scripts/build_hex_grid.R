@@ -26,7 +26,14 @@ states <- st_read(state_file, layer = "state_legislation_summary", quiet = TRUE)
 states <- st_make_valid(st_transform(states, target_crs))
 
 make_region_grid <- function(state_codes, region_code) {
-  boundary <- st_union(states[states$state %in% state_codes, ])
+  region_states <- states[states$state %in% state_codes, ]
+  if (region_code == "HI") {
+    main_islands_bbox <- st_bbox(c(xmin = -161, ymin = 18, xmax = -154, ymax = 23), crs = st_crs(4326))
+    region_states <- st_transform(region_states, 4326)
+    region_states <- suppressWarnings(st_intersection(region_states, st_as_sfc(main_islands_bbox)))
+    region_states <- st_transform(region_states, target_crs)
+  }
+  boundary <- st_union(region_states)
   grid <- st_make_grid(boundary, cellsize = cell_size, square = FALSE)
   keep <- lengths(st_intersects(grid, boundary)) > 0
   grid <- grid[keep]
