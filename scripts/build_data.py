@@ -13,10 +13,12 @@ ROOT = Path(__file__).resolve().parents[2]
 SITE = Path(__file__).resolve().parents[1]
 OUT = SITE / "dist" / "dashboard-data.js"
 POWER_OUT = SITE / "dist" / "power-plant-data.js"
+TRANSMISSION_OUT = SITE / "dist" / "transmission-data.js"
 SOURCE = ROOT / "Local Opposition" / "US Opposition Layer" / "Layer 08 Local Opposition" / "US_Data_Centers_Local_Opposition.gpkg"
 POLICY = ROOT / "Legislation" / "US Legislation Layer" / "Layer 07 State Policy" / "US_Data_Centers_State_Policy.gpkg"
 POLICY_BILLS = ROOT / "Analysis" / "State_Legislation" / "state_legislation_bills.csv"
 POWER = ROOT / "Power" / "US Power Layer" / "Layer 04 Infrastructure and Grid Pressure" / "US_Data_Centers_Grid_Pressure.gpkg"
+GRID = ROOT / "QGIS" / "US_OSM_Power_Grid.gpkg"
 
 
 def wkb_offset(blob: bytes) -> int:
@@ -128,6 +130,17 @@ def polygon_path(multipolygon, state):
     return "".join(parts)
 
 
+def multiline_path(multiline):
+    parts = []
+    for line in multiline:
+        projected = [project(lon, lat) for lon, lat in line]
+        projected = simplify(projected, tolerance=0.45)
+        if len(projected) < 2:
+            continue
+        parts.append("M" + "L".join(f"{fmt(x)},{fmt(y)}" for x, y in projected))
+    return "".join(parts)
+
+
 FACILITY_FIELDS = [
     "facility_id", "facility_name", "city", "state", "county", "project_phase", "activity_group",
     "operator_name", "purpose_group", "mw_mid", "capacity_class", "power_source_primary",
@@ -172,6 +185,23 @@ def build():
         x, y = project(lon, lat, item["state"])
         item.update({"lon": round(lon, 5), "lat": round(lat, 5), "x": round(x, 1), "y": round(y, 1)})
         facilities.append(item)
+    con.close()
+
+    transmission_paths = {
+        "High (200–499 kV)": [],
+        "Extra-high (500+ kV)": [],
+    }
+    transmission_counts = Counter()
+    con = sqlite3.connect(GRID)
+    for geom, voltage_class in con.execute(
+        "SELECT geom,voltage_class FROM transmission_lines WHERE voltage_max_kv >= 200"
+    ):
+        label = "Extra-high (500+ kV)" if voltage_class == "Extra-high (500+ kV)" else "High (200–499 kV)"
+        path = multiline_path(gpkg_geometry(geom))
+        if path:
+            transmission_paths[label].append(path)
+            transmission_counts[label] += 1
+    source_metadata = dict(con.execute("SELECT item,value FROM source_metadata"))
     con.close()
 
     plants = []
@@ -264,8 +294,21 @@ def build():
         "plants": plants,
     }
     POWER_OUT.write_text("window.POWER_PLANT_DATA=" + json.dumps(power_payload, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
+    transmission_payload = {
+        "source": source_metadata.get("source"),
+        "snapshot": source_metadata.get("source_snapshot"),
+        "thresholdKv": 200,
+        "featureCount": sum(transmission_counts.values()),
+        "coverageWarning": source_metadata.get("coverage_warning"),
+        "paths": [
+            {"class": label, "featureCount": transmission_counts[label], "d": "".join(transmission_paths[label])}
+            for label in ("High (200–499 kV)", "Extra-high (500+ kV)")
+        ],
+    }
+    TRANSMISSION_OUT.write_text("window.TRANSMISSION_DATA=" + json.dumps(transmission_payload, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
     print(f"Wrote {OUT} ({OUT.stat().st_size / 1024:.1f} KiB)")
     print(f"Wrote {POWER_OUT} ({POWER_OUT.stat().st_size / 1024:.1f} KiB)")
+    print(f"Wrote {TRANSMISSION_OUT} ({TRANSMISSION_OUT.stat().st_size / 1024:.1f} KiB)")
 
 
 if __name__ == "__main__":
