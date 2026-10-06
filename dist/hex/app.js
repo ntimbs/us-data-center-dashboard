@@ -21,8 +21,8 @@
   const els = Object.fromEntries([
     "outcomeSelect","compareSelect","stateFilter","landFilter","pointToggle","sampleCount","coverageText","exportButton",
     "metricHexes","metricOccupied","metricMoran","metricSpatial","mapTitle","mapShell","map","mapViewport","stateLayer",
-    "hexLayer","facilityLayer","outlineLayer","tooltip","legend","zoomOut","zoomReset","zoomIn","scatterplot","scatterTitle",
-    "pearsonStat","interpretTitle","interpretText","cellArea","pairCount","detailPanel","resetButton","outcomeHelp","compareHelp",
+    "hexLayer","facilityLayer","outlineLayer","tooltip","legend","zoomOut","zoomReset","zoomIn","summaryTitle","plainSummary",
+    "interpretTitle","interpretText","cellArea","pairCount","detailPanel","resetButton","outcomeHelp","compareHelp",
     "guideButton","guideModal","guideClose","guideNav","guideContent","statusChecks","activityChecks","capacityChecks","powerChecks",
     "statusSelection","activitySelection","capacitySelection","powerSelection"
   ].map(id => [id, document.getElementById(id)]));
@@ -245,34 +245,38 @@
   function positionTooltip(event) { const r=els.mapShell.getBoundingClientRect(); els.tooltip.style.left=`${Math.min(event.clientX-r.left+13,r.width-290)}px`; els.tooltip.style.top=`${Math.max(8,event.clientY-r.top-72)}px`; }
   function renderSummary() {
     stats=computeStats();
-    const occupied=filtered.filter(c=>c.facilityCount>0).length;
+    const occupiedCells=filtered.filter(c=>c.facilityCount>0);
+    const occupied=occupiedCells.length;
     const visibleIds=new Set(filtered.map(c=>c.id));
     const visibleFacilities=selectedFacilities.filter(f=>visibleIds.has(f.hexId)).length;
     els.sampleCount.textContent=`${fmt.format(filtered.length)} hexagons`;
-    els.coverageText.textContent=`${fmt.format(visibleFacilities)} selected facilities · ${fmt.format(occupied)} occupied · ${fmt.format(stats.pairs)} complete pairs`;
+    els.coverageText.textContent=`${fmt.format(visibleFacilities)} selected facilities · ${fmt.format(occupied)} occupied · ${fmt.format(stats.pairs)} areas with both measures`;
     els.metricHexes.textContent=fmt.format(filtered.length);
     els.metricOccupied.textContent=fmt.format(occupied);
     els.metricMoran.textContent=Number.isFinite(stats.moran)?stats.moran.toFixed(3):"—";
     els.metricSpatial.textContent=Number.isFinite(stats.spatial)?stats.spatial.toFixed(3):"—";
-    els.pearsonStat.textContent=Number.isFinite(stats.pearson)?`r = ${stats.pearson.toFixed(3)}`:"r = —";
     els.pairCount.textContent=fmt.format(stats.pairs);
     const ov=varByKey.get(outcome),cv=varByKey.get(comparison);
     els.mapTitle.textContent=display==="outcome"?ov.label:display==="comparison"?cv.label:`${ov.label} × ${cv.label}`;
-    els.scatterTitle.textContent=`${ov.label} vs. ${cv.label}`;
-    els.interpretTitle.textContent=`${cv.group} context at a common scale`;
-    els.interpretText.textContent=`${cv.definition} ${cv.calculation} Pearson’s r compares values in the same cells. Spatial-lag r compares ${ov.label.toLowerCase()} in each cell with the average ${cv.label.toLowerCase()} among adjacent cells.`;
+    els.summaryTitle.textContent=`What stands out across ${fmt.format(filtered.length)} areas`;
+    els.interpretTitle.textContent=cv.label;
+    els.interpretText.textContent=`${cv.definition} The summary compares simple averages across the current map selection. It is useful for spotting broad patterns, but it does not show that one factor caused another.`;
+    renderPlainSummary(occupiedCells,visibleFacilities,cv);
     renderVariableHelp();
   }
-  function renderScatter() {
-    const data=stats.valid;
-    const xs=data.map(c=>c[comparison]), ys=data.map(c=>c[outcome]);
-    if (data.length<2){els.scatterplot.innerHTML="";return;}
-    const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
-    const sx=x=>48+(x-minX)/(maxX-minX||1)*490, sy=y=>178-(y-minY)/(maxY-minY||1)*145;
-    const mx=mean(xs),my=mean(ys); let num=0,den=0; xs.forEach((x,i)=>{num+=(x-mx)*(ys[i]-my);den+=(x-mx)**2}); const slope=den?num/den:0,intercept=my-slope*mx;
-    const lines=[0,.25,.5,.75,1].map(p=>`<line class="gridline" x1="48" x2="538" y1="${33+145*p}" y2="${33+145*p}"></line>`).join("");
-    const dots=data.map(c=>`<circle class="scatter-dot" cx="${sx(c[comparison])}" cy="${sy(c[outcome])}" r="2.5"><title>${escapeHtml(c.id)}</title></circle>`).join("");
-    els.scatterplot.innerHTML=`${lines}<line class="axis" x1="48" y1="178" x2="538" y2="178"></line><line class="axis" x1="48" y1="33" x2="48" y2="178"></line>${dots}<line class="trend" x1="${sx(minX)}" y1="${sy(intercept+slope*minX)}" x2="${sx(maxX)}" y2="${sy(intercept+slope*maxX)}"></line><text class="axis-label" x="48" y="198">${escapeHtml(varByKey.get(comparison).label)}</text><text class="axis-label" transform="translate(14 174) rotate(-90)">${escapeHtml(varByKey.get(outcome).label)}</text>`;
+  function renderPlainSummary(occupiedCells,visibleFacilities,cv) {
+    const occupiedShare=filtered.length?occupiedCells.length/filtered.length*100:0;
+    const withValues=occupiedCells.map(c=>c[comparison]).filter(Number.isFinite);
+    const withoutValues=filtered.filter(c=>c.facilityCount===0).map(c=>c[comparison]).filter(Number.isFinite);
+    const avgWith=mean(withValues),avgWithout=mean(withoutValues);
+    const busiest=occupiedCells.reduce((best,c)=>!best||c.facilityCount>best.facilityCount?c:best,null);
+    const comparisonValue=Number.isFinite(avgWith)&&Number.isFinite(avgWithout)?`${number(avgWith,cv.unit)} vs ${number(avgWithout,cv.unit)}`:"Not enough data";
+    const comparisonDetail=Number.isFinite(avgWith)&&Number.isFinite(avgWithout)?`Average ${cv.label.toLowerCase()} in areas with selected facilities, compared with other visible areas.`:`The current selection does not have enough values to compare areas with and without facilities.`;
+    const busiestLocation=busiest?[busiest.countyName,busiest.state].filter(Boolean).join(", "):"No occupied area in the current selection.";
+    els.plainSummary.innerHTML=`
+      <article class="summary-item"><span>Data-center footprint</span><strong>${fmt.format(occupiedCells.length)} of ${fmt.format(filtered.length)} areas</strong><p>${fmt.format(visibleFacilities)} selected facilities appear across ${fmt.format(occupiedShare)}% of the visible grid.</p></article>
+      <article class="summary-item"><span>With facilities vs. without</span><strong>${escapeHtml(comparisonValue)}</strong><p>${escapeHtml(comparisonDetail)}</p></article>
+      <article class="summary-item"><span>Busiest visible area</span><strong>${busiest?`${fmt.format(busiest.facilityCount)} ${busiest.facilityCount===1?"facility":"facilities"}`:"No facilities"}</strong><p>${escapeHtml(busiestLocation)}</p></article>`;
   }
   function item(label,val){return `<div class="detail-item"><span>${escapeHtml(label)}</span><strong>${escapeHtml(val)}</strong></div>`;}
   function section(title,items){return `<section class="detail-section"><h3>${escapeHtml(title)}</h3><div class="detail-grid">${items.join("")}</div></section>`;}
@@ -286,7 +290,7 @@
     if(options.reaggregate)reaggregateFacilities();
     filtered=currentCells();
     updateCheckboxCounts();
-    renderSummary();renderMap();renderScatter();
+    renderSummary();renderMap();
     if(selectedId)selectCell(selectedId);
   }
   function updateTransform(){els.mapViewport.setAttribute("transform",`translate(${transform.x} ${transform.y}) scale(${transform.scale})`);}

@@ -6,7 +6,7 @@
   <meta name="description" content="Analysis-ready 50 km equal-area hex grid for exploring spatial relationships between U.S. data centers, power, resources, legislation, and local opposition.">
   <title>U.S. Data Center Ecosystem Tracker | Hexagon Spatial Explorer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M32 9l19 11v22L32 53 13 42V20z' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1.7">
+  <link rel="stylesheet" href="styles.css?v=1.8">
 </head>
 <body>
   <header class="topbar">
@@ -102,15 +102,15 @@
       </article>
 
       <div class="analysis-row">
-        <article class="scatter-card">
-          <div class="card-heading"><div><span class="eyebrow">Cell-level relationship</span><h2 id="scatterTitle">—</h2></div><strong id="pearsonStat">—</strong></div>
-          <svg id="scatterplot" viewBox="0 0 560 210" role="img" aria-label="Scatterplot of selected hex-grid variables"></svg>
+        <article class="summary-card">
+          <div class="card-heading"><div><span class="eyebrow">At a glance</span><h2 id="summaryTitle">What stands out in this view</h2></div></div>
+          <div id="plainSummary" class="plain-summary" aria-live="polite"></div>
         </article>
         <article class="read-card">
-          <span class="eyebrow">Interpretation</span>
-          <h2 id="interpretTitle">Read the measures together</h2>
-          <p id="interpretText">The map and scatterplot update from the same set of land cells. Moran’s I measures clustering in the outcome; spatial-lag r compares each outcome value with neighboring cells’ comparison values.</p>
-          <dl><div><dt>Cell area</dt><dd id="cellArea">—</dd></div><div><dt>Complete pairs</dt><dd id="pairCount">—</dd></div><div><dt>Adjacency</dt><dd>Queen</dd></div></dl>
+          <span class="eyebrow">How to read this</span>
+          <h2 id="interpretTitle">About the selected comparison</h2>
+          <p id="interpretText">Use the map and summary together to spot broad patterns. The figures describe the current selection; they do not show that one factor caused another.</p>
+          <dl><div><dt>Typical cell area</dt><dd id="cellArea">—</dd></div><div><dt>Areas with both measures</dt><dd id="pairCount">—</dd></div><div><dt>Neighbor rule</dt><dd>Touching cells</dd></div></dl>
         </article>
       </div>
     </section>
@@ -154,6 +154,6 @@
 
   <script src="../dashboard-data.js?v=1.4"></script>
   <script src="hex-data.js?v=1.4"></script>
-  <script src="app.js?v=1.4"></script>
+  <script src="app.js?v=1.5"></script>
 </body>
 </html>

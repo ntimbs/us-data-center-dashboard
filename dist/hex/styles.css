@@ -71,7 +71,7 @@ h2 { margin:3px 0 0; font-size:1rem; line-height:1.3; }
 .metric-strip span { color:var(--muted); font-size:.7rem; }
 .metric-strip strong { display:block; margin:4px 0 2px; font-size:1.25rem; font-variant-numeric:tabular-nums; }
 .metric-strip small { color:var(--subtle); font-size:.65rem; }
-.map-card,.scatter-card,.read-card { border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+.map-card,.summary-card,.read-card { border:1px solid var(--line); border-radius:12px; background:var(--panel); }
 .map-toolbar { min-height:55px; padding:9px 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line); }
 .map-actions { display:flex; gap:4px; }
 .map-actions button { min-height:32px; min-width:32px; padding:0 8px; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--muted); cursor:pointer; font-size:.74rem; font-weight:650; }
@@ -94,14 +94,12 @@ h2 { margin:3px 0 0; font-size:1rem; line-height:1.3; }
 .legend-item+.legend-item { margin-top:4px; }
 .legend-swatch { width:10px; height:10px; flex:0 0 auto; border:1px solid rgba(255,255,255,.16); }
 .analysis-row { display:grid; grid-template-columns:1.45fr 1fr; gap:12px; margin-top:12px; }
-.scatter-card,.read-card { min-height:260px; padding:15px; }
-.card-heading > strong { color:var(--teal); font-size:1.05rem; }
-#scatterplot { width:100%; height:205px; display:block; margin-top:6px; }
-.axis { stroke:#365064; stroke-width:1; }
-.gridline { stroke:#1d3345; stroke-width:1; }
-.scatter-dot { fill:var(--teal); opacity:.48; }
-.trend { stroke:var(--amber); stroke-width:2; }
-.axis-label { fill:#859bad; font-size:10px; }
+.summary-card,.read-card { min-height:260px; padding:15px; }
+.plain-summary { display:grid; gap:9px; margin-top:14px; }
+.summary-item { min-width:0; display:grid; grid-template-columns:minmax(112px,.8fr) minmax(0,1.35fr); column-gap:14px; align-items:start; padding:12px 13px; border:1px solid var(--line); border-radius:9px; background:#0b1a28; }
+.summary-item > span { display:block; color:var(--subtle); font-size:.68rem; font-weight:700; }
+.summary-item > strong { display:block; grid-column:1; margin-top:5px; color:#e8f3f5; font-size:.92rem; line-height:1.3; font-variant-numeric:tabular-nums; }
+.summary-item > p { grid-column:2; grid-row:1 / span 2; margin:0; color:var(--muted); font-size:.72rem; line-height:1.45; }
 .read-card h2 { margin-top:6px; font-size:1.05rem; }
 .read-card p { margin:10px 0 16px; color:var(--muted); font-size:.79rem; line-height:1.55; }
 .read-card dl { margin:0; display:grid; gap:9px; }
@@ -161,7 +159,7 @@ h2 { margin:3px 0 0; font-size:1rem; line-height:1.3; }
 body.guide-open { overflow:hidden; }
 @media (max-width:1200px){.topbar{height:auto;min-height:68px;padding:10px 15px;flex-wrap:wrap;gap:8px}.header-actions{width:100%;justify-content:flex-end}.brand p{display:none}.workspace{height:calc(100vh - 118px);grid-template-columns:292px minmax(500px,1fr)}.detail-panel{position:fixed;z-index:20;right:0;top:118px;bottom:0;width:320px;transform:translateX(101%);transition:transform .2s ease;box-shadow:-20px 0 45px rgba(0,0,0,.4)}.detail-panel.open{transform:translateX(0)}}
 @media (max-width:830px){body{overflow:auto}.topbar{height:auto;min-height:68px;padding:12px 15px;flex-wrap:wrap;gap:10px}.header-actions{width:100%;justify-content:flex-end;flex-wrap:wrap;gap:8px}.brand p,.snapshot{display:none}.workspace{height:auto;display:block}.controls{border-right:0;border-bottom:1px solid var(--line)}.main-panel{overflow:visible;padding:12px}.metric-strip{grid-template-columns:1fr 1fr}.map-shell{min-height:430px}.analysis-row{grid-template-columns:1fr}.map-caption span:last-child{display:none}.guide-backdrop{padding:10px}.guide-dialog{width:100%;height:94vh}.guide-intro{grid-template-columns:1fr}.measure-grid,.stat-guide-grid{grid-template-columns:1fr}}
-@media (max-width:500px){.header-actions>a{display:none}.header-actions{justify-content:flex-start}.institutional-logos img{height:24px}.brand h1{font-size:.9rem}.detail-grid{grid-template-columns:1fr}.legend{width:158px}}
+@media (max-width:500px){.header-actions>a{display:none}.header-actions{justify-content:flex-start}.institutional-logos img{height:24px}.brand h1{font-size:.9rem}.detail-grid{grid-template-columns:1fr}.legend{width:158px}.summary-item{grid-template-columns:1fr}.summary-item>p{grid-column:1;grid-row:auto;margin-top:7px}}
 
 /* Keyboard-navigation focus ring, added for accessibility audit. */
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
