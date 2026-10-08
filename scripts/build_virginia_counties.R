@@ -192,6 +192,10 @@ facility_points <- lapply(seq_len(nrow(facility_join)), function(i) list(
   name = as.character(facility_join$facility_name[i]),
   countyId = as.character(facility_join$county_id[i]),
   phase = as.character(facility_join$project_phase[i]),
+  activity = as.character(facility_join$activity_group[i]),
+  directOpposition = as.numeric(facility_join$opposition_direct_facility_flag[i]),
+  onlineYear = if (is.na(facility_join$expected_online_year[i])) NULL else as.integer(facility_join$expected_online_year[i]),
+  dateCreated = if (is.na(facility_join$date_created[i])) NULL else as.character(facility_join$date_created[i]),
   mw = if (is.na(facility_join$mw_mid[i])) NULL else round(as.numeric(facility_join$mw_mid[i]), 2),
   x = round(facility_screen[i, 1], 1),
   y = round(facility_screen[i, 2], 1)

@@ -162,6 +162,7 @@ FACILITY_FIELDS = [
     "policy_moratorium_tracker_count", "policy_total_bills", "policy_bills_pass",
     "opposition_direct_facility_flag", "opposition_direct_status", "opposition_county_event_count",
     "local_action_county_count", "opposition_context_class", "location_confidence", "information_source",
+    "expected_online_year", "date_created",
 ]
 
 
@@ -171,7 +172,7 @@ SHORT_KEYS = [
     "generation50Mw", "queueActiveMw", "relativeScale", "waterClass", "waterFactor", "risk", "drought",
     "flood", "heat", "wildfire", "acreageClass", "acres", "density", "cbpEstablishments", "incentive",
     "electricityTax", "moratoriumCount", "billCount", "passedBills", "directOpposition", "oppositionStatus",
-    "countyEvents", "localActions", "oppositionClass", "locationConfidence", "source",
+    "countyEvents", "localActions", "oppositionClass", "locationConfidence", "source", "onlineYear", "dateCreated",
 ]
 
 

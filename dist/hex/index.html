@@ -6,7 +6,7 @@
   <meta name="description" content="Analysis-ready 50 km equal-area hex grid for exploring spatial relationships between U.S. data centers, power, resources, legislation, and local opposition.">
   <title>U.S. Data Center Ecosystem Tracker | Hexagon Spatial Explorer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M32 9l19 11v22L32 53 13 42V20z' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1.8">
+  <link rel="stylesheet" href="styles.css?v=1.9">
 </head>
 <body>
   <header class="topbar">
@@ -18,7 +18,7 @@
       <a href="../virginia/">Virginia counties</a>
       <a href="../index.html">Facility view</a>
       <div class="institutional-logos" aria-label="University of Virginia National Security Institute and Special Competitive Studies Project"><img src="../assets/uva-nsi-logo.png" alt="University of Virginia National Security Institute"><img src="../assets/scsp-logo.webp" alt="Special Competitive Studies Project"></div>
-      <div class="snapshot"><span>Snapshot</span><strong>28 Sep 2026</strong></div>
+      <div class="snapshot"><span>Snapshot</span><strong>8 Oct 2026</strong></div>
     </div>
   </header>
 
@@ -33,6 +33,14 @@
       <label class="field"><span>Comparison variable</span><select id="compareSelect" aria-describedby="compareHelp"></select><small id="compareHelp" class="variable-help"></small></label>
       <label class="field"><span>State</span><select id="stateFilter"><option value="">All states</option></select></label>
       <label class="field"><span>Minimum land share</span><select id="landFilter"><option value="0">Any land share</option><option value="0.25">25% or more</option><option value="0.5">50% or more</option></select></label>
+
+      <section class="timeline-control" aria-labelledby="timelineTitle">
+        <div class="timeline-heading"><div><span class="eyebrow">Timeline</span><h3 id="timelineTitle">Cumulative through <output id="timelineYearLabel" for="timelineRange">—</output></h3></div><button id="timelinePlay" class="timeline-play" type="button">Play</button></div>
+        <label><span>Timeline basis</span><select id="timelineBasis"><option value="inventory">Added to inventory</option><option value="online">Reported/expected online</option></select></label>
+        <input id="timelineRange" type="range" step="1" aria-label="Timeline year">
+        <div class="timeline-scale"><span id="timelineMin">—</span><span id="timelineMax">—</span></div>
+        <p id="timelineCoverage"></p>
+      </section>
 
       <p class="filter-instruction">All facility categories begin selected. These filters rebuild the data-center measures inside every visible hexagon.</p>
       <details class="multi-filter" open>
@@ -132,7 +140,7 @@
           <dl>
             <div><dt>Projection</dt><dd>North America Albers Equal Area</dd></div>
             <div><dt>Full-cell area</dt><dd>2,165.1 km²</dd></div>
-            <div><dt>Snapshot</dt><dd>28 September 2026</dd></div>
+            <div><dt>Snapshot</dt><dd>8 October 2026</dd></div>
           </dl>
         </div>
         <nav id="guideNav" class="guide-nav" aria-label="Measure groups"></nav>
@@ -152,8 +160,8 @@
     </section>
   </div>
 
-  <script src="../dashboard-data.js?v=1.7"></script>
-  <script src="hex-data.js?v=1.6"></script>
-  <script src="app.js?v=1.6"></script>
+  <script src="../dashboard-data.js?v=1.8"></script>
+  <script src="hex-data.js?v=1.7"></script>
+  <script src="app.js?v=1.7"></script>
 </body>
 </html>

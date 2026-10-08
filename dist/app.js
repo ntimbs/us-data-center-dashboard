@@ -109,7 +109,7 @@
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "transmissionLayer", "plantLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
     "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyTopic", "policyStatusGroup", "generationControls", "generationSource", "transmissionToggle", "transmissionStatus",
-    "profileEyebrow", "profileTitle"
+    "profileEyebrow", "profileTitle", "timelineBasis", "timelineRange", "timelineYearLabel", "timelineMin", "timelineMax", "timelineCoverage", "timelinePlay"
   ].map(id => [id, document.getElementById(id)]));
 
   let currentView = "status";
@@ -122,11 +122,70 @@
   let transform = { x: 0, y: 0, scale: 1 };
   let dragging = false;
   let dragStart = null;
+  let timelineMode = "inventory";
+  let timelineYear = 0;
+  let timelineTimer = null;
   const stateByAbbr = new Map(states.map(state => [state.abbr, state]));
+
+  function facilityTimelineYear(f, mode = timelineMode) {
+    if (mode === "online") return Number.isInteger(f.onlineYear) ? f.onlineYear : null;
+    const match = String(f.dateCreated || "").match(/^(\d{4})/);
+    return match ? Number(match[1]) : null;
+  }
+  function timelineBounds(mode = timelineMode) {
+    const years = facilities.map(f => facilityTimelineYear(f, mode)).filter(Number.isInteger);
+    return { min: Math.min(...years), max: Math.max(...years), dated: years.length, undated: facilities.length - years.length };
+  }
+  function matchesTimeline(f) {
+    const year = facilityTimelineYear(f);
+    if (Number.isInteger(year)) return year <= timelineYear;
+    return timelineMode === "inventory" && timelineYear === timelineBounds().max;
+  }
+  function stopTimeline() {
+    if (timelineTimer) clearInterval(timelineTimer);
+    timelineTimer = null;
+    els.timelinePlay.textContent = "Play";
+  }
+  function renderTimelineCoverage() {
+    const bounds = timelineBounds();
+    const shown = facilities.filter(matchesTimeline).length;
+    els.timelineYearLabel.textContent = timelineYear;
+    els.timelineRange.setAttribute("aria-valuetext", `Cumulative through ${timelineYear}`);
+    els.timelineCoverage.textContent = timelineMode === "inventory"
+      ? `${fmt.format(shown)} records shown. ${fmt.format(bounds.dated)} have an inventory-added year; ${fmt.format(bounds.undated)} undated records appear only at the latest year. Colors show current status, not historical status.`
+      : `${fmt.format(shown)} of ${fmt.format(bounds.dated)} records with a reported or expected online year are shown. ${fmt.format(bounds.undated)} undated records are omitted; dates are not verified openings.`;
+  }
+  function configureTimeline(resetToMax = false) {
+    const bounds = timelineBounds();
+    if (resetToMax || timelineYear < bounds.min || timelineYear > bounds.max) timelineYear = bounds.max;
+    els.timelineRange.min = bounds.min;
+    els.timelineRange.max = bounds.max;
+    els.timelineRange.value = timelineYear;
+    els.timelineMin.textContent = bounds.min;
+    els.timelineMax.textContent = bounds.max;
+    renderTimelineCoverage();
+  }
+  function playTimeline() {
+    if (timelineTimer) { stopTimeline(); return; }
+    const bounds = timelineBounds();
+    if (timelineYear >= bounds.max) timelineYear = bounds.min;
+    els.timelineRange.value = timelineYear;
+    renderTimelineCoverage();
+    applyFilters();
+    els.timelinePlay.textContent = "Pause";
+    timelineTimer = setInterval(() => {
+      if (timelineYear >= bounds.max) { stopTimeline(); return; }
+      timelineYear += 1;
+      els.timelineRange.value = timelineYear;
+      renderTimelineCoverage();
+      applyFilters();
+    }, 900);
+  }
 
   const unique = (key) => [...new Set(facilities.map(f => f[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
   const populate = (select, values) => values.forEach(v => select.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
   populate(els.stateFilter, unique("state"));
+  configureTimeline(true);
 
   function escapeHtml(input) {
     return String(input ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -366,7 +425,7 @@
       query: els.searchInput.value.trim().toLowerCase(), state: els.stateFilter.value,
       incentive: els.incentiveFilter.checked, opposition: els.oppositionFilter.checked, moratorium: els.moratoriumFilter.checked,
       statuses: selectedValues("status"), activities: selectedValues("activity"), capacities: selectedValues("capacity"),
-      powerSources: selectedValues("power")
+      powerSources: selectedValues("power"), timelineBasis: timelineMode, throughYear: timelineYear
     };
   }
 
@@ -377,6 +436,7 @@
     if (q.incentive && f.incentive !== 1) return false;
     if (q.opposition && f.directOpposition !== 1) return false;
     if (q.moratorium && !(f.moratoriumCount > 0)) return false;
+    if (!matchesTimeline(f)) return false;
     if (omitGroup !== "status" && !q.statuses.includes(filterGroupDefs.status.key(f))) return false;
     if (omitGroup !== "activity" && !q.activities.includes(filterGroupDefs.activity.key(f))) return false;
     if (omitGroup !== "capacity" && !q.capacities.includes(filterGroupDefs.capacity.key(f))) return false;
@@ -592,7 +652,7 @@
     els.detailPanel.innerHTML = `<div class="detail-content">
       <div class="detail-top"><div><span class="eyebrow">${escapeHtml(f.id)}</span><h2>${escapeHtml(f.name)}</h2><p class="detail-location">${escapeHtml([f.city, f.county, f.state].filter(Boolean).join(" · "))}</p></div><button class="close-detail" type="button" aria-label="Close facility details">×</button></div>
       <span class="phase-pill">${escapeHtml(f.phase || "Unknown status")}</span>
-      ${detailSection("Facility", [detailItem("Operator", f.operator), detailItem("Purpose", f.purpose), detailItem("Capacity", f.mw == null ? "Unknown" : `${fmt.format(f.mw)} MW`), detailItem("Capacity class", f.capacity), detailItem("Power source", f.power), detailItem("Reported acreage", f.acres == null ? f.acreageClass : `${fmt.format(f.acres)} acres`)])}
+      ${detailSection("Facility", [detailItem("Operator", f.operator), detailItem("Purpose", f.purpose), detailItem("Capacity", f.mw == null ? "Unknown" : `${fmt.format(f.mw)} MW`), detailItem("Capacity class", f.capacity), detailItem("Power source", f.power), detailItem("Reported acreage", f.acres == null ? f.acreageClass : `${fmt.format(f.acres)} acres`), detailItem("Added to inventory", f.dateCreated), detailItem("Reported/expected online", f.onlineYear)])}
       ${detailSection("Power and grid", [detailItem("Candidate utility", f.utility), detailItem("Utility match", f.utilityMatch), detailItem("eGRID subregion", f.subregion), detailItem("State industrial price", statePrice ? `${priceFmt.format(statePrice.industrial)} ¢/kWh (${statePrice.year})` : "Unknown"), detailItem("200+ kV line", f.txKm == null ? "Unknown" : `${fmt.format(f.txKm)} km`), detailItem("Nearest substation", f.substationKm == null ? "Unknown" : `${fmt.format(f.substationKm)} km`), detailItem("Active queue MW", f.queueActiveMw == null ? "Unknown" : `${fmt.format(f.queueActiveMw)} MW`)])}
       ${detailSection("Resources", [detailItem("Water scarcity", f.waterClass), detailItem("AWARE factor", f.waterFactor), detailItem("Overall hazard", f.risk), detailItem("Drought", f.drought), detailItem("Flood", f.flood), detailItem("Heat", f.heat)])}
       ${detailSection("Policy and opposition", [detailItem("Dedicated incentive", f.incentive ? "Yes" : "No"), detailItem("Tracked state bills", f.billCount), detailItem("Moratorium entries", f.moratoriumCount), detailItem("Opposition evidence", f.oppositionClass), detailItem("County events", f.countyEvents), detailItem("Local actions", f.localActions)])}
@@ -693,23 +753,30 @@
   function resetView() { transform = { x: 0, y: 0, scale: 1 }; updateTransform(); }
 
   function exportCsv() {
-    const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "mw_mid", "capacity_class", "power_source", "state_industrial_price_2024_cents_kwh", "water_scarcity", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
-    const rows = filtered.map(f => [f.id, f.name, f.city, f.state, f.county, f.phase, f.mw, f.capacity, f.power, stateByAbbr.get(f.state)?.electricityPrice?.industrial, f.waterClass, f.incentive, f.moratoriumCount, f.oppositionClass, f.lat, f.lon]);
+    const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "date_added_to_inventory", "reported_expected_online_year", "mw_mid", "capacity_class", "power_source", "state_industrial_price_2024_cents_kwh", "water_scarcity", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
+    const rows = filtered.map(f => [f.id, f.name, f.city, f.state, f.county, f.phase, f.dateCreated, f.onlineYear, f.mw, f.capacity, f.power, stateByAbbr.get(f.state)?.electricityPrice?.industrial, f.waterClass, f.incentive, f.moratoriumCount, f.oppositionClass, f.lat, f.lon]);
     const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
   }
 
   [els.searchInput, els.stateFilter, els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
+  els.timelineBasis.addEventListener("change", () => { stopTimeline(); timelineMode = els.timelineBasis.value; configureTimeline(true); applyFilters(); });
+  els.timelineRange.addEventListener("input", () => { stopTimeline(); timelineYear = Number(els.timelineRange.value); renderTimelineCoverage(); applyFilters(); });
+  els.timelinePlay.addEventListener("click", playTimeline);
   document.querySelectorAll("[data-filter-action]").forEach(button => button.addEventListener("click", () => {
     const group = filterGroups[button.dataset.filterGroup];
     group.container.querySelectorAll("input").forEach(input => { input.checked = button.dataset.filterAction === "all"; });
     applyFilters();
   }));
   els.resetFilters.addEventListener("click", () => {
+    stopTimeline();
     [els.searchInput, els.stateFilter].forEach(el => el.value = "");
     [els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.checked = false);
     Object.keys(filterGroups).forEach(name => setGroupSelection(name, filterGroups[name].categories.map(([label]) => label)));
+    timelineMode = "inventory";
+    els.timelineBasis.value = timelineMode;
+    configureTimeline(true);
     applyFilters();
   });
   els.exportButton.addEventListener("click", exportCsv);
@@ -782,14 +849,16 @@
     const context = document.modelContext;
     if (!context?.registerTool) return;
     const register = tool => { try { Promise.resolve(context.registerTool(tool)).catch(() => {}); } catch (_) {} };
-    register({ name: "filter_facilities", title: "Filter facilities", description: "Apply visible dashboard filters for state, project status, activity group, capacity class, power source, or search text.", inputSchema: { type: "object", properties: { state: { type: "string" }, phase: { type: "string" }, query: { type: "string" }, statuses: { type: "array", items: { type: "string" } }, activities: { type: "array", items: { type: "string" } }, capacities: { type: "array", items: { type: "string" } }, powerSources: { type: "array", items: { type: "string" } } }, additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false }, execute(input) {
+    register({ name: "filter_facilities", title: "Filter facilities", description: "Apply visible dashboard filters, including the cumulative facility timeline.", inputSchema: { type: "object", properties: { state: { type: "string" }, phase: { type: "string" }, query: { type: "string" }, timelineBasis: { type: "string", enum: ["inventory", "online"] }, throughYear: { type: "integer" }, statuses: { type: "array", items: { type: "string" } }, activities: { type: "array", items: { type: "string" } }, capacities: { type: "array", items: { type: "string" } }, powerSources: { type: "array", items: { type: "string" } } }, additionalProperties: false }, annotations: { readOnlyHint: false, untrustedContentHint: false }, execute(input) {
       if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Input must be an object");
-      const allowed = new Set(["state", "phase", "query", "statuses", "activities", "capacities", "powerSources"]);
+      const allowed = new Set(["state", "phase", "query", "timelineBasis", "throughYear", "statuses", "activities", "capacities", "powerSources"]);
       if (Object.keys(input).some(key => !allowed.has(key))) throw new Error("Unsupported filter field");
       if (["state", "phase", "query"].some(key => input[key] !== undefined && typeof input[key] !== "string")) throw new Error("State, phase, and query must be strings");
       if (["statuses", "activities", "capacities", "powerSources"].some(key => input[key] !== undefined && (!Array.isArray(input[key]) || input[key].some(value => typeof value !== "string")))) throw new Error("Category filters must be arrays of strings");
       if (input.state !== undefined) els.stateFilter.value = input.state;
       if (input.query !== undefined) els.searchInput.value = input.query;
+      if (input.timelineBasis !== undefined) { stopTimeline(); timelineMode = input.timelineBasis; els.timelineBasis.value = timelineMode; configureTimeline(true); }
+      if (Number.isInteger(input.throughYear)) { const bounds = timelineBounds(); timelineYear = Math.max(bounds.min, Math.min(bounds.max, input.throughYear)); els.timelineRange.value = timelineYear; renderTimelineCoverage(); }
       if (input.phase !== undefined) setGroupSelection("status", input.phase ? [input.phase] : filterGroups.status.categories.map(([label]) => label));
       if (input.statuses !== undefined) setGroupSelection("status", input.statuses);
       if (input.activities !== undefined) setGroupSelection("activity", input.activities);

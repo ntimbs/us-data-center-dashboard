@@ -6,7 +6,7 @@
   <meta name="description" content="Virginia county-level explorer for data centers, power, resources, and local opposition.">
   <title>U.S. Data Center Ecosystem Tracker | Virginia County Explorer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M14 13h36v38H14z' fill='none' stroke='%232dd4bf' stroke-width='5'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=1.5">
+  <link rel="stylesheet" href="styles.css?v=1.6">
 </head>
 <body>
   <header class="topbar">
@@ -18,7 +18,7 @@
       <a href="../hex/">U.S. hex view</a>
       <a href="../index.html">Facility view</a>
       <div class="institutional-logos" aria-label="University of Virginia National Security Institute and Special Competitive Studies Project"><img src="../assets/uva-nsi-logo.png" alt="University of Virginia National Security Institute"><img src="../assets/scsp-logo.webp" alt="Special Competitive Studies Project"></div>
-      <div class="snapshot"><span>Snapshot</span><strong>28 Sep 2026</strong></div>
+      <div class="snapshot"><span>Snapshot</span><strong>8 Oct 2026</strong></div>
     </div>
   </header>
 
@@ -32,6 +32,14 @@
       <label class="control"><span>Outcome</span><select id="outcomeSelect" aria-describedby="outcomeHelp"></select><small id="outcomeHelp" class="variable-help"></small></label>
       <label class="control"><span>Comparison variable</span><select id="compareSelect" aria-describedby="compareHelp"></select><small id="compareHelp" class="variable-help"></small></label>
       <label class="control county-picker"><span>Inspect a county or city</span><select id="countySelect"><option value="">Select a geography</option></select></label>
+
+      <section class="timeline-control" aria-labelledby="timelineTitle">
+        <div class="timeline-heading"><div><span class="eyebrow">Timeline</span><h3 id="timelineTitle">Cumulative through <output id="timelineYearLabel" for="timelineRange">—</output></h3></div><button id="timelinePlay" class="timeline-play" type="button">Play</button></div>
+        <label><span>Timeline basis</span><select id="timelineBasis"><option value="inventory">Added to inventory</option><option value="online">Reported/expected online</option></select></label>
+        <input id="timelineRange" type="range" step="1" aria-label="Timeline year">
+        <div class="timeline-scale"><span id="timelineMin">—</span><span id="timelineMax">—</span></div>
+        <p id="timelineCoverage"></p>
+      </section>
 
       <fieldset class="control display-control"><legend>Map display</legend><div class="segmented">
         <button type="button" class="display-button active" data-display="outcome">Outcome</button>
@@ -83,7 +91,7 @@
       <div class="guide-scroll">
         <div class="guide-intro">
           <p>Every map value represents one Virginia county or independent city. Point and line features are aggregated inside boundaries; water, hazard, business, and interconnection-queue measures are native county attributes.</p>
-          <dl><div><dt>Geography</dt><dd>133 county equivalents</dd></div><div><dt>Projection</dt><dd>North America Albers Equal Area</dd></div><div><dt>Snapshot</dt><dd>28 September 2026</dd></div></dl>
+          <dl><div><dt>Geography</dt><dd>133 county equivalents</dd></div><div><dt>Projection</dt><dd>North America Albers Equal Area</dd></div><div><dt>Snapshot</dt><dd>8 October 2026</dd></div></dl>
         </div>
         <div class="policy-context"><span class="eyebrow">Statewide legislation context</span><p id="policySummary"></p><small>These values are not comparison variables because every Virginia county would receive the same value.</small></div>
         <nav id="guideNav" class="guide-nav" aria-label="Measure groups"></nav>
@@ -103,7 +111,7 @@
     </section>
   </div>
 
-  <script src="county-data.js?v=1.3"></script>
-  <script src="app.js?v=1.2"></script>
+  <script src="county-data.js?v=1.4"></script>
+  <script src="app.js?v=1.3"></script>
 </body>
 </html>

@@ -13,7 +13,8 @@
     "metricOccupied","metricMoran","metricSpatial","mapTitle","mapShell","map","mapViewport","countyLayer",
     "facilityLayer","tooltip","legend","zoomOut","zoomReset","zoomIn","scatterplot","scatterTitle","pearsonStat",
     "interpretTitle","interpretText","cellArea","pairCount","detailPanel","resetButton","outcomeHelp","compareHelp",
-    "guideButton","guideModal","guideClose","guideNav","guideContent","policySummary"
+    "guideButton","guideModal","guideClose","guideNav","guideContent","policySummary","timelineBasis","timelineRange",
+    "timelineYearLabel","timelineMin","timelineMax","timelineCoverage","timelinePlay"
   ].map(id => [id, document.getElementById(id)]));
 
   let outcome = "facilityCount";
@@ -24,6 +25,52 @@
   let dragging = false;
   let dragStart = null;
   let stats = {};
+  let visibleFacilities = facilities;
+  let timelineMode = "inventory";
+  let timelineYear = 0;
+  let timelineTimer = null;
+
+  function facilityTimelineYear(f, mode=timelineMode) {
+    if(mode==="online")return Number.isInteger(f.onlineYear)?f.onlineYear:null;
+    const match=String(f.dateCreated||"").match(/^(\d{4})/);
+    return match?Number(match[1]):null;
+  }
+  function timelineBounds(mode=timelineMode) {
+    const years=facilities.map(f=>facilityTimelineYear(f,mode)).filter(Number.isInteger);
+    return {min:Math.min(...years),max:Math.max(...years),dated:years.length,undated:facilities.length-years.length};
+  }
+  function matchesTimeline(f) {
+    const year=facilityTimelineYear(f);
+    if(Number.isInteger(year))return year<=timelineYear;
+    return timelineMode==="inventory"&&timelineYear===timelineBounds().max;
+  }
+  function stopTimeline(){if(timelineTimer)clearInterval(timelineTimer);timelineTimer=null;els.timelinePlay.textContent="Play";}
+  function renderTimelineCoverage(){
+    const bounds=timelineBounds(),shown=facilities.filter(matchesTimeline).length;
+    els.timelineYearLabel.textContent=timelineYear;
+    els.timelineRange.setAttribute("aria-valuetext",`Cumulative through ${timelineYear}`);
+    els.timelineCoverage.textContent=timelineMode==="inventory"
+      ? `${fmt.format(shown)} Virginia records shown. ${fmt.format(bounds.dated)} have an inventory-added year; status categories are the current snapshot.`
+      : `${fmt.format(shown)} of ${fmt.format(bounds.dated)} Virginia records with a reported or expected online year are shown. ${fmt.format(bounds.undated)} undated records are omitted; dates are not verified openings.`;
+  }
+  function configureTimeline(resetToMax=false){
+    const bounds=timelineBounds();
+    if(resetToMax||timelineYear<bounds.min||timelineYear>bounds.max)timelineYear=bounds.max;
+    els.timelineRange.min=bounds.min;els.timelineRange.max=bounds.max;els.timelineRange.value=timelineYear;
+    els.timelineMin.textContent=bounds.min;els.timelineMax.textContent=bounds.max;renderTimelineCoverage();
+  }
+  function reaggregateFacilities(){
+    visibleFacilities=facilities.filter(matchesTimeline);
+    cells.forEach(c=>{c.facilityCount=0;c.reportedMw=0;c.knownMwCount=0;c.operatingCount=0;c.pipelineCount=0;c.directOppositionCount=0;});
+    visibleFacilities.forEach(f=>{const c=byId.get(f.countyId);if(!c)return;c.facilityCount+=1;if(Number.isFinite(f.mw)){c.reportedMw+=f.mw;c.knownMwCount+=1;}if(f.phase==="Operating")c.operatingCount+=1;if(f.activity==="Active pipeline")c.pipelineCount+=1;if(f.directOpposition===1)c.directOppositionCount+=1;});
+  }
+  function playTimeline(){
+    if(timelineTimer){stopTimeline();return;}
+    const bounds=timelineBounds();
+    if(timelineYear>=bounds.max)timelineYear=bounds.min;
+    els.timelineRange.value=timelineYear;renderTimelineCoverage();update();els.timelinePlay.textContent="Pause";
+    timelineTimer=setInterval(()=>{if(timelineYear>=bounds.max){stopTimeline();return;}timelineYear+=1;els.timelineRange.value=timelineYear;renderTimelineCoverage();update();},900);
+  }
 
   function escapeHtml(input) { return String(input ?? "").replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch])); }
   function number(value, unit="") { return Number.isFinite(value) ? `${fmt.format(value)}${unit ? ` ${unit}` : ""}` : "Unknown"; }
@@ -39,6 +86,7 @@
   cells.slice().sort((a,b)=>a.countyName.localeCompare(b.countyName)).forEach(c => els.countySelect.insertAdjacentHTML("beforeend", `<option value="${c.id}">${escapeHtml(c.countyName)}</option>`));
   els.cellArea.textContent = fmt.format(meta.countyCount);
   els.policySummary.textContent = `${fmt.format(meta.policy.totalBills)} tracked data-center bills, ${fmt.format(meta.policy.billsPassed)} passed bills, ${meta.policy.incentive === 1 ? "a dedicated incentive" : "no dedicated incentive"}, ${meta.policy.electricityTax === 1 ? "an electricity-tax incentive" : "no electricity-tax incentive"}, and ${fmt.format(meta.policy.moratoriumRecords)} moratorium-tracker record.`;
+  configureTimeline(true);
 
   function groupId(group) { return `guide-${group.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`; }
   function renderGuide() {
@@ -135,7 +183,7 @@
       path.addEventListener("click", e => { e.stopPropagation(); selectCounty(path.dataset.id); });
       path.addEventListener("keydown", e => { if(e.key==="Enter"||e.key===" "){e.preventDefault();selectCounty(path.dataset.id);} });
     });
-    els.facilityLayer.innerHTML = els.pointToggle.checked ? facilities.map(f => `<circle class="facility-point" cx="${f.x}" cy="${f.y}" r="2.2" data-county="${f.countyId}"><title>${escapeHtml(f.name)} · ${escapeHtml(f.phase || "Status unknown")}${Number.isFinite(f.mw) ? ` · ${number(f.mw,"MW")}` : ""}</title></circle>`).join("") : "";
+    els.facilityLayer.innerHTML = els.pointToggle.checked ? visibleFacilities.map(f => `<circle class="facility-point" cx="${f.x}" cy="${f.y}" r="2.2" data-county="${f.countyId}"><title>${escapeHtml(f.name)} · ${escapeHtml(f.phase || "Status unknown")}${Number.isFinite(f.mw) ? ` · ${number(f.mw,"MW")}` : ""}</title></circle>`).join("") : "";
     els.facilityLayer.querySelectorAll(".facility-point").forEach(point => point.addEventListener("click", e => { e.stopPropagation(); selectCounty(point.dataset.county); }));
     renderLegend(key, breaks);
   }
@@ -195,7 +243,7 @@
     els.detailPanel.innerHTML=`<div class="detail-content"><span class="eyebrow">Virginia county equivalent</span><h2>${escapeHtml(c.countyName)}</h2><p class="detail-location">FIPS ${escapeHtml(c.id)}</p><span class="detail-badge">${number(c.landAreaSqKm,"km²")}</span>${section("Selected analysis",[item(ov.label,number(c[outcome],ov.unit)),item(cv.label,number(c[comparison],cv.unit)),item("Adjacent geographies",fmt.format(c.neighbors.length))])}${section("Data centers",[item("Facilities",number(c.facilityCount)),item("Reported MW",number(c.reportedMw,"MW")),item("Known MW records",`${c.knownMwCount} of ${c.facilityCount}`),item("Operating",number(c.operatingCount)),item("Active pipeline",number(c.pipelineCount)),item("Direct opposition",number(c.directOppositionCount))])}${section("Power",[item("Operating generation",number(c.plantOperatingMw,"MW")),item("Power plants",number(c.plantCount)),item("≥200 kV lines",number(c.hvLineKm,"km")),item("Active queue",number(c.queueActiveMw,"MW"))])}${section("Resources and opposition",[item("Water scarcity",number(c.waterFactor)),item("Water withdrawal",number(c.waterWithdrawalMgd,"Mgal/day")),item("Drought risk",number(c.droughtScore)),item("Heat-wave risk",number(c.heatScore)),item("Data-processing establishments",number(c.cbpEstablishments)),item("Local actions",number(c.localActionCount))])}<section class="detail-section"><h3>Adjacent geographies</h3><p class="neighbor-list">${escapeHtml(neighborNames)}</p></section></div>`;
     els.detailPanel.classList.add("open"); renderMap(); renderScatter();
   }
-  function update() { renderSummary(); renderMap(); renderScatter(); }
+  function update() { reaggregateFacilities(); renderSummary(); renderMap(); renderScatter(); if(selectedId)selectCounty(selectedId); }
   function updateTransform(){els.mapViewport.setAttribute("transform",`translate(${transform.x} ${transform.y}) scale(${transform.scale})`);}
   function zoom(factor,cx=500,cy=300){const old=transform.scale,next=Math.max(1,Math.min(8,old*factor));transform.x=cx-(cx-transform.x)*(next/old);transform.y=cy-(cy-transform.y)*(next/old);transform.scale=next;updateTransform();}
   function resetView(){transform={x:0,y:0,scale:1};updateTransform();}
@@ -210,8 +258,11 @@
   els.compareSelect.addEventListener("change",()=>{comparison=els.compareSelect.value;update();});
   els.countySelect.addEventListener("change",()=>{if(els.countySelect.value)selectCounty(els.countySelect.value);});
   els.pointToggle.addEventListener("change",renderMap);
+  els.timelineBasis.addEventListener("change",()=>{stopTimeline();timelineMode=els.timelineBasis.value;configureTimeline(true);update();});
+  els.timelineRange.addEventListener("input",()=>{stopTimeline();timelineYear=Number(els.timelineRange.value);renderTimelineCoverage();update();});
+  els.timelinePlay.addEventListener("click",playTimeline);
   document.querySelectorAll(".display-button").forEach(b=>b.addEventListener("click",()=>{display=b.dataset.display;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x===b));update();}));
-  els.resetButton.addEventListener("click",()=>{outcome="facilityCount";comparison="hvLineKm";display="outcome";els.outcomeSelect.value=outcome;els.compareSelect.value=comparison;els.countySelect.value="";els.pointToggle.checked=false;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display==="outcome"));selectedId=null;els.detailPanel.classList.remove("open");els.detailPanel.innerHTML='<div class="detail-empty"><span class="detail-hex county-detail-mark"></span><h2>Select a county</h2><p>Choose a county or independent city to inspect its data centers, power context, resources, and neighboring geographies.</p></div>';resetView();update();});
+  els.resetButton.addEventListener("click",()=>{stopTimeline();outcome="facilityCount";comparison="hvLineKm";display="outcome";els.outcomeSelect.value=outcome;els.compareSelect.value=comparison;els.countySelect.value="";els.pointToggle.checked=false;timelineMode="inventory";els.timelineBasis.value=timelineMode;configureTimeline(true);document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display==="outcome"));selectedId=null;els.detailPanel.classList.remove("open");els.detailPanel.innerHTML='<div class="detail-empty"><span class="detail-hex county-detail-mark"></span><h2>Select a county</h2><p>Choose a county or independent city to inspect its data centers, power context, resources, and neighboring geographies.</p></div>';resetView();update();});
   els.exportButton.addEventListener("click",exportCsv); els.zoomIn.addEventListener("click",()=>zoom(1.35));els.zoomOut.addEventListener("click",()=>zoom(1/1.35));els.zoomReset.addEventListener("click",resetView);
   els.guideButton.addEventListener("click",openGuide); els.guideClose.addEventListener("click",closeGuide);
   els.guideModal.addEventListener("click",event=>{if(event.target===els.guideModal)closeGuide();});

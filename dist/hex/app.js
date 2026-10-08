@@ -25,7 +25,8 @@
     "hexLayer","facilityLayer","outlineLayer","tooltip","legend","zoomOut","zoomReset","zoomIn","summaryTitle","plainSummary",
     "interpretTitle","interpretText","cellArea","pairCount","detailPanel","resetButton","outcomeHelp","compareHelp",
     "guideButton","guideModal","guideClose","guideNav","guideContent","statusChecks","activityChecks","capacityChecks","powerChecks",
-    "statusSelection","activitySelection","capacitySelection","powerSelection"
+    "statusSelection","activitySelection","capacitySelection","powerSelection","timelineBasis","timelineRange",
+    "timelineYearLabel","timelineMin","timelineMax","timelineCoverage","timelinePlay"
   ].map(id => [id, document.getElementById(id)]));
   let outcome = "facilityCount";
   let comparison = "hvLineKm";
@@ -37,6 +38,47 @@
   let dragging = false;
   let dragStart = null;
   let stats = {};
+  let timelineMode = "inventory";
+  let timelineYear = 0;
+  let timelineTimer = null;
+
+  function facilityTimelineYear(f, mode=timelineMode) {
+    if (mode === "online") return Number.isInteger(f.onlineYear) ? f.onlineYear : null;
+    const match=String(f.dateCreated||"").match(/^(\d{4})/);
+    return match ? Number(match[1]) : null;
+  }
+  function timelineBounds(mode=timelineMode) {
+    const years=allFacilities.map(f=>facilityTimelineYear(f,mode)).filter(Number.isInteger);
+    return {min:Math.min(...years),max:Math.max(...years),dated:years.length,undated:allFacilities.length-years.length};
+  }
+  function matchesTimeline(f) {
+    const year=facilityTimelineYear(f);
+    if(Number.isInteger(year))return year<=timelineYear;
+    return timelineMode==="inventory"&&timelineYear===timelineBounds().max;
+  }
+  function stopTimeline(){if(timelineTimer)clearInterval(timelineTimer);timelineTimer=null;els.timelinePlay.textContent="Play";}
+  function renderTimelineCoverage(){
+    const bounds=timelineBounds(),shown=allFacilities.filter(matchesTimeline).length;
+    els.timelineYearLabel.textContent=timelineYear;
+    els.timelineRange.setAttribute("aria-valuetext",`Cumulative through ${timelineYear}`);
+    els.timelineCoverage.textContent=timelineMode==="inventory"
+      ? `${fmt.format(shown)} records in the timeline. ${fmt.format(bounds.dated)} have an inventory-added year; ${fmt.format(bounds.undated)} undated records appear only at the latest year. Status categories are the current snapshot.`
+      : `${fmt.format(shown)} of ${fmt.format(bounds.dated)} records with a reported or expected online year are in the timeline. ${fmt.format(bounds.undated)} undated records are omitted; dates are not verified openings.`;
+  }
+  function configureTimeline(resetToMax=false){
+    const bounds=timelineBounds();
+    if(resetToMax||timelineYear<bounds.min||timelineYear>bounds.max)timelineYear=bounds.max;
+    els.timelineRange.min=bounds.min;els.timelineRange.max=bounds.max;els.timelineRange.value=timelineYear;
+    els.timelineMin.textContent=bounds.min;els.timelineMax.textContent=bounds.max;renderTimelineCoverage();
+  }
+  function playTimeline(){
+    if(timelineTimer){stopTimeline();return;}
+    const bounds=timelineBounds();
+    if(timelineYear>=bounds.max)timelineYear=bounds.min;
+    els.timelineRange.value=timelineYear;renderTimelineCoverage();update({reaggregate:true});
+    els.timelinePlay.textContent="Pause";
+    timelineTimer=setInterval(()=>{if(timelineYear>=bounds.max){stopTimeline();return;}timelineYear+=1;els.timelineRange.value=timelineYear;renderTimelineCoverage();update({reaggregate:true});},900);
+  }
 
   function escapeHtml(input) { return String(input ?? "").replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch])); }
   function number(value, unit="") { return Number.isFinite(value) ? `${unit==="¢/kWh"?priceFmt.format(value):fmt.format(value)}${unit ? ` ${unit}` : ""}` : "Unknown"; }
@@ -73,9 +115,10 @@
     filterGroups[name].container.querySelectorAll("input").forEach(input=>{input.checked=wanted.has(input.value);});
   }
   function currentFacilityFilters() {
-    return { statuses:selectedValues("status"), activities:selectedValues("activity"), capacities:selectedValues("capacity"), powerSources:selectedValues("power") };
+    return { statuses:selectedValues("status"), activities:selectedValues("activity"), capacities:selectedValues("capacity"), powerSources:selectedValues("power"), timelineBasis:timelineMode, throughYear:timelineYear };
   }
   function matchesFacilityFilters(f,q,omitGroup=null) {
+    if(!matchesTimeline(f)) return false;
     if (omitGroup!=="status"&&!q.statuses.includes(filterGroupDefs.status.key(f))) return false;
     if (omitGroup!=="activity"&&!q.activities.includes(filterGroupDefs.activity.key(f))) return false;
     if (omitGroup!=="capacity"&&!q.capacities.includes(filterGroupDefs.capacity.key(f))) return false;
@@ -107,6 +150,7 @@
     });
   }
   initializeFilterGroups();
+  configureTimeline(true);
 
   function groupId(group) { return `guide-${group.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`; }
   function renderGuide() {
@@ -306,13 +350,16 @@
   els.outcomeSelect.addEventListener("change",()=>{outcome=els.outcomeSelect.value;update();});
   els.compareSelect.addEventListener("change",()=>{comparison=els.compareSelect.value;update();});
   els.stateFilter.addEventListener("change",update); els.landFilter.addEventListener("change",update); els.pointToggle.addEventListener("change",renderMap);
+  els.timelineBasis.addEventListener("change",()=>{stopTimeline();timelineMode=els.timelineBasis.value;configureTimeline(true);update({reaggregate:true});});
+  els.timelineRange.addEventListener("input",()=>{stopTimeline();timelineYear=Number(els.timelineRange.value);renderTimelineCoverage();update({reaggregate:true});});
+  els.timelinePlay.addEventListener("click",playTimeline);
   document.querySelectorAll("[data-filter-action]").forEach(button=>button.addEventListener("click",()=>{
     const group=filterGroups[button.dataset.filterGroup];
     setGroupSelection(button.dataset.filterGroup,button.dataset.filterAction==="all"?group.categories.map(([label])=>label):[]);
     update({reaggregate:true});
   }));
   document.querySelectorAll(".display-button").forEach(b=>b.addEventListener("click",()=>{display=b.dataset.display;document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x===b));update();}));
-  els.resetButton.addEventListener("click",()=>{outcome="facilityCount";comparison="hvLineKm";display="outcome";els.outcomeSelect.value=outcome;els.compareSelect.value=comparison;els.stateFilter.value="";els.landFilter.value="0";els.pointToggle.checked=false;Object.entries(filterGroups).forEach(([name,group])=>setGroupSelection(name,group.categories.map(([label])=>label)));document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display==="outcome"));selectedId=null;els.detailPanel.classList.remove("open");els.detailPanel.innerHTML='<div class="detail-empty"><span class="detail-hex"></span><h2>Select a hexagon</h2><p>Choose a cell to inspect its outcome, context measures, source geography, and neighbors.</p></div>';resetView();update({reaggregate:true});});
+  els.resetButton.addEventListener("click",()=>{stopTimeline();outcome="facilityCount";comparison="hvLineKm";display="outcome";els.outcomeSelect.value=outcome;els.compareSelect.value=comparison;els.stateFilter.value="";els.landFilter.value="0";els.pointToggle.checked=false;timelineMode="inventory";els.timelineBasis.value=timelineMode;configureTimeline(true);Object.entries(filterGroups).forEach(([name,group])=>setGroupSelection(name,group.categories.map(([label])=>label)));document.querySelectorAll(".display-button").forEach(x=>x.classList.toggle("active",x.dataset.display==="outcome"));selectedId=null;els.detailPanel.classList.remove("open");els.detailPanel.innerHTML='<div class="detail-empty"><span class="detail-hex"></span><h2>Select a hexagon</h2><p>Choose a cell to inspect its outcome, context measures, source geography, and neighbors.</p></div>';resetView();update({reaggregate:true});});
   els.exportButton.addEventListener("click",exportCsv); els.zoomIn.addEventListener("click",()=>zoom(1.35));els.zoomOut.addEventListener("click",()=>zoom(1/1.35));els.zoomReset.addEventListener("click",resetView);
   els.guideButton.addEventListener("click",openGuide); els.guideClose.addEventListener("click",closeGuide);
   els.guideModal.addEventListener("click",event=>{if(event.target===els.guideModal)closeGuide();});
