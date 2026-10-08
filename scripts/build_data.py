@@ -307,7 +307,7 @@ def build():
 
     payload = {
         "meta": {
-            "snapshot": "28 September 2026",
+            "snapshot": "8 October 2026",
             "facilities": len(facilities),
             "powerPlants": len(plants),
             "powerPlantYear": 2024,

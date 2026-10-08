@@ -239,7 +239,7 @@ variables <- list(
   list(
     key="facilityCount", label="Data-center count", group="Data centers", unit="facilities",
     definition="Number of inventoried facility or project point records located inside the hexagon.",
-    source="Layer 08 data_centers table, derived from Data_Centers_Database.xlsx (DB_Output_V2); 1,669 records in the snapshot.",
+    source=sprintf("Layer 08 data_centers table, derived from Data_Centers_Database.xlsx (DB_Output_V2); %s records in the snapshot.", format(nrow(facilities), big.mark=",")),
     calculation="Point-in-polygon count. Each inventory row contributes one record to one cell.",
     missing="A cell with no matched inventory record is coded 0. Zero means none observed in this inventory, not proof that no facility exists.",
     caution="Records describe facilities or projects, not individual buildings or servers; inventory completeness can vary by place.",
@@ -365,7 +365,7 @@ variables <- list(
   list(
     key="policyBills", label="State data-center bills", group="Legislation", unit="bills",
     definition="Number of tracked state data-center legislative records in the prepared policy dataset.",
-    source="Layer 07 state legislation summary and underlying state_legislation_summary.csv, reviewed 28 September 2026.",
+    source="Layer 07 state legislation summary and underlying state_legislation_summary.csv, reviewed 8 October 2026.",
     calculation="The state total is assigned to each cell by centroid.",
     missing="States with no tracked record are represented by the prepared state total; tracker absence is not proof that no relevant policy exists.",
     caution="A bill count mixes topics and statuses and does not measure policy stringency, enforcement, or project-level applicability.",
@@ -401,7 +401,7 @@ variables <- list(
   list(
     key="directOppositionCount", label="Direct facility opposition", group="Local opposition", unit="facilities",
     definition="Number of facility records with direct project-specific opposition evidence.",
-    source="Layer 08 matched opposition events derived from opposition_events.csv, reviewed 28 September 2026.",
+    source="Layer 08 matched opposition events derived from opposition_events.csv, reviewed 8 October 2026.",
     calculation="Count of facilities where opposition_direct_facility_flag equals 1 within each cell.",
     missing="Facilities without a direct matched record contribute 0; that is unknown/no match, not confirmed absence of opposition.",
     caution="Direct evidence indicates a documented match and does not provide a standardized intensity, duration, or causal effect.",
@@ -411,7 +411,7 @@ variables <- list(
 
 payload <- list(
   meta = list(
-    snapshot = "28 September 2026",
+    snapshot = "8 October 2026",
     crs = "ESRI:102008 / North America Albers Equal Area Conic",
     cellWidthKm = cell_size_km,
     cellAreaSqKm = round(as.numeric(st_area(grid[1, ])) / 1e6, 1),

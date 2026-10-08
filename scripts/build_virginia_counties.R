@@ -18,7 +18,7 @@ county_file <- file.path(root, "Resources", "US Resources Layer", "Layer 06 Land
 actions_file <- file.path(root, "QGIS", "FracTracker_Local_Actions.gpkg")
 
 target_crs <- "ESRI:102008"
-snapshot <- "28 September 2026"
+snapshot <- "8 October 2026"
 
 counties <- st_read(county_file, layer = "queue_counties_2025", quiet = TRUE)
 counties <- counties[substr(as.character(counties$GEOID), 1, 2) == "51", ]
@@ -277,7 +277,7 @@ set_variable_text("heatScore", "calculation", "The published FEMA NRI county sco
 set_variable_text("heatScore", "basis", "County FEMA NRI heat-wave-risk score")
 set_variable_text("cbpEstablishments", "calculation", "The published 2023 County Business Patterns county count is used directly.")
 set_variable_text("cbpEstablishments", "basis", "County CBP 2023 establishment count")
-set_variable_text("facilityCount", "source", sprintf("Layer 08 data_centers table derived from Data_Centers_Database.xlsx (DB_Output_V2); %d of 1,669 national records fall within Virginia county boundaries.", nrow(facility_join)))
+set_variable_text("facilityCount", "source", sprintf("Layer 08 data_centers table derived from Data_Centers_Database.xlsx (DB_Output_V2); %d of %s national records fall within Virginia county boundaries.", nrow(facility_join), format(nrow(facilities), big.mark=",")))
 set_variable_text("reportedMw", "source", sprintf("Layer 08 field mw_mid for the %d Virginia facility records; values originate in the project database.", nrow(facility_join)))
 set_variable_text("operatingCount", "source", sprintf("Layer 08 project_phase field for the %d Virginia facility records.", nrow(facility_join)))
 set_variable_text("pipelineCount", "source", sprintf("Layer 08 activity_group derived from project_phase for the %d Virginia facility records.", nrow(facility_join)))
