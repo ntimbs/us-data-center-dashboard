@@ -104,7 +104,7 @@
   };
 
   const els = Object.fromEntries([
-    "searchInput", "stateFilter", "incentiveFilter", "oppositionFilter", "moratoriumFilter",
+    "searchInput", "stateFilter",
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "transmissionLayer", "plantLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
@@ -423,7 +423,6 @@
   function currentFilters() {
     return {
       query: els.searchInput.value.trim().toLowerCase(), state: els.stateFilter.value,
-      incentive: els.incentiveFilter.checked, opposition: els.oppositionFilter.checked, moratorium: els.moratoriumFilter.checked,
       statuses: selectedValues("status"), activities: selectedValues("activity"), capacities: selectedValues("capacity"),
       powerSources: selectedValues("power"), timelineBasis: timelineMode, throughYear: timelineYear
     };
@@ -433,9 +432,6 @@
     const haystack = [f.name, f.operator, f.city, f.county, f.state].filter(Boolean).join(" ").toLowerCase();
     if (q.query && !haystack.includes(q.query)) return false;
     if (q.state && f.state !== q.state) return false;
-    if (q.incentive && f.incentive !== 1) return false;
-    if (q.opposition && f.directOpposition !== 1) return false;
-    if (q.moratorium && !(f.moratoriumCount > 0)) return false;
     if (!matchesTimeline(f)) return false;
     if (omitGroup !== "status" && !q.statuses.includes(filterGroupDefs.status.key(f))) return false;
     if (omitGroup !== "activity" && !q.activities.includes(filterGroupDefs.activity.key(f))) return false;
@@ -760,7 +756,7 @@
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
   }
 
-  [els.searchInput, els.stateFilter, els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
+  [els.searchInput, els.stateFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
   els.timelineBasis.addEventListener("change", () => { stopTimeline(); timelineMode = els.timelineBasis.value; configureTimeline(true); applyFilters(); });
   els.timelineRange.addEventListener("input", () => { stopTimeline(); timelineYear = Number(els.timelineRange.value); renderTimelineCoverage(); applyFilters(); });
   els.timelinePlay.addEventListener("click", playTimeline);
@@ -772,7 +768,6 @@
   els.resetFilters.addEventListener("click", () => {
     stopTimeline();
     [els.searchInput, els.stateFilter].forEach(el => el.value = "");
-    [els.incentiveFilter, els.oppositionFilter, els.moratoriumFilter].forEach(el => el.checked = false);
     Object.keys(filterGroups).forEach(name => setGroupSelection(name, filterGroups[name].categories.map(([label]) => label)));
     timelineMode = "inventory";
     els.timelineBasis.value = timelineMode;

@@ -6,7 +6,7 @@
   <meta name="description" content="The U.S. Data Center Ecosystem Tracker maps national facilities and their power, resource, policy, and community context.">
   <title>U.S. Data Center Ecosystem Tracker | National Facility View</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M14 18h36v10H14zm0 18h36v10H14z' fill='%2314b8a6'/%3E%3Ccircle cx='44' cy='23' r='2' fill='white'/%3E%3Ccircle cx='44' cy='41' r='2' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=2.5">
+  <link rel="stylesheet" href="styles.css?v=2.6">
 </head>
 <body>
   <header class="topbar">
@@ -67,13 +67,6 @@
         <div class="multi-actions"><button type="button" data-filter-group="power" data-filter-action="all">Select all</button><button type="button" data-filter-group="power" data-filter-action="none">Clear</button></div>
         <div id="powerChecks" class="checkbox-options" role="group" aria-label="Reported power source"></div>
       </details>
-
-      <fieldset class="flag-filters">
-        <legend>Evidence filters</legend>
-        <label><input id="incentiveFilter" type="checkbox"><span>State incentive</span></label>
-        <label><input id="oppositionFilter" type="checkbox"><span>Direct opposition</span></label>
-        <label><input id="moratoriumFilter" type="checkbox"><span>Moratorium tracker</span></label>
-      </fieldset>
 
       <div class="selection-summary">
         <span>Current selection</span>
@@ -169,6 +162,6 @@
   </main>
 
   <script src="dashboard-data.js?v=1.8"></script>
-  <script src="app.js?v=2.3"></script>
+  <script src="app.js?v=2.4"></script>
 </body>
 </html>

@@ -77,10 +77,6 @@ h2 { margin: 3px 0 0; font-size: 1rem; line-height: 1.25; }
 .choice-dot { width:8px; height:8px; border-radius:50%; background:var(--choice-color,#64748b); }
 .choice-label { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .choice-count { color:var(--subtle); font-size:.64rem; font-variant-numeric:tabular-nums; }
-.flag-filters { display: grid; gap: 9px; margin: 20px 0 0; padding: 14px 0 0; border: 0; border-top: 1px solid var(--line-soft); }
-.flag-filters legend { padding: 0 0 10px; }
-.flag-filters label { display: flex; gap: 9px; align-items: center; color: #c7d3dc; font-size: .82rem; }
-.flag-filters input { accent-color: var(--teal); width: 16px; height: 16px; }
 .selection-summary { display: grid; gap: 7px; margin-top: 22px; padding: 15px; border: 1px solid #1d4550; border-radius: 9px; background: linear-gradient(145deg, rgba(21,77,82,.32), rgba(9,25,37,.55)); }
 .selection-summary span { color: var(--muted); font-size: .72rem; }
 .selection-summary strong { font-size: 1.05rem; }
