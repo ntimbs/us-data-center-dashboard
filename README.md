@@ -9,7 +9,7 @@ Designed to be a living and customizable tool ,the U.S. Data Center Ecosystem Tr
 
 ## Dashboard views
 
-- **[National facility view](https://ntimbs.github.io/us-data-center-dashboard/):** facility status, reported capacity, power source, eGRID power plants by generation source, optional 200+ kV transmission lines, 2024 state industrial electricity prices, grid context, resources, legislation, local opposition, and a cumulative facility timeline.
+- **[National facility view](https://ntimbs.github.io/us-data-center-dashboard/):** facility status, reported capacity, power source, eGRID power plants by generation source, optional 200+ kV transmission lines, 2024 state industrial electricity prices, separate AWARE water-scarcity and FEMA hazard themes, legislation, local opposition, and a cumulative facility timeline.
 - **[U.S. hexagon spatial explorer](https://ntimbs.github.io/us-data-center-dashboard/hex/):** equal-area cells for comparing data-center activity with contextual measures—including state industrial electricity prices—and spatial statistics, with facility measures re-aggregated through the selected timeline year.
 - **[Virginia county explorer](https://ntimbs.github.io/us-data-center-dashboard/virginia/):** county-level data-center and contextual measures for Virginia, with a cumulative facility timeline.
 

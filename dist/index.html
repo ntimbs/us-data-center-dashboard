@@ -6,7 +6,7 @@
   <meta name="description" content="The U.S. Data Center Ecosystem Tracker maps national facilities and their power, resource, policy, and community context.">
   <title>U.S. Data Center Ecosystem Tracker | National Facility View</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23091420'/%3E%3Cpath d='M14 18h36v10H14zm0 18h36v10H14z' fill='%2314b8a6'/%3E%3Ccircle cx='44' cy='23' r='2' fill='white'/%3E%3Ccircle cx='44' cy='41' r='2' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=2.6">
+  <link rel="stylesheet" href="styles.css?v=2.7">
 </head>
 <body>
   <header class="topbar">
@@ -14,7 +14,7 @@
       <div class="brand-mark" aria-hidden="true"><span></span><span></span></div>
       <div>
         <h1>U.S. Data Center Ecosystem Tracker</h1>
-        <p>National facility view · grid, resource, policy, and opposition context</p>
+        <p>National facility view · grid, water, hazard, policy, and opposition context</p>
       </div>
     </div>
     <div class="header-actions"><a href="hex/">U.S. hex view</a><a href="virginia/">Virginia counties</a><div class="institutional-logos" aria-label="University of Virginia National Security Institute and Special Competitive Studies Project"><img src="assets/uva-nsi-logo.png" alt="University of Virginia National Security Institute"><img src="assets/scsp-logo.webp" alt="Special Competitive Studies Project"></div><div class="snapshot"><span>Snapshot</span><strong>8 Oct 2026</strong></div></div>
@@ -97,6 +97,7 @@
             <button class="view-button" data-view="generation" type="button">Generation</button>
             <button class="view-button" data-view="cost" type="button">Electricity cost</button>
             <button class="view-button" data-view="water" type="button">Water</button>
+            <button class="view-button" data-view="hazard" type="button">Hazard</button>
             <button class="view-button" data-view="policy" type="button">Policy</button>
             <button class="view-button" data-view="opposition" type="button">Opposition</button>
           </div>
@@ -118,6 +119,16 @@
             </select>
             <label class="transmission-toggle"><input id="transmissionToggle" type="checkbox"> Show 200+ kV transmission lines</label>
             <span id="transmissionStatus" class="transmission-status" aria-live="polite"></span>
+          </div>
+          <div id="hazardControls" class="hazard-controls" hidden>
+            <label for="hazardMeasure">FEMA hazard measure</label>
+            <select id="hazardMeasure">
+              <option value="risk">Overall hazard</option>
+              <option value="drought">Drought</option>
+              <option value="flood">Riverine flood</option>
+              <option value="heat">Heat wave</option>
+              <option value="wildfire">Wildfire</option>
+            </select>
           </div>
           <div class="map-actions">
             <button id="zoomOut" type="button" aria-label="Zoom out">−</button>
@@ -162,6 +173,6 @@
   </main>
 
   <script src="dashboard-data.js?v=1.8"></script>
-  <script src="app.js?v=2.4"></script>
+  <script src="app.js?v=2.5"></script>
 </body>
 </html>

@@ -25,6 +25,18 @@
     { label: "9–11.99 ¢/kWh", min: 9, max: 11.99 },
     { label: "12+ ¢/kWh", min: 12, max: Infinity }
   ];
+  const hazardMeasures = {
+    risk: { label: "Overall hazard", field: "risk" },
+    drought: { label: "Drought", field: "drought" },
+    flood: { label: "Riverine flood", field: "flood" },
+    heat: { label: "Heat wave", field: "heat" },
+    wildfire: { label: "Wildfire", field: "wildfire" }
+  };
+  const hazardCategories = [
+    ["Very Low", "#2dd4bf"], ["Relatively Low", "#84cc16"], ["Relatively Moderate", "#f5b942"],
+    ["Relatively High", "#fb923c"], ["Very High", "#e11d48"], ["No Rating", "#64748b"],
+    ["Insufficient Data", "#475569"], ["Unknown", "#334155"]
+  ];
 
   const config = {
     status: {
@@ -75,10 +87,17 @@
     },
     water: {
       title: "County water-scarcity screening",
-      insight: ["Water context belongs at several scales", "The AWARE factor, historical withdrawals, hazard ratings, and cooling technology remain separate. County measures do not establish water rights or site-level availability."],
-      source: "AWARE annual-average water-scarcity factor and U.S. Geological Survey county water-use data, with FEMA National Risk Index hazard context.",
+      insight: ["Water scarcity is screening context", "The AWARE annual-average factor compares relative county water scarcity. It does not measure facility withdrawals, water rights, utility capacity, treatment capacity, cooling technology, or future supply."],
+      source: "AWARE annual-average water-scarcity factor, joined to facilities by five-digit county FIPS.",
       categories: [["Under 0.5", "#2dd4bf"], ["0.5–0.99", "#84cc16"], ["1–4.99", "#f5b942"], ["5 or more", "#fb7185"], ["Unknown", "#64748b"]],
       key: f => f.waterClass || "Unknown"
+    },
+    hazard: {
+      title: "FEMA hazard screening",
+      insight: ["Hazard ratings are county-level context", "Choose an overall or hazard-specific FEMA National Risk Index rating. These ratings support broad screening; they are not parcel-level exposure, forecasts, engineering assessments, or estimates of facility resilience."],
+      source: "FEMA National Risk Index county risk ratings.",
+      categories: hazardCategories,
+      key: f => f[hazardMeasures[currentHazardMeasure].field] || "Unknown"
     },
     policy: {
       title: "Tracked state legislation",
@@ -108,7 +127,7 @@
     "statusChecks", "activityChecks", "capacityChecks", "powerChecks", "statusSelection", "activitySelection", "capacitySelection", "powerSelection",
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "transmissionLayer", "plantLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
-    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyTopic", "policyStatusGroup", "generationControls", "generationSource", "transmissionToggle", "transmissionStatus",
+    "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyTopic", "policyStatusGroup", "generationControls", "generationSource", "transmissionToggle", "transmissionStatus", "hazardControls", "hazardMeasure",
     "profileEyebrow", "profileTitle", "timelineBasis", "timelineRange", "timelineYearLabel", "timelineMin", "timelineMax", "timelineCoverage", "timelinePlay"
   ].map(id => [id, document.getElementById(id)]));
 
@@ -119,6 +138,7 @@
   let selectedStateAbbr = null;
   let policyTopic = "";
   let policyStatuses = new Set(["Active", "Pass", "Fail", "Veto"]);
+  let currentHazardMeasure = "risk";
   let transform = { x: 0, y: 0, scale: 1 };
   let dragging = false;
   let dragStart = null;
@@ -278,6 +298,8 @@
     const index = costBins.findIndex(bin => price >= bin.min && price <= bin.max);
     return costColors[Math.max(0, index)];
   }
+  function activeHazard() { return hazardMeasures[currentHazardMeasure]; }
+  function facilityHazard(f) { return f[activeHazard().field] || "Unknown"; }
   function stateIsInteractive() { return currentView === "policy" || currentView === "cost"; }
 
   const filterGroups = {};
@@ -398,7 +420,10 @@
   }
 
   function showTooltip(event, f) {
-    els.tooltip.innerHTML = `<strong>${escapeHtml(f.name)}</strong><span>${escapeHtml([f.city, f.state].filter(Boolean).join(", "))} · ${escapeHtml(f.phase || "Unknown status")} · ${escapeHtml(value(f.mw, " MW"))}</span>`;
+    const resourceContext = currentView === "water"
+      ? ` · Water scarcity: ${value(f.waterClass)} · AWARE: ${value(f.waterFactor)}`
+      : currentView === "hazard" ? ` · ${activeHazard().label}: ${facilityHazard(f)}` : "";
+    els.tooltip.innerHTML = `<strong>${escapeHtml(f.name)}</strong><span>${escapeHtml([f.city, f.state].filter(Boolean).join(", "))} · ${escapeHtml(f.phase || "Unknown status")} · ${escapeHtml(value(f.mw, " MW"))}${escapeHtml(resourceContext)}</span>`;
     els.tooltip.hidden = false;
     positionTooltip(event);
   }
@@ -492,6 +517,12 @@
       const selectedState = stateByAbbr.get(els.stateFilter.value);
       const selectedNote = selectedState && Number.isFinite(electricityPrice(selectedState)) ? ` ${selectedState.name}: ${priceFmt.format(electricityPrice(selectedState))} ¢/kWh.` : "";
       els.coverageLine.textContent = `${fmt.format(available.length)} contiguous states have 2024 industrial-price values.${selectedNote} Alaska and Hawaii are unavailable in this source. State averages do not represent facility-specific tariffs or contracts.`;
+    } else if (currentView === "water") {
+      const available = filtered.filter(f => Number.isFinite(f.waterFactor)).length;
+      els.coverageLine.textContent = `${fmt.format(available)} of ${fmt.format(count)} selected facilities have a county AWARE factor. This is relative scarcity screening, not facility water use or available supply.`;
+    } else if (currentView === "hazard") {
+      const rated = filtered.filter(f => !["Unknown", "No Rating", "Insufficient Data"].includes(facilityHazard(f))).length;
+      els.coverageLine.textContent = `${fmt.format(rated)} of ${fmt.format(count)} selected facilities have a rated ${activeHazard().label.toLowerCase()} category in the FEMA National Risk Index. Ratings are county context, not parcel-level exposure.`;
     } else if (currentView === "policy") {
       const stateCount = states.filter(state => (state.billCount || 0) > 0).length;
       els.coverageLine.textContent = `${fmt.format(stateCount)} states have tracked bills. Topic counts are non-exclusive because one bill may address several policy types; counts measure legislative attention, not stringency.`;
@@ -532,6 +563,18 @@
       els.statusChart.innerHTML = rows.map(([label, count]) => `<div class="bar-row"><span title="${escapeHtml(label)}">${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill policy" style="width:${count/max*100}%"></div></div><strong>${fmt.format(count)}</strong></div>`).join("");
       return;
     }
+    if (currentView === "water" || currentView === "hazard") {
+      const cfg = config[currentView];
+      const counts = {};
+      filtered.forEach(f => { const label = cfg.key(f); counts[label] = (counts[label] || 0) + 1; });
+      const rows = cfg.categories.map(([label, color]) => [label, counts[label] || 0, color]).filter(([, count]) => count > 0).sort((a, b) => b[1] - a[1]);
+      const max = Math.max(...rows.map(([, count]) => count), 1);
+      els.profileEyebrow.textContent = currentView === "water" ? "Water profile" : "Hazard profile";
+      els.profileTitle.textContent = currentView === "water" ? "Water-scarcity distribution" : `${activeHazard().label} distribution`;
+      els.chartTotal.textContent = `${fmt.format(filtered.length)} records`;
+      els.statusChart.innerHTML = rows.length ? rows.map(([label, count, color]) => `<div class="bar-row"><span>${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${count/max*100}%;background:${color}"></div></div><strong>${fmt.format(count)}</strong></div>`).join("") : `<p class="detail-location">No facilities match these filters.</p>`;
+      return;
+    }
     const counts = {};
     filtered.forEach(f => counts[f.phase || "Unknown"] = (counts[f.phase || "Unknown"] || 0) + 1);
     const rows = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
@@ -566,6 +609,9 @@
         ? `<div class="transmission-key"><span class="line-key high"></span> 200–499 kV</div><div class="transmission-key"><span class="line-key extra-high"></span> 500+ kV</div>`
         : "";
       els.legend.innerHTML = cfg.categories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note">${lineKeys}<span class="facility-key"></span> Data centers shown as pale context points.<br>Circle size reflects nameplate capacity.</div>`;
+    } else if (currentView === "hazard") {
+      els.viewTitle.textContent = `${activeHazard().label} rating`;
+      els.legend.innerHTML = cfg.categories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note">FEMA National Risk Index county rating.<br>Select another hazard measure above.</div>`;
     } else {
       els.legend.innerHTML = cfg.categories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("");
     }
@@ -650,7 +696,8 @@
       <span class="phase-pill">${escapeHtml(f.phase || "Unknown status")}</span>
       ${detailSection("Facility", [detailItem("Operator", f.operator), detailItem("Purpose", f.purpose), detailItem("Capacity", f.mw == null ? "Unknown" : `${fmt.format(f.mw)} MW`), detailItem("Capacity class", f.capacity), detailItem("Power source", f.power), detailItem("Reported acreage", f.acres == null ? f.acreageClass : `${fmt.format(f.acres)} acres`), detailItem("Added to inventory", f.dateCreated), detailItem("Reported/expected online", f.onlineYear)])}
       ${detailSection("Power and grid", [detailItem("Candidate utility", f.utility), detailItem("Utility match", f.utilityMatch), detailItem("eGRID subregion", f.subregion), detailItem("State industrial price", statePrice ? `${priceFmt.format(statePrice.industrial)} ¢/kWh (${statePrice.year})` : "Unknown"), detailItem("200+ kV line", f.txKm == null ? "Unknown" : `${fmt.format(f.txKm)} km`), detailItem("Nearest substation", f.substationKm == null ? "Unknown" : `${fmt.format(f.substationKm)} km`), detailItem("Active queue MW", f.queueActiveMw == null ? "Unknown" : `${fmt.format(f.queueActiveMw)} MW`)])}
-      ${detailSection("Resources", [detailItem("Water scarcity", f.waterClass), detailItem("AWARE factor", f.waterFactor), detailItem("Overall hazard", f.risk), detailItem("Drought", f.drought), detailItem("Flood", f.flood), detailItem("Heat", f.heat)])}
+      ${detailSection("Water", [detailItem("Water scarcity", f.waterClass), detailItem("AWARE factor", f.waterFactor)])}
+      ${detailSection("Hazards", [detailItem("Overall hazard", f.risk), detailItem("Drought", f.drought), detailItem("Riverine flood", f.flood), detailItem("Heat wave", f.heat), detailItem("Wildfire", f.wildfire)])}
       ${detailSection("Policy and opposition", [detailItem("Dedicated incentive", f.incentive ? "Yes" : "No"), detailItem("Tracked state bills", f.billCount), detailItem("Moratorium entries", f.moratoriumCount), detailItem("Opposition evidence", f.oppositionClass), detailItem("County events", f.countyEvents), detailItem("Local actions", f.localActions)])}
       ${detailSection("Evidence", [detailItem("Location confidence", f.locationConfidence), detailItem("Inventory source", f.source)])}
     </div>`;
@@ -704,6 +751,7 @@
     document.querySelectorAll(".view-button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
     els.policyControls.hidden = view !== "policy";
     els.generationControls.hidden = view !== "generation";
+    els.hazardControls.hidden = view !== "hazard";
     els.mapShell.classList.toggle("policy-mode", view === "policy");
     els.mapShell.classList.toggle("cost-mode", view === "cost");
     els.mapShell.classList.toggle("generation-mode", view === "generation");
@@ -749,8 +797,8 @@
   function resetView() { transform = { x: 0, y: 0, scale: 1 }; updateTransform(); }
 
   function exportCsv() {
-    const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "date_added_to_inventory", "reported_expected_online_year", "mw_mid", "capacity_class", "power_source", "state_industrial_price_2024_cents_kwh", "water_scarcity", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
-    const rows = filtered.map(f => [f.id, f.name, f.city, f.state, f.county, f.phase, f.dateCreated, f.onlineYear, f.mw, f.capacity, f.power, stateByAbbr.get(f.state)?.electricityPrice?.industrial, f.waterClass, f.incentive, f.moratoriumCount, f.oppositionClass, f.lat, f.lon]);
+    const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "date_added_to_inventory", "reported_expected_online_year", "mw_mid", "capacity_class", "power_source", "state_industrial_price_2024_cents_kwh", "water_scarcity", "aware_factor", "overall_hazard", "drought_hazard", "riverine_flood_hazard", "heat_wave_hazard", "wildfire_hazard", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
+    const rows = filtered.map(f => [f.id, f.name, f.city, f.state, f.county, f.phase, f.dateCreated, f.onlineYear, f.mw, f.capacity, f.power, stateByAbbr.get(f.state)?.electricityPrice?.industrial, f.waterClass, f.waterFactor, f.risk, f.drought, f.flood, f.heat, f.wildfire, f.incentive, f.moratoriumCount, f.oppositionClass, f.lat, f.lon]);
     const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
@@ -790,6 +838,12 @@
   els.generationSource.addEventListener("change", () => {
     if (selectedPlantId && !visiblePowerPlants().some(plant => plant.id === selectedPlantId)) clearSelection();
     renderPlants();
+    renderLegend();
+    renderSummary();
+  });
+  els.hazardMeasure.addEventListener("change", () => {
+    currentHazardMeasure = els.hazardMeasure.value;
+    clearSelection();
     renderLegend();
     renderSummary();
   });
