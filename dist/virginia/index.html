@@ -35,7 +35,7 @@
 
       <section class="timeline-control" aria-labelledby="timelineTitle">
         <div class="timeline-heading"><div><span class="eyebrow">Timeline</span><h3 id="timelineTitle">Cumulative through <output id="timelineYearLabel" for="timelineRange">—</output></h3></div><button id="timelinePlay" class="timeline-play" type="button">Play</button></div>
-        <label><span>Timeline basis</span><select id="timelineBasis"><option value="inventory">Added to inventory</option><option value="online">Reported/expected online</option></select></label>
+        <label><span>Timeline basis</span><select id="timelineBasis"><option value="inventory">Added to inventory</option><option value="online">Reported/expected online + active</option></select></label>
         <input id="timelineRange" type="range" step="1" aria-label="Timeline year">
         <div class="timeline-scale"><span id="timelineMin">—</span><span id="timelineMax">—</span></div>
         <p id="timelineCoverage"></p>
@@ -112,6 +112,6 @@
   </div>
 
   <script src="county-data.js?v=1.4"></script>
-  <script src="app.js?v=1.3"></script>
+  <script src="app.js?v=1.4"></script>
 </body>
 </html>

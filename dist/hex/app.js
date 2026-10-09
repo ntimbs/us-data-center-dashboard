@@ -42,10 +42,19 @@
   let timelineYear = 0;
   let timelineTimer = null;
 
-  function facilityTimelineYear(f, mode=timelineMode) {
-    if (mode === "online") return Number.isInteger(f.onlineYear) ? f.onlineYear : null;
+  function inventoryAddedYear(f) {
     const match=String(f.dateCreated||"").match(/^(\d{4})/);
     return match ? Number(match[1]) : null;
+  }
+  function facilityTimelineYear(f, mode=timelineMode) {
+    const addedYear=inventoryAddedYear(f);
+    if(mode==="online"){
+      const onlineYear=Number.isInteger(f.onlineYear)?f.onlineYear:null;
+      const activeSnapshotYear=["Operating","Expanding"].includes(f.phase)?addedYear:null;
+      if(Number.isInteger(onlineYear)&&Number.isInteger(activeSnapshotYear))return Math.min(onlineYear,activeSnapshotYear);
+      return Number.isInteger(onlineYear)?onlineYear:activeSnapshotYear;
+    }
+    return addedYear;
   }
   function timelineBounds(mode=timelineMode) {
     const years=allFacilities.map(f=>facilityTimelineYear(f,mode)).filter(Number.isInteger);
@@ -63,7 +72,7 @@
     els.timelineRange.setAttribute("aria-valuetext",`Cumulative through ${timelineYear}`);
     els.timelineCoverage.textContent=timelineMode==="inventory"
       ? `${fmt.format(shown)} records in the timeline. ${fmt.format(bounds.dated)} have an inventory-added year; ${fmt.format(bounds.undated)} undated records appear only at the latest year. Status categories are the current snapshot.`
-      : `${fmt.format(shown)} of ${fmt.format(bounds.dated)} records with a reported or expected online year are in the timeline. ${fmt.format(bounds.undated)} undated records are omitted; dates are not verified openings.`;
+      : `${fmt.format(shown)} of ${fmt.format(bounds.dated)} timeline-eligible records are shown. This includes reported/expected online years plus current Operating or Expanding records no later than their inventory-added year. ${fmt.format(bounds.undated)} records have no eligible date; this is not a verified opening history.`;
   }
   function configureTimeline(resetToMax=false){
     const bounds=timelineBounds();

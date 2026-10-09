@@ -14,3 +14,5 @@ Designed to be a living and customizable tool ,the U.S. Data Center Ecosystem Tr
 - **[Virginia county explorer](https://ntimbs.github.io/us-data-center-dashboard/virginia/):** county-level data-center and contextual measures for Virginia, with a cumulative facility timeline.
 
 The public dashboard is built in the `dist` directory and published through the repository's `gh-pages` branch.
+
+The timeline offers an inventory-added basis and an online/active basis. The latter uses a reported or expected online year when available and also includes records currently classified Operating or Expanding no later than their inventory-added year. It is a cumulative screening timeline, not a verified history of facility openings or status transitions.
