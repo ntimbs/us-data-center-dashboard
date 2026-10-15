@@ -157,6 +157,7 @@
   let voteLoadPromise = null;
   const voteStateCache = new Map();
   const voteStateRows = new Map();
+  const voteFacilityBins = new Map();
   let voteDisplayState = "";
   let selectedPrecinct = null;
   let voteRenderVersion = 0;
@@ -179,7 +180,7 @@
     if (margin > -0.4) return 5;
     return 6;
   }
-  const voteColor = margin => voteCategories[voteBin(margin)][1];
+  const voteColor = margin => Number.isFinite(margin) ? voteCategories[voteBin(margin)][1] : "#64748b";
 
   function inventoryAddedYear(f) {
     const match = String(f.dateCreated || "").match(/^(\d{4})/);
@@ -335,6 +336,7 @@
   function votePath(geometry, arcs, transform, state) {
     const polygons = geometry.type === "Polygon" ? [geometry.arcs] : geometry.arcs || [];
     const parts = [];
+    const bounds = [Infinity, Infinity, -Infinity, -Infinity];
     for (const polygon of polygons) for (const ring of polygon) {
       const points = [];
       for (const arcIndex of ring) {
@@ -360,9 +362,13 @@
         const cy = (minY + maxY) / 2;
         reduced.splice(0, reduced.length, [cx - .12, cy - .12], [cx + .12, cy - .12], [cx + .12, cy + .12], [cx - .12, cy + .12]);
       }
+      for (const [x, y] of reduced) {
+        bounds[0] = Math.min(bounds[0], x); bounds[1] = Math.min(bounds[1], y);
+        bounds[2] = Math.max(bounds[2], x); bounds[3] = Math.max(bounds[3], y);
+      }
       parts.push("M" + reduced.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join("L") + "Z");
     }
-    return parts.join("");
+    return [parts.join(""), bounds];
   }
   async function fetchVoteState(state) {
     const response = await fetch(`${voteDataBase}/${state}-precincts-with-results.topojson.gz`);
@@ -371,8 +377,9 @@
     const geometries = topology.objects[state]?.geometries || [];
     return geometries.map(geometry => {
       const props = geometry.properties;
+      const [path, bounds] = votePath(geometry, topology.arcs, topology.transform, state);
       return [props.GEOID, props.votes_dem, props.votes_rep, props.votes_total, props.pct_dem_lead,
-        props.official_boundary, votePath(geometry, topology.arcs, topology.transform, state)];
+        props.official_boundary, path, bounds];
     }).filter(row => row[6]);
   }
   function loadVoteState(state) {
@@ -380,6 +387,58 @@
       voteStateCache.set(state, fetchVoteState(state).then(rows => { voteStateRows.set(state, rows); return rows; }).catch(error => { voteStateCache.delete(state); throw error; }));
     }
     return voteStateCache.get(state);
+  }
+  function matchFacilitiesToVotePrecincts(state, rows) {
+    if (voteFacilityBins.has(state)) return;
+    const matches = new Map();
+    const context = document.createElement("canvas").getContext("2d");
+    const paths = new Map();
+    for (const facility of facilities.filter(item => item.state === state)) {
+      const [x, y] = projectVotePoint(facility.lon, facility.lat, state);
+      let bin = null;
+      for (let index = 0; index < rows.length; index++) {
+        const [minX, minY, maxX, maxY] = rows[index][7];
+        if (x < minX - .01 || x > maxX + .01 || y < minY - .01 || y > maxY + .01) continue;
+        if (!paths.has(index)) paths.set(index, new Path2D(rows[index][6]));
+        if (context.isPointInPath(paths.get(index), x, y, "evenodd")) {
+          bin = Number.isFinite(rows[index][4]) ? voteBin(rows[index][4]) : null;
+          break;
+        }
+      }
+      matches.set(facility.id, bin);
+    }
+    voteFacilityBins.set(state, matches);
+  }
+  function voteFacilitySummary(state) {
+    const matches = voteDisplayState === state ? voteFacilityBins.get(state) : null;
+    if (!matches) return null;
+    const counts = voteCategories.map(() => 0);
+    let unmatched = 0;
+    for (const facility of filtered) {
+      const bin = matches.get(facility.id);
+      if (bin === null || bin === undefined) unmatched++;
+      else counts[bin]++;
+    }
+    return { counts, unmatched, matched: counts.reduce((sum, count) => sum + count, 0) };
+  }
+  function showVoteStateDetails(state) {
+    const summary = voteFacilitySummary(state.abbr);
+    if (!summary) {
+      if (!voteManifest || voteManifest.states[state.abbr]) return;
+      els.detailPanel.innerHTML = `<div class="detail-content"><div class="detail-top"><div><span class="eyebrow">2024 presidential vote · ${escapeHtml(state.abbr)}</span><h2>${escapeHtml(state.name)}</h2></div><button class="close-detail" type="button" aria-label="Close state vote details">×</button></div><p class="policy-note">The New York Times source has no mapped precinct results for this state, so its ${fmt.format(filtered.length)} selected data centers cannot be assigned to vote-share categories.</p></div>`;
+      els.detailPanel.classList.add("open");
+      els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
+      return;
+    }
+    const { counts, unmatched, matched } = summary;
+    els.detailPanel.innerHTML = `<div class="detail-content">
+      <div class="detail-top"><div><span class="eyebrow">2024 presidential vote · ${escapeHtml(state.abbr)}</span><h2>${escapeHtml(state.name)}</h2><p class="detail-location">${fmt.format(matched)} of ${fmt.format(filtered.length)} selected data centers matched to a precinct</p></div><button class="close-detail" type="button" aria-label="Close state vote details">×</button></div>
+      <section class="detail-section"><h3>Data centers by vote share</h3><div class="vote-breakdown">${voteCategories.map(([label, color], index) => `<div><span><i style="background:${color}"></i>${escapeHtml(label)}</span><strong>${fmt.format(counts[index])}</strong></div>`).join("")}<div><span><i style="background:#64748b"></i>No mapped precinct</span><strong>${fmt.format(unmatched)}</strong></div></div></section>
+      <p class="policy-note">Counts reflect the current facility filters. Each facility point is assigned to one mapped precinct; unmatched points are listed separately. The categories show the Harris–Trump vote margin as a share of all presidential votes, not views about data centers.</p>
+      <p class="policy-note">Source: <a href="${voteConfig.sourceUrl}" target="_blank" rel="noopener">The New York Times 2024 precinct map</a>.</p>
+    </div>`;
+    els.detailPanel.classList.add("open");
+    els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
   }
   function zoomToVoteState(state) {
     const bounds = voteManifest?.states?.[state]?.bounds;
@@ -407,6 +466,7 @@
         els.voteLayer.innerHTML = rows.map((row, index) =>
           `<path class="vote-precinct${selectedPrecinct?.state === state && selectedPrecinct.index === index ? " selected" : ""}" data-index="${index}" d="${row[6]}" fill="${voteColor(row[4])}" fill-rule="evenodd"></path>`
         ).join("");
+        matchFacilitiesToVotePrecincts(state, rows);
         els.voteStatus.textContent = `${fmt.format(rows.length)} mapped precincts in ${state}`;
         if (previousState !== state) { zoomToVoteState(state); renderFacilities(); }
       } else if (unavailable) {
@@ -418,6 +478,7 @@
       }
       renderLegend();
       renderSummary();
+      if (selectedStateAbbr === state && stateByAbbr.has(state)) showVoteStateDetails(stateByAbbr.get(state));
     } catch (_) {
       if (version !== voteRenderVersion) return;
       els.voteLayer.replaceChildren();
@@ -482,7 +543,7 @@
   }
   function activeHazard() { return hazardMeasures[currentHazardMeasure]; }
   function facilityHazard(f) { return f[activeHazard().field] || "Unknown"; }
-  function stateIsInteractive() { return currentView === "policy" || currentView === "cost"; }
+  function stateIsInteractive() { return currentView === "policy" || currentView === "cost" || votesActive(); }
 
   const filterGroups = {};
   function initializeFilterGroups() {
@@ -518,7 +579,7 @@
   }
 
   function renderStates() {
-    els.stateLayer.innerHTML = states.map(s => `<path class="state${s.abbr === selectedStateAbbr ? " selected" : ""}" data-state="${s.abbr}" d="${s.path}" style="fill:${stateFill(s)}" ${stateIsInteractive() ? `role="button" tabindex="0" aria-label="Open ${escapeHtml(s.name)} ${currentView === "cost" ? "electricity-price" : "legislation"} details"` : ""}><title>${escapeHtml(s.name)}</title></path>`).join("");
+    els.stateLayer.innerHTML = states.map(s => `<path class="state${s.abbr === selectedStateAbbr || votesActive() && s.abbr === els.stateFilter.value ? " selected" : ""}" data-state="${s.abbr}" d="${s.path}" style="fill:${stateFill(s)}" ${stateIsInteractive() ? `role="button" tabindex="0" aria-label="${votesActive() ? "Show" : "Open"} ${escapeHtml(s.name)} ${votesActive() ? "precinct vote share and data centers" : currentView === "cost" ? "electricity-price details" : "legislation details"}"` : ""}><title>${escapeHtml(s.name)}</title></path>`).join("");
     els.stateLayer.querySelectorAll(".state").forEach(path => {
       const state = states.find(item => item.abbr === path.dataset.state);
       path.addEventListener("pointerenter", event => showStateTooltip(event, state));
@@ -538,7 +599,7 @@
   }
 
   function colorFor(f) {
-    if (votesActive()) return "#e2e8f0";
+    if (votesActive()) return "#fef08a";
     if (currentView === "generation" || currentView === "cost") return "#e2e8f0";
     const cfg = config[currentView];
     const key = cfg.key(f);
@@ -546,7 +607,7 @@
   }
 
   function radiusFor(f) {
-    if (votesActive()) return 1.8 / transform.scale;
+    if (votesActive()) return 6 / transform.scale;
     if (!f.mw) return 2.7;
     return Math.max(3, Math.min(8.5, 2.6 + Math.log10(f.mw + 1) * 1.8));
   }
@@ -613,7 +674,9 @@
   }
   function showStateTooltip(event, state) {
     if (!stateIsInteractive()) return;
-    if (currentView === "cost") {
+    if (votesActive()) {
+      els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>Click to view data centers by 2024 precinct vote share</span>`;
+    } else if (currentView === "cost") {
       const price = state.electricityPrice;
       els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>${price ? `2024 industrial average: ${priceFmt.format(price.industrial)} ¢/kWh<br>Inflation-adjusted: ${priceFmt.format(price.industrialReal2020)} ¢/kWh in 2020 dollars` : "Electricity-price data unavailable"}</span>`;
     } else {
@@ -670,6 +733,7 @@
     renderPlants();
     renderFacilities();
     renderSummary();
+    if (votesActive() && selectedStateAbbr && stateByAbbr.has(selectedStateAbbr)) showVoteStateDetails(stateByAbbr.get(selectedStateAbbr));
     updateCheckboxCounts(q);
   }
 
@@ -723,15 +787,20 @@
   }
 
   function renderProfileChart() {
+    els.statusChart.classList.toggle("votes-chart", votesActive());
     if (votesActive()) {
-      const selectedRows = els.stateFilter.value && voteDisplayState === els.stateFilter.value ? voteStateRows.get(els.stateFilter.value) : null;
-      const counts = voteCategories.map(() => 0);
-      if (Array.isArray(selectedRows)) selectedRows.forEach(row => { counts[voteBin(row[4])] += 1; });
-      const max = Math.max(...counts, 1);
-      els.profileEyebrow.textContent = "Presidential vote profile";
-      els.profileTitle.textContent = "Mapped precincts by margin";
-      els.chartTotal.textContent = selectedRows ? `${fmt.format(counts.reduce((a, b) => a + b, 0))} precincts` : "Choose a state";
-      els.statusChart.innerHTML = selectedRows ? voteCategories.map(([label, color], index) => `<div class="bar-row"><span>${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${counts[index] / max * 100}%;background:${color}"></div></div><strong>${fmt.format(counts[index])}</strong></div>`).join("") : '<p class="chart-empty">Select a state to load and compare its precinct results.</p>';
+      const state = els.stateFilter.value;
+      const summary = state ? voteFacilitySummary(state) : null;
+      const { counts, unmatched, matched } = summary || { counts: voteCategories.map(() => 0), unmatched: 0, matched: 0 };
+      const max = Math.max(...counts, unmatched, 1);
+      els.profileEyebrow.textContent = state ? `${state} facility profile` : "Presidential vote profile";
+      els.profileTitle.textContent = "Data centers by 2024 vote share";
+      els.chartTotal.textContent = summary ? `${fmt.format(matched)} of ${fmt.format(filtered.length)} matched` : state ? voteManifest && !voteManifest.states[state] ? "No mapped results" : "Loading…" : "Choose a state";
+      els.statusChart.innerHTML = summary
+        ? voteCategories.map(([label, color], index) => `<div class="bar-row"><span title="${escapeHtml(label)}">${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${counts[index] / max * 100}%;background:${color}"></div></div><strong>${fmt.format(counts[index])}</strong></div>`).join("")
+          + `<div class="bar-row"><span title="No mapped precinct">No mapped precinct</span><div class="bar-track"><div class="bar-fill" style="width:${unmatched / max * 100}%;background:#64748b"></div></div><strong>${fmt.format(unmatched)}</strong></div>`
+          + `<p class="chart-note">Selected facilities are assigned by point location to a mapped precinct. Categories show the Harris–Trump margin as a share of all presidential votes. Unmatched facilities are kept separate.</p>`
+        : `<p class="chart-empty">${state && voteManifest && !voteManifest.states[state] ? "No mapped precinct results for this state." : "Click a state or choose one in the State filter to compare its data centers."}</p>`;
       return;
     }
     if (currentView === "generation") {
@@ -800,7 +869,7 @@
       els.insightSource.textContent = `Data source: ${cfg.source}`;
     }
     if (votesActive()) {
-      els.legend.innerHTML = voteCategories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note">Harris minus Trump as a share of all votes. Select a state to load precinct boundaries from The New York Times; click a precinct for counts. Pale dots mark data centers.</div>`;
+      els.legend.innerHTML = voteCategories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note">Harris minus Trump as a share of all votes. Click a state for its facility counts or a precinct for vote totals.<br><span class="vote-facility-key"></span> Data centers</div>`;
     } else if (currentView === "cost") {
       els.legend.innerHTML = costBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${costColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:#172938"></span><span>Unavailable</span></div><div class="legend-note">2024 state industrial average.<br>Facilities are pale context points.</div>`;
     } else if (currentView === "policy") {
@@ -854,6 +923,10 @@
   function selectState(abbr) {
     const state = states.find(item => item.abbr === abbr);
     if (!state) return;
+    if (votesActive()) {
+      setVoteState(abbr);
+      return;
+    }
     if (currentView === "cost") { selectCostState(state); return; }
     selectedStateAbbr = abbr;
     selectedId = null;
@@ -878,6 +951,15 @@
     els.detailPanel.querySelector("#exportStateBills")?.addEventListener("click", () => exportStateBills(state));
     renderStates();
     renderFacilities();
+  }
+  function setVoteState(abbr) {
+    if (abbr && ![...els.stateFilter.options].some(option => option.value === abbr)) els.stateFilter.add(new Option(abbr, abbr));
+    els.stateFilter.value = abbr;
+    clearSelection();
+    selectedStateAbbr = abbr || null;
+    applyFilters();
+    renderStates();
+    renderVoteLayer();
   }
 
   function exportStateBills(state) {
@@ -1020,7 +1102,7 @@
   }
 
   els.searchInput.addEventListener("input", applyFilters);
-  els.stateFilter.addEventListener("change", () => { if (votesActive() && selectedPrecinct) clearSelection(); applyFilters(); if (votesActive()) renderVoteLayer(); });
+  els.stateFilter.addEventListener("change", () => { if (votesActive()) setVoteState(els.stateFilter.value); else applyFilters(); });
   els.oppositionMeasure.addEventListener("change", () => {
     const leavingVotes = votesActive() && els.oppositionMeasure.value !== "votes";
     oppositionMeasure = els.oppositionMeasure.value;
@@ -1137,7 +1219,7 @@
       }
       return;
     }
-    if (!votesActive()) return;
+    if (!votesActive() || event.target.classList.contains("facility")) return;
     const precinct = event.target.closest?.(".vote-precinct");
     if (!precinct) { hideTooltip(); return; }
     const state = voteDisplayState;
