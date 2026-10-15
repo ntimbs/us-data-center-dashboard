@@ -135,9 +135,8 @@ h2 { margin: 3px 0 0; font-size: 1rem; line-height: 1.25; }
 .map-shell.policy-mode .facility, .map-shell.cost-mode .facility { opacity:.18; pointer-events:none; }
 .map-shell.generation-mode .facility { fill:#e2e8f0 !important; opacity:.28; stroke:#07101b; }
 .map-shell.votes-mode .facility { fill:#e2e8f0 !important; opacity:.32; pointer-events:none; }
-#voteOverlay { pointer-events:none; }
-#voteOverlay[hidden] { display:none; }
-#voteCanvas { display:block; width:1000px; height:600px; }
+.vote-precinct { cursor:pointer; stroke:rgba(8,20,31,.45); stroke-width:.35; vector-effect:non-scaling-stroke; }
+.vote-precinct:hover, .vote-precinct.selected { stroke:#f8fafc; stroke-width:1.3; }
 .transmission-line { fill:none; pointer-events:none; vector-effect:non-scaling-stroke; stroke-linecap:round; stroke-linejoin:round; }
 .transmission-line.high { stroke:#8b5cf6; stroke-width:.8; opacity:.28; }
 .transmission-line.extra-high { stroke:#f0abfc; stroke-width:1.15; opacity:.48; }
