@@ -16,3 +16,9 @@ Designed to be a living and customizable tool ,the U.S. Data Center Ecosystem Tr
 The public dashboard is built in the `dist` directory and published through the repository's `gh-pages` branch.
 
 The timeline offers an inventory-added basis and an online/active basis. The latter uses a reported or expected online year when available and also includes records currently classified Operating or Expanding no later than their inventory-added year. It is a cumulative screening timeline, not a verified history of facility openings or status transitions.
+
+### 2024 presidential precinct vote layer
+
+In the national view, choose **Opposition → 2024 presidential precinct vote**, then select a state to load its precinct boundaries and results directly from The New York Times. Click a precinct for Harris, Trump, and total presidential votes, margin, and whether its boundary is official. Colors use `(Harris votes − Trump votes) / all presidential votes`, not a two-party denominator. This is political context and does not measure support for or opposition to data centers. Coverage and boundary quality vary by state.
+
+Citation: “2024 Precinct-Level Election Results.” *New York Times*, [published precinct map](https://www.nytimes.com/interactive/2025/us/elections/2024-election-map-precinct-results.html). Accessed October 15, 2026. © The New York Times Company. [Source data and caveats](https://github.com/nytimes/presidential-precinct-map-2024) · [terms and license](https://github.com/nytimes/presidential-precinct-map-2024/blob/main/LICENSE). One source record lacks display geometry. This repository contains only an aggregate coverage manifest, not the precinct dataset. To rebuild that manifest from a local copy of the source, place `precincts-with-results` and `precincts-with-results.topojson.gz` in `../NYT_2024_vote_data/` and run `PYTHONDONTWRITEBYTECODE=1 python3 scripts/build_precinct_votes.py` from this directory.

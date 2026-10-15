@@ -37,6 +37,18 @@
     ["Relatively High", "#fb923c"], ["Very High", "#e11d48"], ["No Rating", "#64748b"],
     ["Insufficient Data", "#475569"], ["Unknown", "#334155"]
   ];
+  const voteCategories = [
+    ["Harris +40 or more", "#2563a6"], ["Harris +15 to 40", "#4b91d2"], ["Harris +5 to 15", "#8bb8dc"],
+    ["Within 5 points", "#b8b6ba"], ["Trump +5 to 15", "#e8a0a0"], ["Trump +15 to 40", "#d76565"], ["Trump +40 or more", "#a92f38"]
+  ];
+  const voteConfig = {
+    title: "2024 presidential vote by precinct",
+    insight: ["Voting is community context", "Colors show Harris’s lead over Trump as a share of all presidential votes in each mapped precinct. Vote results do not measure support for or opposition to data centers. Some boundaries are estimated, and some areas have no usable precinct results."],
+    source: "“2024 Precinct-Level Election Results.” New York Times. Accessed 15 October 2026.",
+    sourceUrl: "https://www.nytimes.com/interactive/2025/us/elections/2024-election-map-precinct-results.html",
+    categories: voteCategories
+  };
+  const voteDataBase = "https://int.nyt.com/newsgraphics/elections/map-data/2024/national";
 
   const config = {
     status: {
@@ -128,7 +140,8 @@
     "resetFilters", "selectionCount", "exportButton", "metricFacilities", "metricShare", "metricMw", "metricOperating", "metricOpposition",
     "stateLayer", "transmissionLayer", "plantLayer", "facilityLayer", "map", "mapShell", "tooltip", "legend", "viewTitle", "statusChart", "chartTotal", "insightTitle", "insightText", "insightSource",
     "coverageLine", "detailPanel", "zoomIn", "zoomOut", "zoomReset", "policyControls", "policyTopic", "policyStatusGroup", "generationControls", "generationSource", "transmissionToggle", "transmissionStatus", "hazardControls", "hazardMeasure",
-    "profileEyebrow", "profileTitle", "timelineBasis", "timelineRange", "timelineYearLabel", "timelineMin", "timelineMax", "timelineCoverage", "timelinePlay"
+    "profileEyebrow", "profileTitle", "timelineBasis", "timelineRange", "timelineYearLabel", "timelineMin", "timelineMax", "timelineCoverage", "timelinePlay",
+    "oppositionControls", "oppositionMeasure", "voteStatus", "voteOverlay", "voteCanvas"
   ].map(id => [id, document.getElementById(id)]));
 
   let currentView = "status";
@@ -139,6 +152,18 @@
   let policyTopic = "";
   let policyStatuses = new Set(["Active", "Pass", "Fail", "Veto"]);
   let currentHazardMeasure = "risk";
+  let oppositionMeasure = "evidence";
+  let voteManifest = null;
+  let voteLoadPromise = null;
+  const voteStateCache = new Map();
+  const voteStateRows = new Map();
+  let voteDisplayState = "";
+  let voteHitRows = [];
+  let selectedPrecinct = null;
+  let voteRenderVersion = 0;
+  const voteHitCanvas = document.createElement("canvas");
+  voteHitCanvas.width = 1000;
+  voteHitCanvas.height = 600;
   let transform = { x: 0, y: 0, scale: 1 };
   let dragging = false;
   let dragStart = null;
@@ -146,6 +171,18 @@
   let timelineYear = 0;
   let timelineTimer = null;
   const stateByAbbr = new Map(states.map(state => [state.abbr, state]));
+  const votesActive = () => currentView === "opposition" && oppositionMeasure === "votes";
+  const activeConfig = () => votesActive() ? voteConfig : config[currentView];
+  function voteBin(margin) {
+    if (margin >= 0.4) return 0;
+    if (margin >= 0.15) return 1;
+    if (margin >= 0.05) return 2;
+    if (margin > -0.05) return 3;
+    if (margin > -0.15) return 4;
+    if (margin > -0.4) return 5;
+    return 6;
+  }
+  const voteColor = margin => voteCategories[voteBin(margin)][1];
 
   function inventoryAddedYear(f) {
     const match = String(f.dateCreated || "").match(/^(\d{4})/);
@@ -274,6 +311,174 @@
     return transmissionLoadPromise;
   }
 
+  async function voteJson(path) {
+    const response = await fetch(`votes/${path}`);
+    if (!response.ok) throw new Error(`Could not load ${path}`);
+    return response.json();
+  }
+  function loadVoteData() {
+    if (voteLoadPromise) return voteLoadPromise;
+    voteLoadPromise = voteJson("manifest.json").then(manifest => {
+      voteManifest = manifest;
+      const selectedState = els.stateFilter.value;
+      const options = new Set([...els.stateFilter.options].map(option => option.value).filter(Boolean));
+      Object.keys(manifest.states).forEach(state => options.add(state));
+      els.stateFilter.innerHTML = '<option value="">All states</option>';
+      populate(els.stateFilter, [...options].sort());
+      els.stateFilter.value = selectedState;
+      return manifest;
+    }).catch(error => { voteLoadPromise = null; throw error; });
+    return voteLoadPromise;
+  }
+  function projectVotePoint(lon, lat, state) {
+    if (state === "HI") return [300 + (lon + 161) * 19, 512 + (23 - lat) * 19];
+    if (state === "AK") return [48 + (lon + 170) * 4.5, 445 + (72 - lat) * 4.3];
+    return [95 + (lon + 125) * 14.15, 45 + (50 - lat) * 20.1];
+  }
+  function votePath(geometry, arcs, transform, state) {
+    const polygons = geometry.type === "Polygon" ? [geometry.arcs] : geometry.arcs || [];
+    const parts = [];
+    for (const polygon of polygons) for (const ring of polygon) {
+      const points = [];
+      for (const arcIndex of ring) {
+        const arc = arcs[arcIndex >= 0 ? arcIndex : ~arcIndex];
+        let x = 0, y = 0;
+        const decoded = arc.map(([dx, dy]) => {
+          x += dx; y += dy;
+          return projectVotePoint(x * transform.scale[0] + transform.translate[0], y * transform.scale[1] + transform.translate[1], state);
+        });
+        if (arcIndex < 0) decoded.reverse();
+        for (let i = points.length ? 1 : 0; i < decoded.length; i++) points.push(decoded[i]);
+      }
+      if (points.length < 3) continue;
+      const reduced = [points[0]];
+      for (const point of points.slice(1, -1)) {
+        const prior = reduced[reduced.length - 1];
+        if (Math.hypot(point[0] - prior[0], point[1] - prior[1]) >= 0.35) reduced.push(point);
+      }
+      if (reduced.length < 3) {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const [x, y] of points) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y); }
+        const cx = (minX + maxX) / 2;
+        const cy = (minY + maxY) / 2;
+        reduced.splice(0, reduced.length, [cx - .12, cy - .12], [cx + .12, cy - .12], [cx + .12, cy + .12], [cx - .12, cy + .12]);
+      }
+      parts.push("M" + reduced.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join("L") + "Z");
+    }
+    return parts.join("");
+  }
+  async function fetchVoteState(state) {
+    const response = await fetch(`${voteDataBase}/${state}-precincts-with-results.topojson.gz`);
+    if (!response.ok || !response.body) throw new Error(`Could not load ${state} precinct results`);
+    const topology = await new Response(response.body.pipeThrough(new DecompressionStream("gzip"))).json();
+    const geometries = topology.objects[state]?.geometries || [];
+    return geometries.map(geometry => {
+      const props = geometry.properties;
+      return [props.GEOID, props.votes_dem, props.votes_rep, props.votes_total, props.pct_dem_lead,
+        props.official_boundary, votePath(geometry, topology.arcs, topology.transform, state)];
+    }).filter(row => row[6]);
+  }
+  function loadVoteState(state) {
+    if (!voteStateCache.has(state)) {
+      voteStateCache.set(state, fetchVoteState(state).then(rows => { voteStateRows.set(state, rows); return rows; }).catch(error => { voteStateCache.delete(state); throw error; }));
+    }
+    return voteStateCache.get(state);
+  }
+  function voteHitColor(index) {
+    const id = index + 1;
+    return `rgb(${id & 255},${id >> 8 & 255},${id >> 16 & 255})`;
+  }
+  function zoomToVoteState(state) {
+    const bounds = voteManifest?.states?.[state]?.bounds;
+    if (!bounds) return;
+    const width = Math.max(bounds[2] - bounds[0], 1);
+    const height = Math.max(bounds[3] - bounds[1], 1);
+    const scale = Math.max(1, Math.min(20, 900 / width, 510 / height));
+    transform = { scale, x: 500 - scale * (bounds[0] + bounds[2]) / 2, y: 300 - scale * (bounds[1] + bounds[3]) / 2 };
+    updateTransform();
+  }
+  async function renderVoteLayer() {
+    const version = ++voteRenderVersion;
+    els.voteOverlay.toggleAttribute("hidden", !votesActive());
+    if (!votesActive()) { voteDisplayState = ""; voteHitRows = []; els.voteStatus.textContent = ""; return; }
+    els.voteStatus.textContent = "Loading precinct votes…";
+    try {
+      await loadVoteData();
+      const state = els.stateFilter.value;
+      const unavailable = state && !voteManifest.states[state];
+      const rows = state && !unavailable ? await loadVoteState(state) : null;
+      if (version !== voteRenderVersion || !votesActive()) return;
+      const previousState = voteDisplayState;
+      voteDisplayState = rows ? state : "";
+      voteHitRows = [];
+      const ctx = els.voteCanvas.getContext("2d");
+      const hit = voteHitCanvas.getContext("2d", { willReadFrequently: true });
+      ctx.clearRect(0, 0, 1000, 600);
+      hit.clearRect(0, 0, 1000, 600);
+      if (rows) {
+        rows.forEach((row, index) => {
+          const path = new Path2D(row[6]);
+          ctx.fillStyle = voteColor(row[4]);
+          ctx.fill(path, "evenodd");
+          if (selectedPrecinct?.state === state && selectedPrecinct.index === index) {
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 1.3;
+            ctx.stroke(path);
+          }
+          hit.fillStyle = voteHitColor(index);
+          hit.fill(path, "evenodd");
+          voteHitRows.push([state, index, row[4]]);
+        });
+        els.voteStatus.textContent = `${fmt.format(rows.length)} mapped precincts in ${state}`;
+        if (previousState !== state) { zoomToVoteState(state); renderFacilities(); }
+      } else if (unavailable) {
+        els.voteStatus.textContent = `No mapped NYT precinct results for ${state}`;
+        resetView();
+      } else {
+        els.voteStatus.textContent = "Choose a state to load precinct results from The New York Times";
+        if (previousState) resetView();
+      }
+      renderLegend();
+      renderSummary();
+    } catch (_) {
+      if (version !== voteRenderVersion) return;
+      els.voteOverlay.setAttribute("hidden", "");
+      els.voteStatus.textContent = "Precinct data unavailable";
+      els.coverageLine.textContent = "The precinct voting data could not be loaded. Refresh the page and try again.";
+    }
+  }
+  function voteHitAt(event) {
+    if (!votesActive() || !voteHitRows.length) return null;
+    const matrix = els.voteOverlay.getScreenCTM();
+    if (!matrix) return null;
+    const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+    const x = Math.floor(point.x), y = Math.floor(point.y);
+    if (x < 0 || x >= 1000 || y < 0 || y >= 600) return null;
+    const pixel = voteHitCanvas.getContext("2d", { willReadFrequently: true }).getImageData(x, y, 1, 1).data;
+    const index = pixel[0] + (pixel[1] << 8) + (pixel[2] << 16) - 1;
+    return pixel[3] === 255 && index >= 0 ? voteHitRows[index] || null : null;
+  }
+  async function selectPrecinct(state, index) {
+    let rows;
+    try { rows = await loadVoteState(state); }
+    catch (_) { els.voteStatus.textContent = "Precinct detail unavailable"; return; }
+    const row = rows[index];
+    if (!row || !votesActive()) return;
+    selectedId = selectedPlantId = selectedStateAbbr = null;
+    selectedPrecinct = { state, index };
+    const [geoid, dem, rep, total, margin, official] = row;
+    const lead = margin >= 0 ? "Harris" : "Trump";
+    els.detailPanel.innerHTML = `<div class="detail-content">
+      <div class="detail-top"><div><span class="eyebrow">2024 presidential precinct · ${escapeHtml(state)}</span><h2>${escapeHtml(geoid)}</h2><p class="detail-location">The New York Times precinct results</p></div><button class="close-detail" type="button" aria-label="Close precinct details">×</button></div>
+      <span class="phase-pill">${lead} +${(Math.abs(margin) * 100).toFixed(1)} points</span>
+      ${detailSection("Presidential votes", [detailItem("Kamala Harris", dem), detailItem("Donald Trump", rep), detailItem("All candidates", total), detailItem("Boundary", official ? "Official" : "Estimated")])}
+      <section class="detail-section"><h3>How to use this layer</h3><p class="policy-note">The margin divides the Harris–Trump vote difference by votes for all candidates. Vote results are community context, not evidence of a position on data centers. Boundaries and results have coverage limits.</p><p class="policy-note"><a href="https://www.nytimes.com/interactive/2025/us/elections/2024-election-map-precinct-results.html" target="_blank" rel="noopener">The New York Times 2024 precinct map</a> · <a href="https://github.com/nytimes/presidential-precinct-map-2024/blob/main/LICENSE" target="_blank" rel="noopener">Data terms</a></p></section>
+    </div>`;
+    els.detailPanel.classList.add("open");
+    els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
+    if (voteDisplayState === state) renderVoteLayer();
+  }
+
   const statusLabels = { Active: "Active", Pass: "Passed", Fail: "Failed", Veto: "Vetoed" };
   els.policyTopic.innerHTML = `<option value="">All topics</option>${policyTypes.map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join("")}`;
   const policyStatusChecks = () => Array.from(els.policyStatusGroup.querySelectorAll('input[type="checkbox"]'));
@@ -365,6 +570,7 @@
   }
 
   function colorFor(f) {
+    if (votesActive()) return "#e2e8f0";
     if (currentView === "generation" || currentView === "cost") return "#e2e8f0";
     const cfg = config[currentView];
     const key = cfg.key(f);
@@ -372,6 +578,7 @@
   }
 
   function radiusFor(f) {
+    if (votesActive()) return 1.8 / transform.scale;
     if (!f.mw) return 2.7;
     return Math.max(3, Math.min(8.5, 2.6 + Math.log10(f.mw + 1) * 1.8));
   }
@@ -513,7 +720,14 @@
     renderProfileChart();
     const knownMw = count ? pct(mwValues.length / count * 100) : "—";
     const utilityMatches = filtered.filter(f => f.utilityMatch && f.utilityMatch.includes("Unique")).length;
-    if (currentView === "generation") {
+    if (votesActive()) {
+      const state = els.stateFilter.value;
+      const stat = state ? voteManifest?.states?.[state] : null;
+      const mapped = state ? stat?.count : voteManifest?.count;
+      els.coverageLine.textContent = mapped
+        ? `${fmt.format(mapped)} mapped precincts${state ? ` in ${state}` : ` across ${Object.keys(voteManifest.states).length} jurisdictions`}. ${state ? "" : "Select a state to load the results directly from The New York Times. "}${stat ? fmt.format(stat.official) : fmt.format(Object.values(voteManifest.states).reduce((sum, item) => sum + item.official, 0))} use official boundaries. ${fmt.format(voteManifest.unmapped)} source ${voteManifest.unmapped === 1 ? "record lacks" : "records lack"} display geometry. Some counties or states have no usable results. Presidential voting does not measure data-center opposition.`
+        : voteManifest ? `No mapped New York Times precinct results for ${state}. Presidential voting does not measure data-center opposition.` : "Loading New York Times 2024 precinct results…";
+    } else if (currentView === "generation") {
       const plants = visiblePowerPlants();
       const capacity = plants.map(plant => plant.capacityMw).filter(Number.isFinite).reduce((sum, plantMw) => sum + plantMw, 0);
       const source = els.generationSource.value || "all generation sources";
@@ -541,6 +755,17 @@
   }
 
   function renderProfileChart() {
+    if (votesActive()) {
+      const selectedRows = els.stateFilter.value && voteDisplayState === els.stateFilter.value ? voteStateRows.get(els.stateFilter.value) : null;
+      const counts = voteCategories.map(() => 0);
+      if (Array.isArray(selectedRows)) selectedRows.forEach(row => { counts[voteBin(row[4])] += 1; });
+      const max = Math.max(...counts, 1);
+      els.profileEyebrow.textContent = "Presidential vote profile";
+      els.profileTitle.textContent = "Mapped precincts by margin";
+      els.chartTotal.textContent = selectedRows ? `${fmt.format(counts.reduce((a, b) => a + b, 0))} precincts` : "Choose a state";
+      els.statusChart.innerHTML = selectedRows ? voteCategories.map(([label, color], index) => `<div class="bar-row"><span>${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${counts[index] / max * 100}%;background:${color}"></div></div><strong>${fmt.format(counts[index])}</strong></div>`).join("") : '<p class="chart-empty">Select a state to load and compare its precinct results.</p>';
+      return;
+    }
     if (currentView === "generation") {
       const counts = {};
       visiblePowerPlants().forEach(plant => counts[plant.fuel || "Unknown"] = (counts[plant.fuel || "Unknown"] || 0) + 1);
@@ -595,7 +820,7 @@
   }
 
   function renderLegend() {
-    const cfg = config[currentView];
+    const cfg = activeConfig();
     els.viewTitle.textContent = cfg.title;
     els.insightTitle.textContent = cfg.insight[0];
     els.insightText.textContent = cfg.insight[1];
@@ -606,7 +831,9 @@
     } else {
       els.insightSource.textContent = `Data source: ${cfg.source}`;
     }
-    if (currentView === "cost") {
+    if (votesActive()) {
+      els.legend.innerHTML = voteCategories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note">Harris minus Trump as a share of all votes. Select a state to load precinct boundaries from The New York Times; click a precinct for counts. Pale dots mark data centers.</div>`;
+    } else if (currentView === "cost") {
       els.legend.innerHTML = costBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${costColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:#172938"></span><span>Unavailable</span></div><div class="legend-note">2024 state industrial average.<br>Facilities are pale context points.</div>`;
     } else if (currentView === "policy") {
       els.viewTitle.textContent = policyMetricLabel();
@@ -737,11 +964,15 @@
   }
 
   function clearSelection() {
+    const hadPrecinct = !!selectedPrecinct;
     selectedId = null;
     selectedPlantId = null;
     selectedStateAbbr = null;
+    selectedPrecinct = null;
     els.detailPanel.classList.remove("open");
-    els.detailPanel.innerHTML = currentView === "policy"
+    els.detailPanel.innerHTML = votesActive()
+      ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a precinct</h2><p>Choose a colored precinct on the map to review presidential vote counts and boundary status.</p></div>`
+      : currentView === "policy"
       ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a state</h2><p>Choose a state to review bill counts, statuses, policy types, and bill-level records.</p></div>`
       : currentView === "cost"
         ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a state</h2><p>Choose a state to review its 2024 industrial electricity price and historical context.</p></div>`
@@ -752,20 +983,26 @@
     renderTransmissionLines();
     renderFacilities();
     renderPlants();
+    if (hadPrecinct && votesActive()) renderVoteLayer();
   }
 
   async function setView(view) {
     if (!config[view]) return;
+    const leavingVotes = votesActive() && view !== "opposition";
     currentView = view;
+    if (leavingVotes) resetView();
     document.querySelectorAll(".view-button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
     els.policyControls.hidden = view !== "policy";
     els.generationControls.hidden = view !== "generation";
     els.hazardControls.hidden = view !== "hazard";
+    els.oppositionControls.hidden = view !== "opposition";
     els.mapShell.classList.toggle("policy-mode", view === "policy");
     els.mapShell.classList.toggle("cost-mode", view === "cost");
     els.mapShell.classList.toggle("generation-mode", view === "generation");
+    els.mapShell.classList.toggle("votes-mode", votesActive());
     clearSelection();
     renderLegend(); renderSummary();
+    renderVoteLayer();
     if (view === "generation") {
       els.viewTitle.textContent = "Loading power plants…";
       els.coverageLine.textContent = "Loading the eGRID plant layer…";
@@ -802,8 +1039,9 @@
     transform.x = cx - (cx - transform.x) * next / old;
     transform.y = cy - (cy - transform.y) * next / old;
     transform.scale = next; updateTransform();
+    if (votesActive()) renderFacilities();
   }
-  function resetView() { transform = { x: 0, y: 0, scale: 1 }; updateTransform(); }
+  function resetView() { transform = { x: 0, y: 0, scale: 1 }; updateTransform(); if (votesActive()) renderFacilities(); }
 
   function exportCsv() {
     const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "date_added_to_inventory", "reported_expected_online_year", "mw_mid", "capacity_class", "power_source", "state_industrial_price_2024_cents_kwh", "water_scarcity", "aware_factor", "overall_hazard", "drought_hazard", "riverine_flood_hazard", "heat_wave_hazard", "wildfire_hazard", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
@@ -813,7 +1051,18 @@
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
   }
 
-  [els.searchInput, els.stateFilter].forEach(el => el.addEventListener(el.tagName === "INPUT" && el.type === "search" ? "input" : "change", applyFilters));
+  els.searchInput.addEventListener("input", applyFilters);
+  els.stateFilter.addEventListener("change", () => { if (votesActive() && selectedPrecinct) clearSelection(); applyFilters(); if (votesActive()) renderVoteLayer(); });
+  els.oppositionMeasure.addEventListener("change", () => {
+    const leavingVotes = votesActive() && els.oppositionMeasure.value !== "votes";
+    oppositionMeasure = els.oppositionMeasure.value;
+    if (leavingVotes) resetView();
+    els.mapShell.classList.toggle("votes-mode", votesActive());
+    clearSelection();
+    renderLegend();
+    renderSummary();
+    renderVoteLayer();
+  });
   els.timelineBasis.addEventListener("change", () => { stopTimeline(); timelineMode = els.timelineBasis.value; configureTimeline(true); applyFilters(); });
   els.timelineRange.addEventListener("input", () => { stopTimeline(); timelineYear = Number(els.timelineRange.value); renderTimelineCoverage(); applyFilters(); });
   els.timelinePlay.addEventListener("click", playTimeline);
@@ -829,7 +1078,9 @@
     timelineMode = "inventory";
     els.timelineBasis.value = timelineMode;
     configureTimeline(true);
+    if (votesActive()) resetView();
     applyFilters();
+    if (votesActive()) renderVoteLayer();
   });
   els.exportButton.addEventListener("click", exportCsv);
   els.policyTopic.addEventListener("change", () => {
@@ -899,9 +1150,23 @@
   els.zoomIn.addEventListener("click", () => zoom(1.35)); els.zoomOut.addEventListener("click", () => zoom(1/1.35)); els.zoomReset.addEventListener("click", resetView);
   els.map.addEventListener("wheel", event => { event.preventDefault(); const rect = els.map.getBoundingClientRect(); zoom(event.deltaY < 0 ? 1.18 : 1/1.18, (event.clientX-rect.left)/rect.width*1000, (event.clientY-rect.top)/rect.height*600); }, { passive: false });
   els.map.addEventListener("pointerdown", event => { if (event.target.classList.contains("facility") || event.target.classList.contains("power-plant") || (stateIsInteractive() && event.target.classList.contains("state"))) return; dragging = true; dragStart = { x:event.clientX, y:event.clientY, tx:transform.x, ty:transform.y }; els.map.classList.add("dragging"); els.map.setPointerCapture(event.pointerId); });
-  els.map.addEventListener("pointermove", event => { if (!dragging) return; const rect = els.map.getBoundingClientRect(); transform.x = dragStart.tx + (event.clientX-dragStart.x)/rect.width*1000; transform.y = dragStart.ty + (event.clientY-dragStart.y)/rect.height*600; updateTransform(); });
+  els.map.addEventListener("pointermove", event => {
+    if (dragging) { const rect = els.map.getBoundingClientRect(); transform.x = dragStart.tx + (event.clientX-dragStart.x)/rect.width*1000; transform.y = dragStart.ty + (event.clientY-dragStart.y)/rect.height*600; updateTransform(); return; }
+    if (!votesActive()) return;
+    const hit = voteHitAt(event);
+    if (!hit) { hideTooltip(); return; }
+    const [state, index, margin] = hit;
+    const row = voteStateRows.get(state)?.[index];
+    if (!Number.isFinite(margin)) return;
+    els.tooltip.innerHTML = `<strong>${escapeHtml(row?.[0] || `${state} precinct`)}</strong><span>${margin >= 0 ? "Harris" : "Trump"} +${(Math.abs(margin) * 100).toFixed(1)} points${row ? ` · ${fmt.format(row[3])} total votes` : ""}<br>Click for precinct details</span>`;
+    els.tooltip.hidden = false;
+    positionTooltip(event);
+  });
   els.map.addEventListener("pointerup", () => { dragging = false; els.map.classList.remove("dragging"); });
-  els.map.addEventListener("click", event => { if (event.target === els.map || (!stateIsInteractive() && event.target.classList.contains("state"))) clearSelection(); });
+  els.map.addEventListener("click", event => {
+    if (votesActive()) { const hit = voteHitAt(event); if (hit) selectPrecinct(...hit); else clearSelection(); return; }
+    if (event.target === els.map || (!stateIsInteractive() && event.target.classList.contains("state"))) clearSelection();
+  });
 
   function registerWebMcp() {
     const context = document.modelContext;
