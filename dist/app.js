@@ -48,6 +48,13 @@
     sourceUrl: "https://www.nytimes.com/interactive/2025/us/elections/2024-election-map-precinct-results.html",
     categories: voteCategories
   };
+  const districtConfig = {
+    title: "2024 presidential vote by congressional district",
+    insight: ["District voting is community context", "Colors show Harris’s lead over Trump as a share of all presidential votes in each 2024 congressional district. Facility counts use point locations within Census 119th district boundaries. Presidential votes do not measure views about data centers."],
+    source: "2024 Pres by CD, curated by Drew Savicki; U.S. Census Bureau, 119th congressional districts.",
+    sourceUrl: "https://docs.google.com/spreadsheets/d/1ZHx5E0-5vuXxcZShBgsAl_vwAntkkanGqYQp0owNjoQ/edit?gid=0",
+    categories: voteCategories
+  };
   const voteDataBase = "https://int.nyt.com/newsgraphics/elections/map-data/2024/national";
 
   const config = {
@@ -161,6 +168,9 @@
   let voteDisplayState = "";
   let selectedPrecinct = null;
   let voteRenderVersion = 0;
+  let districtData = null;
+  let districtLoadPromise = null;
+  let selectedDistrict = null;
   let transform = { x: 0, y: 0, scale: 1 };
   let dragging = false;
   let dragStart = null;
@@ -169,8 +179,10 @@
   let timelineYear = 0;
   let timelineTimer = null;
   const stateByAbbr = new Map(states.map(state => [state.abbr, state]));
-  const votesActive = () => currentView === "opposition" && oppositionMeasure === "votes";
-  const activeConfig = () => votesActive() ? voteConfig : config[currentView];
+  const precinctActive = () => currentView === "opposition" && oppositionMeasure === "votes";
+  const districtActive = () => currentView === "opposition" && oppositionMeasure === "districts";
+  const votesActive = () => precinctActive() || districtActive();
+  const activeConfig = () => precinctActive() ? voteConfig : districtActive() ? districtConfig : config[currentView];
   function voteBin(margin) {
     if (margin >= 0.4) return 0;
     if (margin >= 0.15) return 1;
@@ -314,6 +326,74 @@
     if (!response.ok) throw new Error(`Could not load ${path}`);
     return response.json();
   }
+  function loadDistrictData() {
+    if (!districtLoadPromise) {
+      districtLoadPromise = voteJson("districts.json").then(data => {
+        if (data.districts.length !== 435) throw new Error("Incomplete congressional district data");
+        districtData = data;
+        return data;
+      }).catch(error => { districtLoadPromise = null; throw error; });
+    }
+    return districtLoadPromise;
+  }
+  function districtFacilitySummary() {
+    if (!districtData) return null;
+    const districtById = new Map(districtData.districts.map(row => [row[0], row]));
+    const counts = voteCategories.map(() => 0);
+    let unmatched = 0;
+    for (const facility of filtered) {
+      const row = districtById.get(districtData.facilities[facility.id]);
+      if (!row) unmatched++;
+      else counts[voteBin((row[1] - row[2]) / row[3])]++;
+    }
+    return { counts, unmatched, matched: filtered.length - unmatched };
+  }
+  function showDistrictDetails(id) {
+    const row = districtData?.districts.find(item => item[0] === id);
+    if (!row || !districtActive()) return;
+    selectedDistrict = id;
+    selectedId = selectedPlantId = selectedStateAbbr = null;
+    const margin = (row[1] - row[2]) / row[3];
+    const count = filtered.filter(facility => districtData.facilities[facility.id] === id).length;
+    els.detailPanel.innerHTML = `<div class="detail-content">
+      <div class="detail-top"><div><span class="eyebrow">2024 congressional district</span><h2>${escapeHtml(id)}</h2><p class="detail-location">${fmt.format(count)} selected data ${count === 1 ? "center" : "centers"} in this district</p></div><button class="close-detail" type="button" aria-label="Close district details">×</button></div>
+      <span class="phase-pill">${margin >= 0 ? "Harris" : "Trump"} +${(Math.abs(margin) * 100).toFixed(1)} points</span>
+      ${detailSection("Presidential votes", [detailItem("Kamala Harris", row[1]), detailItem("Donald Trump", row[2]), detailItem("All candidates", row[3])])}
+      <p class="policy-note">Facility count reflects the current filters and the 119th congressional district boundary. The margin is (Harris − Trump) ÷ all presidential votes. Voting does not indicate a position on data centers.</p>
+      <p class="policy-note">Results: <a href="${districtConfig.sourceUrl}" target="_blank" rel="noopener">2024 Pres by CD</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html" target="_blank" rel="noopener">U.S. Census Bureau</a>.</p>
+    </div>`;
+    els.detailPanel.classList.add("open");
+    els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
+    els.voteLayer.querySelector(".vote-district.selected")?.classList.remove("selected");
+    els.voteLayer.querySelector(`.vote-district[data-district="${id}"]`)?.classList.add("selected");
+  }
+  async function renderDistrictLayer(version) {
+    els.voteStatus.textContent = "Loading congressional districts…";
+    els.voteLayer.replaceChildren();
+    try {
+      const data = await loadDistrictData();
+      if (version !== voteRenderVersion || !districtActive()) return;
+      const state = els.stateFilter.value;
+      const rows = state ? data.districts.filter(row => row[0].startsWith(`${state}-`)) : data.districts;
+      els.voteLayer.innerHTML = rows.map(row => `<path class="vote-district${selectedDistrict === row[0] ? " selected" : ""}" data-district="${row[0]}" d="${row[4]}" fill="${voteColor((row[1] - row[2]) / row[3])}" fill-rule="evenodd" role="button" tabindex="0" aria-label="${row[0]} congressional district vote details"><title>${row[0]} · ${((row[1] - row[2]) / row[3] * 100).toFixed(1)} point Harris margin</title></path>`).join("");
+      els.voteStatus.textContent = `${fmt.format(rows.length)} congressional ${rows.length === 1 ? "district" : "districts"}${state ? ` in ${state}` : " nationwide"}`;
+      if (state) {
+        const bounds = rows.reduce((box, row) => [Math.min(box[0], row[5][0]), Math.min(box[1], row[5][1]), Math.max(box[2], row[5][2]), Math.max(box[3], row[5][3])], [Infinity, Infinity, -Infinity, -Infinity]);
+        const scale = Math.max(1, Math.min(20, 900 / Math.max(1, bounds[2] - bounds[0]), 510 / Math.max(1, bounds[3] - bounds[1])));
+        transform = { scale, x: 500 - scale * (bounds[0] + bounds[2]) / 2, y: 300 - scale * (bounds[1] + bounds[3]) / 2 };
+        updateTransform();
+      } else resetView();
+      renderFacilities();
+      renderSummary();
+      renderLegend();
+      if (selectedStateAbbr === state && stateByAbbr.has(state)) showVoteStateDetails(stateByAbbr.get(state));
+    } catch (_) {
+      if (version !== voteRenderVersion) return;
+      els.voteLayer.replaceChildren();
+      els.voteStatus.textContent = "District data unavailable";
+      els.coverageLine.textContent = "The congressional district data could not be loaded. Refresh the page and try again.";
+    }
+  }
   function loadVoteData() {
     if (voteLoadPromise) return voteLoadPromise;
     voteLoadPromise = voteJson("manifest.json").then(manifest => {
@@ -422,6 +502,20 @@
     return { counts, unmatched, matched: counts.reduce((sum, count) => sum + count, 0) };
   }
   function showVoteStateDetails(state) {
+    if (districtActive()) {
+      if (!districtData) return;
+      const summary = districtFacilitySummary();
+      const { counts, unmatched, matched } = summary;
+      els.detailPanel.innerHTML = `<div class="detail-content">
+        <div class="detail-top"><div><span class="eyebrow">2024 congressional district vote · ${escapeHtml(state.abbr)}</span><h2>${escapeHtml(state.name)}</h2><p class="detail-location">${fmt.format(matched)} of ${fmt.format(filtered.length)} selected data centers matched to a district</p></div><button class="close-detail" type="button" aria-label="Close state vote details">×</button></div>
+        <section class="detail-section"><h3>Data centers by district vote share</h3><div class="vote-breakdown">${voteCategories.map(([label, color], index) => `<div><span><i style="background:${color}"></i>${escapeHtml(label)}</span><strong>${fmt.format(counts[index])}</strong></div>`).join("")}<div><span><i style="background:#64748b"></i>Outside mapped district</span><strong>${fmt.format(unmatched)}</strong></div></div></section>
+        <p class="policy-note">Counts reflect current facility filters. Each facility point is assigned to a 119th congressional district; points outside mapped boundaries are listed separately. Voting does not measure views about data centers.</p>
+        <p class="policy-note">Results: <a href="${districtConfig.sourceUrl}" target="_blank" rel="noopener">2024 Pres by CD</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html" target="_blank" rel="noopener">U.S. Census Bureau</a>.</p>
+      </div>`;
+      els.detailPanel.classList.add("open");
+      els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
+      return;
+    }
     const summary = voteFacilitySummary(state.abbr);
     if (!summary) {
       if (!voteManifest || voteManifest.states[state.abbr]) return;
@@ -452,13 +546,15 @@
   async function renderVoteLayer() {
     const version = ++voteRenderVersion;
     if (!votesActive()) { voteDisplayState = ""; els.voteLayer.replaceChildren(); els.voteStatus.textContent = ""; return; }
+    if (districtActive()) { voteDisplayState = ""; return renderDistrictLayer(version); }
     els.voteStatus.textContent = "Loading precinct votes…";
+    els.voteLayer.replaceChildren();
     try {
       await loadVoteData();
       const state = els.stateFilter.value;
       const unavailable = state && !voteManifest.states[state];
       const rows = state && !unavailable ? await loadVoteState(state) : null;
-      if (version !== voteRenderVersion || !votesActive()) return;
+      if (version !== voteRenderVersion || !precinctActive()) return;
       const previousState = voteDisplayState;
       voteDisplayState = rows ? state : "";
       els.voteLayer.replaceChildren();
@@ -491,7 +587,7 @@
     try { rows = await loadVoteState(state); }
     catch (_) { els.voteStatus.textContent = "Precinct detail unavailable"; return; }
     const row = rows[index];
-    if (!row || !votesActive()) return;
+    if (!row || !precinctActive()) return;
     selectedId = selectedPlantId = selectedStateAbbr = null;
     selectedPrecinct = { state, index };
     const [geoid, dem, rep, total, margin, official] = row;
@@ -579,7 +675,7 @@
   }
 
   function renderStates() {
-    els.stateLayer.innerHTML = states.map(s => `<path class="state${s.abbr === selectedStateAbbr || votesActive() && s.abbr === els.stateFilter.value ? " selected" : ""}" data-state="${s.abbr}" d="${s.path}" style="fill:${stateFill(s)}" ${stateIsInteractive() ? `role="button" tabindex="0" aria-label="${votesActive() ? "Show" : "Open"} ${escapeHtml(s.name)} ${votesActive() ? "precinct vote share and data centers" : currentView === "cost" ? "electricity-price details" : "legislation details"}"` : ""}><title>${escapeHtml(s.name)}</title></path>`).join("");
+    els.stateLayer.innerHTML = states.map(s => `<path class="state${s.abbr === selectedStateAbbr || votesActive() && s.abbr === els.stateFilter.value ? " selected" : ""}" data-state="${s.abbr}" d="${s.path}" style="fill:${stateFill(s)}" ${stateIsInteractive() ? `role="button" tabindex="0" aria-label="${votesActive() ? "Show" : "Open"} ${escapeHtml(s.name)} ${precinctActive() ? "precinct vote share and data centers" : districtActive() ? "congressional district vote share and data centers" : currentView === "cost" ? "electricity-price details" : "legislation details"}"` : ""}><title>${escapeHtml(s.name)}</title></path>`).join("");
     els.stateLayer.querySelectorAll(".state").forEach(path => {
       const state = states.find(item => item.abbr === path.dataset.state);
       path.addEventListener("pointerenter", event => showStateTooltip(event, state));
@@ -675,7 +771,7 @@
   function showStateTooltip(event, state) {
     if (!stateIsInteractive()) return;
     if (votesActive()) {
-      els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>Click to view data centers by 2024 precinct vote share</span>`;
+      els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>Click to view data centers by 2024 ${precinctActive() ? "precinct" : "congressional district"} vote share</span>`;
     } else if (currentView === "cost") {
       const price = state.electricityPrice;
       els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>${price ? `2024 industrial average: ${priceFmt.format(price.industrial)} ¢/kWh<br>Inflation-adjusted: ${priceFmt.format(price.industrialReal2020)} ¢/kWh in 2020 dollars` : "Electricity-price data unavailable"}</span>`;
@@ -734,6 +830,7 @@
     renderFacilities();
     renderSummary();
     if (votesActive() && selectedStateAbbr && stateByAbbr.has(selectedStateAbbr)) showVoteStateDetails(stateByAbbr.get(selectedStateAbbr));
+    if (districtActive() && selectedDistrict) showDistrictDetails(selectedDistrict);
     updateCheckboxCounts(q);
   }
 
@@ -752,7 +849,13 @@
     renderProfileChart();
     const knownMw = count ? pct(mwValues.length / count * 100) : "—";
     const utilityMatches = filtered.filter(f => f.utilityMatch && f.utilityMatch.includes("Unique")).length;
-    if (votesActive()) {
+    if (districtActive()) {
+      const summary = districtFacilitySummary();
+      const where = els.stateFilter.value ? ` in ${els.stateFilter.value}` : " nationally";
+      els.coverageLine.textContent = summary
+        ? `${fmt.format(districtData.districts.length)} congressional districts use 2024 presidential results and 119th Congress boundaries. ${fmt.format(summary.matched)} of ${fmt.format(count)} selected facility points${where} match a district; ${fmt.format(summary.unmatched)} are outside the mapped boundary. Presidential voting does not measure data-center opposition.`
+        : "Loading 2024 congressional district results…";
+    } else if (votesActive()) {
       const state = els.stateFilter.value;
       const stat = state ? voteManifest?.states?.[state] : null;
       const mapped = state ? stat?.count : voteManifest?.count;
@@ -788,6 +891,20 @@
 
   function renderProfileChart() {
     els.statusChart.classList.toggle("votes-chart", votesActive());
+    if (districtActive()) {
+      const summary = districtFacilitySummary();
+      const { counts, unmatched, matched } = summary || { counts: voteCategories.map(() => 0), unmatched: 0, matched: 0 };
+      const max = Math.max(...counts, unmatched, 1);
+      els.profileEyebrow.textContent = els.stateFilter.value ? `${els.stateFilter.value} facility profile` : "National facility profile";
+      els.profileTitle.textContent = "Data centers by district vote share";
+      els.chartTotal.textContent = summary ? `${fmt.format(matched)} of ${fmt.format(filtered.length)} matched` : "Loading…";
+      els.statusChart.innerHTML = summary
+        ? voteCategories.map(([label, color], index) => `<div class="bar-row"><span title="${escapeHtml(label)}">${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${counts[index] / max * 100}%;background:${color}"></div></div><strong>${fmt.format(counts[index])}</strong></div>`).join("")
+          + `<div class="bar-row"><span title="Outside mapped district">Outside district</span><div class="bar-track"><div class="bar-fill" style="width:${unmatched / max * 100}%;background:#64748b"></div></div><strong>${fmt.format(unmatched)}</strong></div>`
+          + `<p class="chart-note">Selected facility points are assigned to Census 119th congressional districts. Categories show the Harris–Trump margin as a share of all presidential votes.</p>`
+        : `<p class="chart-empty">Loading congressional district results…</p>`;
+      return;
+    }
     if (votesActive()) {
       const state = els.stateFilter.value;
       const summary = state ? voteFacilitySummary(state) : null;
@@ -858,6 +975,9 @@
 
   function renderLegend() {
     const cfg = activeConfig();
+    if (votesActive() && els.legend.parentElement === els.mapShell) els.mapShell.insertAdjacentElement("afterend", els.legend);
+    if (!votesActive() && els.legend.parentElement !== els.mapShell) els.mapShell.append(els.legend);
+    els.legend.classList.toggle("vote-legend", votesActive());
     els.viewTitle.textContent = cfg.title;
     els.insightTitle.textContent = cfg.insight[0];
     els.insightText.textContent = cfg.insight[1];
@@ -868,8 +988,9 @@
     } else {
       els.insightSource.textContent = `Data source: ${cfg.source}`;
     }
+    if (districtActive()) els.insightSource.innerHTML = `Results: <a href="${districtConfig.sourceUrl}" target="_blank" rel="noopener">2024 Pres by CD, curated by Drew Savicki</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html" target="_blank" rel="noopener">U.S. Census Bureau, 119th Congress</a>.`;
     if (votesActive()) {
-      els.legend.innerHTML = voteCategories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note">Harris minus Trump as a share of all votes. Click a state for its facility counts or a precinct for vote totals.<br><span class="vote-facility-key"></span> Data centers</div>`;
+      els.legend.innerHTML = voteCategories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note">Harris minus Trump as a share of all votes. ${districtActive() ? "Choose a state for its facility counts or click a district for vote totals." : "Click a state for its facility counts or a precinct for vote totals."}<br><span class="vote-facility-key"></span> Data centers</div>`;
     } else if (currentView === "cost") {
       els.legend.innerHTML = costBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${costColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:#172938"></span><span>Unavailable</span></div><div class="legend-note">2024 state industrial average.<br>Facilities are pale context points.</div>`;
     } else if (currentView === "policy") {
@@ -974,6 +1095,8 @@
     selectedId = id;
     selectedPlantId = null;
     selectedStateAbbr = null;
+    selectedDistrict = null;
+    els.voteLayer.querySelector(".vote-district.selected")?.classList.remove("selected");
     const f = facilities.find(item => item.id === id);
     if (!f) return;
     const statePrice = stateByAbbr.get(f.state)?.electricityPrice;
@@ -1015,13 +1138,18 @@
 
   function clearSelection() {
     const hadPrecinct = !!selectedPrecinct;
+    const hadDistrict = !!selectedDistrict;
     selectedId = null;
     selectedPlantId = null;
     selectedStateAbbr = null;
     selectedPrecinct = null;
+    selectedDistrict = null;
     if (hadPrecinct) els.voteLayer.querySelector(".vote-precinct.selected")?.classList.remove("selected");
+    if (hadDistrict) els.voteLayer.querySelector(".vote-district.selected")?.classList.remove("selected");
     els.detailPanel.classList.remove("open");
-    els.detailPanel.innerHTML = votesActive()
+    els.detailPanel.innerHTML = districtActive()
+      ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a district</h2><p>Choose a colored congressional district to review presidential vote counts and selected data centers.</p></div>`
+      : votesActive()
       ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a precinct</h2><p>Choose a colored precinct on the map to review presidential vote counts and boundary status.</p></div>`
       : currentView === "policy"
       ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a state</h2><p>Choose a state to review bill counts, statuses, policy types, and bill-level records.</p></div>`
@@ -1104,7 +1232,7 @@
   els.searchInput.addEventListener("input", applyFilters);
   els.stateFilter.addEventListener("change", () => { if (votesActive()) setVoteState(els.stateFilter.value); else applyFilters(); });
   els.oppositionMeasure.addEventListener("change", () => {
-    const leavingVotes = votesActive() && els.oppositionMeasure.value !== "votes";
+    const leavingVotes = votesActive() && els.oppositionMeasure.value !== oppositionMeasure;
     oppositionMeasure = els.oppositionMeasure.value;
     if (leavingVotes) resetView();
     els.mapShell.classList.toggle("votes-mode", votesActive());
@@ -1205,7 +1333,7 @@
     dragMoved = false;
     dragStart = { x:event.clientX, y:event.clientY, tx:transform.x, ty:transform.y };
     els.map.classList.add("dragging");
-    (event.target.classList.contains("vote-precinct") ? event.target : els.map).setPointerCapture(event.pointerId);
+    (event.target.classList.contains("vote-precinct") || event.target.classList.contains("vote-district") ? event.target : els.map).setPointerCapture(event.pointerId);
   });
   els.map.addEventListener("pointermove", event => {
     if (dragging) {
@@ -1220,6 +1348,18 @@
       return;
     }
     if (!votesActive() || event.target.classList.contains("facility")) return;
+    if (districtActive()) {
+      const district = event.target.closest?.(".vote-district");
+      if (!district) { hideTooltip(); return; }
+      const row = districtData?.districts.find(item => item[0] === district.dataset.district);
+      if (!row) return;
+      const margin = (row[1] - row[2]) / row[3];
+      const count = filtered.filter(facility => districtData.facilities[facility.id] === row[0]).length;
+      els.tooltip.innerHTML = `<strong>${row[0]}</strong><span>${margin >= 0 ? "Harris" : "Trump"} +${(Math.abs(margin) * 100).toFixed(1)} points · ${fmt.format(count)} selected data ${count === 1 ? "center" : "centers"}<br>Click for district details</span>`;
+      els.tooltip.hidden = false;
+      positionTooltip(event);
+      return;
+    }
     const precinct = event.target.closest?.(".vote-precinct");
     if (!precinct) { hideTooltip(); return; }
     const state = voteDisplayState;
@@ -1236,12 +1376,25 @@
   els.map.addEventListener("click", event => {
     if (dragMoved) { dragMoved = false; return; }
     if (votesActive()) {
+      if (districtActive()) {
+        const district = event.target.closest?.(".vote-district");
+        if (district) showDistrictDetails(district.dataset.district);
+        else if (event.target === els.map) clearSelection();
+        return;
+      }
       const precinct = event.target.closest?.(".vote-precinct");
       if (precinct && voteDisplayState) selectPrecinct(voteDisplayState, Number(precinct.dataset.index));
       else clearSelection();
       return;
     }
     if (event.target === els.map || (!stateIsInteractive() && event.target.classList.contains("state"))) clearSelection();
+  });
+  els.voteLayer.addEventListener("keydown", event => {
+    if (!districtActive() || !["Enter", " "].includes(event.key)) return;
+    const district = event.target.closest?.(".vote-district");
+    if (!district) return;
+    event.preventDefault();
+    showDistrictDetails(district.dataset.district);
   });
 
   function registerWebMcp() {
