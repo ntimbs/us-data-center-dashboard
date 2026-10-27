@@ -17,6 +17,14 @@ The public dashboard is built in the `dist` directory and published through the 
 
 The timeline offers an inventory-added basis and an online/active basis. The latter uses a reported or expected online year when available and also includes records currently classified Operating or Expanding no later than their inventory-added year. It is a cumulative screening timeline, not a verified history of facility openings or status transitions.
 
+### Facility inventory refresh
+
+The facility layer uses `Data_Centers_Database_102726.xlsx` (`DB_Output_V2`) from the [FracTracker U.S. Data Centers Tracker](https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909). The 27 October 2026 workbook contains 1,730 facility records. This update retains IDs for all 1,708 facilities in the prior snapshot and adds 22 records. The national, 50 km and 100 km hexagon, Virginia county, and congressional district facility counts have been refreshed. The workbook is a local input and is not committed; the dashboard publishes the processed facility records and aggregates.
+
+Grid proximity and other facility-specific spatial analysis for new records has not yet been rebuilt. County, state, resource, policy, and opposition context uses the 8 October 2026 spatial snapshot; new records receive the available county and state context. District assignments use 2024 Census 119th congressional district boundaries. Four facility points have no assignment within their stated state's district boundaries and remain in the unassigned category.
+
+To repeat this refresh from the local workspace, keep the baseline workbook and GeoPackage at the paths used by `scripts/refresh_facilities.py`, download and extract the [Census district boundaries](https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_cd119_500k.zip), then run `python3 scripts/refresh_facilities.py ../Data_Centers_Database_102726.xlsx PATH/TO/cb_2024_us_cd119_500k.shp`. The script uses `openpyxl` and R's `sf` package and updates the committed `dist` datasets.
+
 ### 2024 presidential precinct vote layer
 
 In the national view, choose **Opposition → 2024 presidential precinct vote**, then select a state to load its precinct boundaries and results directly from The New York Times. Click a precinct for Harris, Trump, and total presidential votes, margin, and whether its boundary is official. Colors use `(Harris votes − Trump votes) / all presidential votes`, not a two-party denominator. This is political context and does not measure support for or opposition to data centers. Coverage and boundary quality vary by state.

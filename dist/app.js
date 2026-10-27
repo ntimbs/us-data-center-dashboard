@@ -61,7 +61,7 @@
     status: {
       title: "Operating status",
       insight: ["Project status is the outcome anchor", "Use proposed, development, operating, suspended, and cancelled records to define comparison groups. Preserve the snapshot date before modeling transitions."],
-      source: "U.S. Data Centers Tracker (ArcGIS), reported project-status field.",
+      source: "FracTracker U.S. Data Centers Tracker, 27 October 2026 facility inventory; reported project-status field.",
       sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [
         ["Operating", "#2dd4bf"], ["Development", "#60a5fa"], ["Expanding", "#a78bfa"],
@@ -72,7 +72,7 @@
     capacity: {
       title: "Reported MW capacity",
       insight: ["Capacity coverage is incomplete", "Point size and color use reported MW or the midpoint of a reported range. Unknown values remain visible and are never converted to zero."],
-      source: "U.S. Data Centers Tracker (ArcGIS), reported MW capacity field.",
+      source: "FracTracker U.S. Data Centers Tracker, 27 October 2026 facility inventory; reported MW capacity field.",
       sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [["Mega campus (1,000+ MW)", "#7c3aed"], ["Hyperscale (100-999 MW)", "#2563eb"], ["Large (51-99 MW)", "#0891b2"], ["Medium (11-50 MW)", "#14b8a6"], ["Small (0-10 MW)", "#84cc16"], ["Unknown", "#64748b"]],
       key: f => f.capacity || "Unknown"
@@ -80,7 +80,7 @@
     power: {
       title: "Reported power source",
       insight: ["Reported sourcing is sparse", "Power categories describe source text and announced arrangements. They do not identify the hourly delivered mix or prove a physical grid connection."],
-      source: "U.S. Data Centers Tracker (ArcGIS), reported power-source field.",
+      source: "FracTracker U.S. Data Centers Tracker, 27 October 2026 facility inventory; reported power-source field.",
       sourceUrl: "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909",
       categories: [["Grid", "#60a5fa"], ["Natural gas", "#f59e0b"], ["Renewable", "#22c55e"], ["Nuclear", "#a78bfa"], ["Mixed", "#f97316"], ["Other fossil", "#ef4444"], ["Storage or fuel cell", "#06b6d4"], ["Other", "#94a3b8"], ["Unknown", "#475569"]],
       key: f => f.power || "Unknown"
@@ -1103,7 +1103,7 @@
     els.detailPanel.innerHTML = `<div class="detail-content">
       <div class="detail-top"><div><span class="eyebrow">${escapeHtml(f.id)}</span><h2>${escapeHtml(f.name)}</h2><p class="detail-location">${escapeHtml([f.city, f.county, f.state].filter(Boolean).join(" · "))}</p></div><button class="close-detail" type="button" aria-label="Close facility details">×</button></div>
       <span class="phase-pill">${escapeHtml(f.phase || "Unknown status")}</span>
-      ${detailSection("Facility", [detailItem("Operator", f.operator), detailItem("Purpose", f.purpose), detailItem("Capacity", f.mw == null ? "Unknown" : `${fmt.format(f.mw)} MW`), detailItem("Capacity class", f.capacity), detailItem("Power source", f.power), detailItem("Reported acreage", f.acres == null ? f.acreageClass : `${fmt.format(f.acres)} acres`), detailItem("Added to inventory", f.dateCreated), detailItem("Reported/expected online", f.onlineYear)])}
+      ${detailSection("Facility", [detailItem("Operator", f.operator), detailItem("Purpose", f.purpose), detailItem("Capacity", f.mw == null ? "Unknown" : `${fmt.format(f.mw)} MW`), detailItem("Capacity class", f.capacity), detailItem("Power source", f.power), detailItem("Reported acreage", f.acres == null ? f.acreageClass : `${fmt.format(f.acres)} acres`), detailItem("Added to inventory", f.dateCreated), detailItem("Last updated in inventory", f.dateUpdated), detailItem("Reported/expected online", f.onlineYear == null ? null : String(f.onlineYear))])}
       ${detailSection("Power and grid", [detailItem("Candidate utility", f.utility), detailItem("Utility match", f.utilityMatch), detailItem("eGRID subregion", f.subregion), detailItem("State industrial price", statePrice ? `${priceFmt.format(statePrice.industrial)} ¢/kWh (${statePrice.year})` : "Unknown"), detailItem("200+ kV line", f.txKm == null ? "Unknown" : `${fmt.format(f.txKm)} km`), detailItem("Nearest substation", f.substationKm == null ? "Unknown" : `${fmt.format(f.substationKm)} km`), detailItem("Active queue MW", f.queueActiveMw == null ? "Unknown" : `${fmt.format(f.queueActiveMw)} MW`)])}
       ${detailSection("Water", [detailItem("Water scarcity", f.waterClass), detailItem("AWARE factor", f.waterFactor)])}
       ${detailSection("Hazards", [detailItem("Overall hazard", f.risk), detailItem("Drought", f.drought), detailItem("Riverine flood", f.flood), detailItem("Heat wave", f.heat), detailItem("Wildfire", f.wildfire)])}
@@ -1222,8 +1222,8 @@
   function resetView() { transform = { x: 0, y: 0, scale: 1 }; updateTransform(); if (votesActive()) renderFacilities(); }
 
   function exportCsv() {
-    const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "date_added_to_inventory", "reported_expected_online_year", "mw_mid", "capacity_class", "power_source", "state_industrial_price_2024_cents_kwh", "water_scarcity", "aware_factor", "overall_hazard", "drought_hazard", "riverine_flood_hazard", "heat_wave_hazard", "wildfire_hazard", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
-    const rows = filtered.map(f => [f.id, f.name, f.city, f.state, f.county, f.phase, f.dateCreated, f.onlineYear, f.mw, f.capacity, f.power, stateByAbbr.get(f.state)?.electricityPrice?.industrial, f.waterClass, f.waterFactor, f.risk, f.drought, f.flood, f.heat, f.wildfire, f.incentive, f.moratoriumCount, f.oppositionClass, f.lat, f.lon]);
+    const headers = ["facility_id", "facility_name", "city", "state", "county", "project_phase", "date_added_to_inventory", "date_last_updated_in_inventory", "reported_expected_online_year", "mw_mid", "capacity_class", "power_source", "state_industrial_price_2024_cents_kwh", "water_scarcity", "aware_factor", "overall_hazard", "drought_hazard", "riverine_flood_hazard", "heat_wave_hazard", "wildfire_hazard", "state_incentive", "moratorium_tracker_count", "opposition_evidence", "latitude", "longitude"];
+    const rows = filtered.map(f => [f.id, f.name, f.city, f.state, f.county, f.phase, f.dateCreated, f.dateUpdated, f.onlineYear, f.mw, f.capacity, f.power, stateByAbbr.get(f.state)?.electricityPrice?.industrial, f.waterClass, f.waterFactor, f.risk, f.drought, f.flood, f.heat, f.wildfire, f.incentive, f.moratoriumCount, f.oppositionClass, f.lat, f.lon]);
     const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "us_data_centers_filtered.csv"; link.click(); URL.revokeObjectURL(link.href);
