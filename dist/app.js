@@ -41,6 +41,7 @@
     ["Harris +40 or more", "#2563a6"], ["Harris +15 to 40", "#4b91d2"], ["Harris +5 to 15", "#8bb8dc"],
     ["Within 5 points", "#b8b6ba"], ["Trump +5 to 15", "#e8a0a0"], ["Trump +15 to 40", "#d76565"], ["Trump +40 or more", "#a92f38"]
   ];
+  const houseVoteCategories = voteCategories.map(([label, color]) => [label.replace("Harris", "Democrat").replace("Trump", "Republican"), color]);
   const voteConfig = {
     title: "2024 presidential vote by precinct",
     insight: ["Voting is community context", "Colors show Harris’s lead over Trump as a share of all presidential votes in each mapped precinct. Vote results do not measure support for or opposition to data centers. Some boundaries are estimated, and some areas have no usable precinct results."],
@@ -54,6 +55,13 @@
     source: "2024 Pres by CD, curated by Drew Savicki; U.S. Census Bureau, 119th congressional districts.",
     sourceUrl: "https://docs.google.com/spreadsheets/d/1ZHx5E0-5vuXxcZShBgsAl_vwAntkkanGqYQp0owNjoQ/edit?gid=0",
     categories: voteCategories
+  };
+  const house2026Config = {
+    title: "2026 U.S. House vote by congressional district",
+    insight: ["House voting is community context", "Colors show the Democratic minus Republican share of all reported House votes. Results are preliminary and were retrieved on 5 November 2026; four districts have no reported votes. House voting does not measure views about data centers."],
+    source: "Polling Desk, using civicAPI results; U.S. Census Bureau district boundaries.",
+    sourceUrl: "https://polling-desk.com/house-districts",
+    categories: houseVoteCategories
   };
   const voteDataBase = "https://int.nyt.com/newsgraphics/elections/map-data/2024/national";
 
@@ -170,6 +178,8 @@
   let voteRenderVersion = 0;
   let districtData = null;
   let districtLoadPromise = null;
+  let house2026Data = null;
+  let house2026LoadPromise = null;
   let selectedDistrict = null;
   let transform = { x: 0, y: 0, scale: 1 };
   let dragging = false;
@@ -180,9 +190,13 @@
   let timelineTimer = null;
   const stateByAbbr = new Map(states.map(state => [state.abbr, state]));
   const precinctActive = () => currentView === "opposition" && oppositionMeasure === "votes";
-  const districtActive = () => currentView === "opposition" && oppositionMeasure === "districts";
+  const districtActive = () => currentView === "opposition" && ["districts", "house2026"].includes(oppositionMeasure);
+  const house2026Active = () => districtActive() && oppositionMeasure === "house2026";
   const votesActive = () => precinctActive() || districtActive();
-  const activeConfig = () => precinctActive() ? voteConfig : districtActive() ? districtConfig : config[currentView];
+  const activeConfig = () => precinctActive() ? voteConfig : house2026Active() ? house2026Config : districtActive() ? districtConfig : config[currentView];
+  const activeDistrictData = () => house2026Active() ? house2026Data : districtData;
+  const activeVoteCategories = () => house2026Active() ? houseVoteCategories : voteCategories;
+  const districtMargin = row => row && row[3] > 0 ? (row[1] - row[2]) / row[3] : null;
   function voteBin(margin) {
     if (margin >= 0.4) return 0;
     if (margin >= 0.15) return 1;
@@ -327,6 +341,16 @@
     return response.json();
   }
   function loadDistrictData() {
+    if (house2026Active()) {
+      if (!house2026LoadPromise) {
+        house2026LoadPromise = voteJson("house-2026.json").then(data => {
+          if (data.districts.length !== 435) throw new Error("Incomplete 2026 House district data");
+          house2026Data = data;
+          return data;
+        }).catch(error => { house2026LoadPromise = null; throw error; });
+      }
+      return house2026LoadPromise;
+    }
     if (!districtLoadPromise) {
       districtLoadPromise = voteJson("districts.json").then(data => {
         if (data.districts.length !== 435) throw new Error("Incomplete congressional district data");
@@ -337,24 +361,39 @@
     return districtLoadPromise;
   }
   function districtFacilitySummary() {
-    if (!districtData) return null;
-    const districtById = new Map(districtData.districts.map(row => [row[0], row]));
+    const data = activeDistrictData();
+    if (!data) return null;
+    const districtById = new Map(data.districts.map(row => [row[0], row]));
     const counts = voteCategories.map(() => 0);
     let unmatched = 0;
+    let unreported = 0;
     for (const facility of filtered) {
-      const row = districtById.get(districtData.facilities[facility.id]);
+      const row = districtById.get(data.facilities[facility.id]);
       if (!row) unmatched++;
-      else counts[voteBin((row[1] - row[2]) / row[3])]++;
+      else if (row[3] === 0) unreported++;
+      else counts[voteBin(districtMargin(row))]++;
     }
-    return { counts, unmatched, matched: filtered.length - unmatched };
+    return { counts, unmatched, unreported, matched: filtered.length - unmatched - unreported };
   }
   function showDistrictDetails(id) {
-    const row = districtData?.districts.find(item => item[0] === id);
+    const data = activeDistrictData();
+    const row = data?.districts.find(item => item[0] === id);
     if (!row || !districtActive()) return;
     selectedDistrict = id;
     selectedId = selectedPlantId = selectedStateAbbr = null;
-    const margin = (row[1] - row[2]) / row[3];
-    const count = filtered.filter(facility => districtData.facilities[facility.id] === id).length;
+    const margin = districtMargin(row);
+    const count = filtered.filter(facility => data.facilities[facility.id] === id).length;
+    if (house2026Active()) {
+      const status = row[6] === "called" ? row[3] ? "Race called" : "Source marks race called; no totals" : "Still counting";
+      const lead = margin === null ? "No reported votes" : `${margin >= 0 ? "Democrat" : "Republican"} +${(Math.abs(margin) * 100).toFixed(1)} points`;
+      els.detailPanel.innerHTML = `<div class="detail-content">
+        <div class="detail-top"><div><span class="eyebrow">2026 U.S. House district · preliminary</span><h2>${escapeHtml(id)}</h2><p class="detail-location">${fmt.format(count)} selected data ${count === 1 ? "center" : "centers"} in this district</p></div><button class="close-detail" type="button" aria-label="Close district details">×</button></div>
+        <span class="phase-pill">${escapeHtml(lead)}</span>
+        ${detailSection("House votes reported", [detailItem("Democratic candidates", row[3] ? row[1] : null), detailItem("Republican candidates", row[3] ? row[2] : null), detailItem("Other candidates", row[3] ? row[3] - row[1] - row[2] : null), detailItem("All candidates", row[3] || null), detailItem("Race status", status), detailItem("Winner or leader", row[8]), detailItem("Estimated reporting", row[7] == null ? null : `${row[7]}%`)])}
+        <p class="policy-note">Unofficial results retrieved 5 November 2026; totals and race calls may change. Margin is (Democratic − Republican votes) ÷ all reported House votes. Facility count uses the 120th district boundary, except Missouri, where the unchanged 119th boundary applies. Voting does not indicate a position on data centers.</p>
+        <p class="policy-note">Results: <a href="${escapeHtml(row[10])}" target="_blank" rel="noopener">Polling Desk / civicAPI</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.html" target="_blank" rel="noopener">U.S. Census Bureau</a>.</p>
+      </div>`;
+    } else {
     els.detailPanel.innerHTML = `<div class="detail-content">
       <div class="detail-top"><div><span class="eyebrow">2024 congressional district</span><h2>${escapeHtml(id)}</h2><p class="detail-location">${fmt.format(count)} selected data ${count === 1 ? "center" : "centers"} in this district</p></div><button class="close-detail" type="button" aria-label="Close district details">×</button></div>
       <span class="phase-pill">${margin >= 0 ? "Harris" : "Trump"} +${(Math.abs(margin) * 100).toFixed(1)} points</span>
@@ -362,6 +401,7 @@
       <p class="policy-note">Facility count reflects the current filters and the 119th congressional district boundary. The margin is (Harris − Trump) ÷ all presidential votes. Voting does not indicate a position on data centers.</p>
       <p class="policy-note">Results: <a href="${districtConfig.sourceUrl}" target="_blank" rel="noopener">2024 Pres by CD</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html" target="_blank" rel="noopener">U.S. Census Bureau</a>.</p>
     </div>`;
+    }
     els.detailPanel.classList.add("open");
     els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
     els.voteLayer.querySelector(".vote-district.selected")?.classList.remove("selected");
@@ -375,8 +415,13 @@
       if (version !== voteRenderVersion || !districtActive()) return;
       const state = els.stateFilter.value;
       const rows = state ? data.districts.filter(row => row[0].startsWith(`${state}-`)) : data.districts;
-      els.voteLayer.innerHTML = rows.map(row => `<path class="vote-district${selectedDistrict === row[0] ? " selected" : ""}" data-district="${row[0]}" d="${row[4]}" fill="${voteColor((row[1] - row[2]) / row[3])}" fill-rule="evenodd" role="button" tabindex="0" aria-label="${row[0]} congressional district vote details"><title>${row[0]} · ${((row[1] - row[2]) / row[3] * 100).toFixed(1)} point Harris margin</title></path>`).join("");
-      els.voteStatus.textContent = `${fmt.format(rows.length)} congressional ${rows.length === 1 ? "district" : "districts"}${state ? ` in ${state}` : " nationwide"}`;
+      els.voteLayer.innerHTML = rows.map(row => {
+        const margin = districtMargin(row);
+        const title = margin === null ? "No reported votes" : `${(Math.abs(margin) * 100).toFixed(1)} point ${margin >= 0 ? house2026Active() ? "Democratic" : "Harris" : house2026Active() ? "Republican" : "Trump"} margin`;
+        return `<path class="vote-district${selectedDistrict === row[0] ? " selected" : ""}" data-district="${row[0]}" d="${row[4]}" fill="${voteColor(margin)}" fill-rule="evenodd" role="button" tabindex="0" aria-label="${row[0]} congressional district vote details"><title>${row[0]} · ${title}</title></path>`;
+      }).join("");
+      const reported = rows.filter(row => row[3] > 0).length;
+      els.voteStatus.textContent = `${fmt.format(rows.length)} congressional ${rows.length === 1 ? "district" : "districts"}${state ? ` in ${state}` : " nationwide"}${house2026Active() ? ` · ${reported} with reported votes` : ""}`;
       if (state) {
         const bounds = rows.reduce((box, row) => [Math.min(box[0], row[5][0]), Math.min(box[1], row[5][1]), Math.max(box[2], row[5][2]), Math.max(box[3], row[5][3])], [Infinity, Infinity, -Infinity, -Infinity]);
         const scale = Math.max(1, Math.min(20, 900 / Math.max(1, bounds[2] - bounds[0]), 510 / Math.max(1, bounds[3] - bounds[1])));
@@ -503,14 +548,18 @@
   }
   function showVoteStateDetails(state) {
     if (districtActive()) {
-      if (!districtData) return;
+      if (!activeDistrictData()) return;
       const summary = districtFacilitySummary();
-      const { counts, unmatched, matched } = summary;
+      const { counts, unmatched, unreported, matched } = summary;
+      const categories = activeVoteCategories();
+      const year = house2026Active() ? "2026 U.S. House" : "2024 presidential";
+      const source = house2026Active()
+        ? `<p class="policy-note">Unofficial results retrieved 5 November 2026. House votes may change as counting continues. Four districts currently have no reported votes. The 120th Congress boundaries apply except in Missouri, which used its unchanged 119th Congress map. Voting does not measure views about data centers.</p><p class="policy-note">Results: <a href="https://polling-desk.com/house-districts" target="_blank" rel="noopener">Polling Desk / civicAPI</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.html" target="_blank" rel="noopener">U.S. Census Bureau</a>.</p>`
+        : `<p class="policy-note">Counts reflect current facility filters. Each facility point is assigned to a 119th congressional district; points outside mapped boundaries are listed separately. Voting does not measure views about data centers.</p><p class="policy-note">Results: <a href="${districtConfig.sourceUrl}" target="_blank" rel="noopener">2024 Pres by CD</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html" target="_blank" rel="noopener">U.S. Census Bureau</a>.</p>`;
       els.detailPanel.innerHTML = `<div class="detail-content">
-        <div class="detail-top"><div><span class="eyebrow">2024 congressional district vote · ${escapeHtml(state.abbr)}</span><h2>${escapeHtml(state.name)}</h2><p class="detail-location">${fmt.format(matched)} of ${fmt.format(filtered.length)} selected data centers matched to a district</p></div><button class="close-detail" type="button" aria-label="Close state vote details">×</button></div>
-        <section class="detail-section"><h3>Data centers by district vote share</h3><div class="vote-breakdown">${voteCategories.map(([label, color], index) => `<div><span><i style="background:${color}"></i>${escapeHtml(label)}</span><strong>${fmt.format(counts[index])}</strong></div>`).join("")}<div><span><i style="background:#64748b"></i>Outside mapped district</span><strong>${fmt.format(unmatched)}</strong></div></div></section>
-        <p class="policy-note">Counts reflect current facility filters. Each facility point is assigned to a 119th congressional district; points outside mapped boundaries are listed separately. Voting does not measure views about data centers.</p>
-        <p class="policy-note">Results: <a href="${districtConfig.sourceUrl}" target="_blank" rel="noopener">2024 Pres by CD</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html" target="_blank" rel="noopener">U.S. Census Bureau</a>.</p>
+        <div class="detail-top"><div><span class="eyebrow">${year} district vote · ${escapeHtml(state.abbr)}</span><h2>${escapeHtml(state.name)}</h2><p class="detail-location">${fmt.format(matched)} of ${fmt.format(filtered.length)} selected data centers ${house2026Active() ? "in districts with reported votes" : "matched to a district"}</p></div><button class="close-detail" type="button" aria-label="Close state vote details">×</button></div>
+        <section class="detail-section"><h3>Data centers by district vote share</h3><div class="vote-breakdown">${categories.map(([label, color], index) => `<div><span><i style="background:${color}"></i>${escapeHtml(label)}</span><strong>${fmt.format(counts[index])}</strong></div>`).join("")}${house2026Active() ? `<div><span><i style="background:#64748b"></i>District without reported votes</span><strong>${fmt.format(unreported)}</strong></div>` : ""}<div><span><i style="background:#475569"></i>Outside mapped district</span><strong>${fmt.format(unmatched)}</strong></div></div></section>
+        ${source}
       </div>`;
       els.detailPanel.classList.add("open");
       els.detailPanel.querySelector(".close-detail")?.addEventListener("click", clearSelection);
@@ -771,7 +820,7 @@
   function showStateTooltip(event, state) {
     if (!stateIsInteractive()) return;
     if (votesActive()) {
-      els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>Click to view data centers by 2024 ${precinctActive() ? "precinct" : "congressional district"} vote share</span>`;
+      els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>Click to view data centers by ${house2026Active() ? "2026 House district" : precinctActive() ? "2024 precinct" : "2024 congressional district"} vote share</span>`;
     } else if (currentView === "cost") {
       const price = state.electricityPrice;
       els.tooltip.innerHTML = `<strong>${escapeHtml(state.name)}</strong><span>${price ? `2024 industrial average: ${priceFmt.format(price.industrial)} ¢/kWh<br>Inflation-adjusted: ${priceFmt.format(price.industrialReal2020)} ¢/kWh in 2020 dollars` : "Electricity-price data unavailable"}</span>`;
@@ -853,8 +902,10 @@
       const summary = districtFacilitySummary();
       const where = els.stateFilter.value ? ` in ${els.stateFilter.value}` : " nationally";
       els.coverageLine.textContent = summary
-        ? `${fmt.format(districtData.districts.length)} congressional districts use 2024 presidential results and 119th Congress boundaries. ${fmt.format(summary.matched)} of ${fmt.format(count)} selected facility points${where} match a district; ${fmt.format(summary.unmatched)} are outside the mapped boundary. Presidential voting does not measure data-center opposition.`
-        : "Loading 2024 congressional district results…";
+        ? house2026Active()
+          ? `${fmt.format(activeDistrictData().meta.reportedDistricts)} of 435 districts have reported 2026 House votes as of 5 November 2026. ${fmt.format(summary.matched)} of ${fmt.format(count)} selected facility points${where} are in a district with reported votes; ${fmt.format(summary.unreported)} ${summary.unreported === 1 ? "is" : "are"} in districts without reported votes and ${fmt.format(summary.unmatched)} ${summary.unmatched === 1 ? "is" : "are"} outside mapped boundaries. Results are unofficial and may change. House voting does not measure data-center opposition.`
+          : `${fmt.format(districtData.districts.length)} congressional districts use 2024 presidential results and 119th Congress boundaries. ${fmt.format(summary.matched)} of ${fmt.format(count)} selected facility points${where} match a district; ${fmt.format(summary.unmatched)} are outside the mapped boundary. Presidential voting does not measure data-center opposition.`
+        : house2026Active() ? "Loading preliminary 2026 House district results…" : "Loading 2024 congressional district results…";
     } else if (votesActive()) {
       const state = els.stateFilter.value;
       const stat = state ? voteManifest?.states?.[state] : null;
@@ -893,15 +944,16 @@
     els.statusChart.classList.toggle("votes-chart", votesActive());
     if (districtActive()) {
       const summary = districtFacilitySummary();
-      const { counts, unmatched, matched } = summary || { counts: voteCategories.map(() => 0), unmatched: 0, matched: 0 };
-      const max = Math.max(...counts, unmatched, 1);
+      const { counts, unmatched, unreported, matched } = summary || { counts: voteCategories.map(() => 0), unmatched: 0, unreported: 0, matched: 0 };
+      const max = Math.max(...counts, unmatched, unreported, 1);
       els.profileEyebrow.textContent = els.stateFilter.value ? `${els.stateFilter.value} facility profile` : "National facility profile";
       els.profileTitle.textContent = "Data centers by district vote share";
-      els.chartTotal.textContent = summary ? `${fmt.format(matched)} of ${fmt.format(filtered.length)} matched` : "Loading…";
+      els.chartTotal.textContent = summary ? `${fmt.format(matched)} of ${fmt.format(filtered.length)} ${house2026Active() ? "with reported votes" : "matched"}` : "Loading…";
       els.statusChart.innerHTML = summary
-        ? voteCategories.map(([label, color], index) => `<div class="bar-row"><span title="${escapeHtml(label)}">${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${counts[index] / max * 100}%;background:${color}"></div></div><strong>${fmt.format(counts[index])}</strong></div>`).join("")
+        ? activeVoteCategories().map(([label, color], index) => `<div class="bar-row"><span title="${escapeHtml(label)}">${escapeHtml(label)}</span><div class="bar-track"><div class="bar-fill" style="width:${counts[index] / max * 100}%;background:${color}"></div></div><strong>${fmt.format(counts[index])}</strong></div>`).join("")
+          + (house2026Active() ? `<div class="bar-row"><span title="District without reported votes">No vote total</span><div class="bar-track"><div class="bar-fill" style="width:${unreported / max * 100}%;background:#64748b"></div></div><strong>${fmt.format(unreported)}</strong></div>` : "")
           + `<div class="bar-row"><span title="Outside mapped district">Outside district</span><div class="bar-track"><div class="bar-fill" style="width:${unmatched / max * 100}%;background:#64748b"></div></div><strong>${fmt.format(unmatched)}</strong></div>`
-          + `<p class="chart-note">Selected facility points are assigned to Census 119th congressional districts. Categories show the Harris–Trump margin as a share of all presidential votes.</p>`
+          + `<p class="chart-note">${house2026Active() ? "Selected facility points use Census 120th districts, except Missouri's unchanged 119th map. Categories show the Democratic–Republican margin as a share of reported House votes. Results are preliminary as of 5 November 2026." : "Selected facility points are assigned to Census 119th congressional districts. Categories show the Harris–Trump margin as a share of all presidential votes."}</p>`
         : `<p class="chart-empty">Loading congressional district results…</p>`;
       return;
     }
@@ -988,9 +1040,11 @@
     } else {
       els.insightSource.textContent = `Data source: ${cfg.source}`;
     }
-    if (districtActive()) els.insightSource.innerHTML = `Results: <a href="${districtConfig.sourceUrl}" target="_blank" rel="noopener">2024 Pres by CD, curated by Drew Savicki</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html" target="_blank" rel="noopener">U.S. Census Bureau, 119th Congress</a>.`;
+    if (districtActive()) els.insightSource.innerHTML = house2026Active()
+      ? `Results: <a href="https://polling-desk.com/house-districts" target="_blank" rel="noopener">Polling Desk / civicAPI, retrieved 5 November 2026</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.html" target="_blank" rel="noopener">U.S. Census Bureau, 120th Congress (Missouri: unchanged 119th)</a>.`
+      : `Results: <a href="${districtConfig.sourceUrl}" target="_blank" rel="noopener">2024 Pres by CD, curated by Drew Savicki</a> · Boundaries: <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html" target="_blank" rel="noopener">U.S. Census Bureau, 119th Congress</a>.`;
     if (votesActive()) {
-      els.legend.innerHTML = voteCategories.map(([label, color]) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + `<div class="legend-note">Harris minus Trump as a share of all votes. ${districtActive() ? "Choose a state for its facility counts or click a district for vote totals." : "Click a state for its facility counts or a precinct for vote totals."}<br><span class="vote-facility-key"></span> Data centers</div>`;
+      els.legend.innerHTML = activeVoteCategories().map(([label, color]) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${color}"></span><span>${escapeHtml(label)}</span></div>`).join("") + (house2026Active() ? `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:#64748b"></span><span>No reported votes</span></div>` : "") + `<div class="legend-note">${house2026Active() ? "Democratic minus Republican share of reported House votes; preliminary as of 5 November 2026." : "Harris minus Trump as a share of all votes."} ${districtActive() ? "Choose a state for its facility counts or click a district for vote totals." : "Click a state for its facility counts or a precinct for vote totals."}<br><span class="vote-facility-key"></span> Data centers</div>`;
     } else if (currentView === "cost") {
       els.legend.innerHTML = costBins.map((bin, index) => `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:${costColors[index]}"></span><span>${escapeHtml(bin.label)}</span></div>`).join("") + `<div class="legend-item"><span class="legend-swatch state-swatch" style="background:#172938"></span><span>Unavailable</span></div><div class="legend-note">2024 state industrial average.<br>Facilities are pale context points.</div>`;
     } else if (currentView === "policy") {
@@ -1148,7 +1202,7 @@
     if (hadDistrict) els.voteLayer.querySelector(".vote-district.selected")?.classList.remove("selected");
     els.detailPanel.classList.remove("open");
     els.detailPanel.innerHTML = districtActive()
-      ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a district</h2><p>Choose a colored congressional district to review presidential vote counts and selected data centers.</p></div>`
+      ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a district</h2><p>Choose a congressional district to review ${house2026Active() ? "preliminary House" : "presidential"} vote counts and selected data centers.</p></div>`
       : votesActive()
       ? `<div class="detail-empty"><span class="detail-marker"></span><h2>Select a precinct</h2><p>Choose a colored precinct on the map to review presidential vote counts and boundary status.</p></div>`
       : currentView === "policy"
@@ -1351,11 +1405,13 @@
     if (districtActive()) {
       const district = event.target.closest?.(".vote-district");
       if (!district) { hideTooltip(); return; }
-      const row = districtData?.districts.find(item => item[0] === district.dataset.district);
+      const data = activeDistrictData();
+      const row = data?.districts.find(item => item[0] === district.dataset.district);
       if (!row) return;
-      const margin = (row[1] - row[2]) / row[3];
-      const count = filtered.filter(facility => districtData.facilities[facility.id] === row[0]).length;
-      els.tooltip.innerHTML = `<strong>${row[0]}</strong><span>${margin >= 0 ? "Harris" : "Trump"} +${(Math.abs(margin) * 100).toFixed(1)} points · ${fmt.format(count)} selected data ${count === 1 ? "center" : "centers"}<br>Click for district details</span>`;
+      const margin = districtMargin(row);
+      const count = filtered.filter(facility => data.facilities[facility.id] === row[0]).length;
+      const lead = margin === null ? "No reported votes" : `${margin >= 0 ? house2026Active() ? "Democrat" : "Harris" : house2026Active() ? "Republican" : "Trump"} +${(Math.abs(margin) * 100).toFixed(1)} points`;
+      els.tooltip.innerHTML = `<strong>${row[0]}</strong><span>${lead} · ${fmt.format(count)} selected data ${count === 1 ? "center" : "centers"}${house2026Active() ? " · preliminary" : ""}<br>Click for district details</span>`;
       els.tooltip.hidden = false;
       positionTooltip(event);
       return;
