@@ -401,7 +401,7 @@ variables <- list(
   list(
     key="directOppositionCount", label="Direct facility opposition", group="Local opposition", unit="facilities",
     definition="Number of facility records with direct project-specific opposition evidence.",
-    source="Layer 08 matched opposition events derived from opposition_events.csv, reviewed 8 October 2026.",
+    source="FracTracker inventory community_pushback flags; not a count of matches in the opposition-event tracker.",
     calculation="Count of facilities where opposition_direct_facility_flag equals 1 within each cell.",
     missing="Facilities without a direct matched record contribute 0; that is unknown/no match, not confirmed absence of opposition.",
     caution="Direct evidence indicates a documented match and does not provide a standardized intensity, duration, or causal effect.",

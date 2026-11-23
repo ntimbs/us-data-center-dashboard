@@ -22,6 +22,8 @@ The public dashboard is built in the `dist` directory. The GitHub Pages workflow
 
 The [GitHub source catalogue](SOURCES.md), website source directory, and CSV registers are generated from `dist/sources/catalog.json` and the bill records in `dist/dashboard-data.js`. After changing either input, run `python3 scripts/build_sources.py` and commit the generated files. The source directory documents the published snapshots; it does not refresh the underlying maps.
 
+**Source audit:** [Coverage, link checks, and licensing findings](SOURCE_AUDIT.md). These sources are not all openly licensed; each catalogue entry now records reuse terms or an explicit uncertainty. [Download the dated URL check results](dist/sources/link-checks.csv). To repeat the network checks, run `python3 scripts/check_source_links.py` and review access blocks separately from broken links.
+
 The timeline offers an inventory-added basis and an online/active basis. The latter uses a reported or expected online year when available and also includes records currently classified Operating or Expanding no later than their inventory-added year. It is a cumulative screening timeline, not a verified history of facility openings or status transitions.
 
 ### Facility inventory refresh

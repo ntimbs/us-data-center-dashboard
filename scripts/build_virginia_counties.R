@@ -288,7 +288,7 @@ set_variable_text("pipelineCount", "source", sprintf("Layer 08 activity_group de
 set_variable_text("plantOperatingMw", "source", sprintf("U.S. EPA eGRID 2024 operating_mw field for %d Virginia power-plant records.", nrow(plant_join)))
 set_variable_text("plantCount", "source", sprintf("U.S. EPA eGRID 2024; %d power-plant records fall within Virginia county boundaries.", nrow(plant_join)))
 set_variable_text("localActionCount", "source", sprintf("FracTracker local-actions GeoPackage used in Layer 08; %d point records fall within Virginia county boundaries.", nrow(action_join)))
-set_variable_text("directOppositionCount", "source", sprintf("Layer 08 matched facility opposition derived from opposition_events.csv; %d Virginia facility records have the direct-opposition flag.", sum(counties$direct_opposition_count, na.rm = TRUE)))
+set_variable_text("directOppositionCount", "source", sprintf("FracTracker inventory community_pushback flags; %d Virginia facility records have the direct-opposition flag.", sum(counties$direct_opposition_count, na.rm = TRUE)))
 
 state_policy <- st_read(state_file, layer = "state_legislation_summary", quiet = TRUE)
 state_policy <- st_drop_geometry(state_policy[state_policy$state == "VA", ])

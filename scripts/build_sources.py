@@ -34,14 +34,14 @@ def main():
         key=lambda b: (b["state"], b["year"] or 0, b["bill"]),
     )
     with (OUT / "source-links.csv").open("w", newline="") as handle:
-        writer = csv.writer(handle)
-        writer.writerow(["category", "source", "publisher", "vintage", "used_for", "notes", "link_label", "url"])
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(["category", "source", "publisher", "vintage", "used_for", "notes", "reuse_status", "reuse_notes", "link_label", "url"])
         for s in sources:
             for item in s["links"]:
                 url = item["url"]
                 if not urlsplit(url).scheme:
                     url = "https://ntimbs.github.io/us-data-center-dashboard/sources/" + url
-                writer.writerow([s["category"], s["title"], s["publisher"], s["vintage"], s["use"], s["notes"], item["label"], url])
+                writer.writerow([s["category"], s["title"], s["publisher"], s["vintage"], s["use"], s["notes"], s["reuse"]["status"], s["reuse"]["notes"], item["label"], url])
     with (OUT / "legislation-sources.csv").open("w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(["state", "bill", "year", "snapshot_status", "last_action_date", "source_url"])
@@ -57,6 +57,7 @@ def main():
         f"The {len(sources)} source entries below cover the published national facility, U.S. hexagon, and Virginia county views. Each entry identifies the publisher, the snapshot used, its contribution to the dashboard, and the original source links.",
         "Facility inventory: **27 October 2026**. Spatial and policy context reviewed: **8 October 2026**. Preliminary 2026 House results retrieved: **5 November 2026**. Source websites may show newer data; these dates describe the versions used by the dashboard.",
         "[Source links CSV](dist/sources/source-links.csv) · [Legislative source register CSV](dist/sources/legislation-sources.csv)",
+        "**Publicly accessible does not mean openly licensed.** Sources include public-domain data, open licenses, noncommercial restrictions, and files whose exact reuse terms remain unverified. Each entry below records the evidence reviewed. See the [coverage, link, and licensing audit](SOURCE_AUDIT.md) and [individual URL check results](dist/sources/link-checks.csv). Link checks are a dated snapshot, not a guarantee of continued access.",
     ]
     for category, entries in groups.items():
         markdown.append(f"## {category}")
@@ -66,6 +67,7 @@ def main():
                 f"**Publisher:** {s['publisher']}\n\n**Version / snapshot:** {s['vintage']}",
                 f"**Used for:** {s['use']}",
                 s["notes"],
+                f"**Reuse: {s['reuse']['status']}.** {s['reuse']['notes']}",
             ])
             source_links = []
             for item in s["links"]:
@@ -99,6 +101,7 @@ def main():
               <p class="vintage">{escape(s['vintage'])}</p>
               <p>{escape(s['use'])}</p>
               <p class="source-note">{escape(s['notes'])}</p>
+              <p class="source-reuse"><strong>Reuse: {escape(s['reuse']['status'])}.</strong> {escape(s['reuse']['notes'])}</p>
               <ul class="source-links" aria-label="Links for {escape(s['title'], quote=True)}">{links}</ul>
             </article>''')
         sections.append(f'<section class="source-group" id="{section_id}" aria-labelledby="{section_id}-title"><h2 id="{section_id}-title">{escape(category)}</h2><div class="source-grid">{"".join(cards)}</div></section>')
@@ -141,6 +144,7 @@ def main():
       <div><span>Facility inventory</span><strong>27 October 2026</strong></div><div><span>Spatial &amp; policy context reviewed</span><strong>8 October 2026</strong></div><div><span>2026 House results</span><strong>5 November 2026 · preliminary</strong></div>
     </div>
     <p class="scope-note">This directory covers the sources used in the published dashboard. Source websites may now show newer data. Dates below describe the versions used here; adding this directory does not refresh the maps. Original record-level references remain with their source providers. The bill register below also exposes the individual links already used in this dashboard.</p>
+    <section class="methods-note" aria-labelledby="auditTitle"><h2 id="auditTitle">Access and reuse</h2><p>These sources are not all openly licensed. The collection includes public-domain and openly licensed data, noncommercial restrictions, and sources whose exact reuse terms remain unverified. Each source card records its reuse status and supporting terms.</p><p>Reviewed {escape(catalog['reviewed'])}. Some providers block automated link checks; those links remain unverified. Read the <a href="https://github.com/ntimbs/us-data-center-dashboard/blob/main/SOURCE_AUDIT.md">coverage, link, and licensing audit</a> or <a href="link-checks.csv" download>download individual URL check results (CSV)</a>.</p></section>
     <div class="source-tools"><label for="sourceSearch">Find a dataset<input id="sourceSearch" type="search" placeholder="Search source, topic, publisher, or year" autocomplete="off"></label><a class="download-link" href="source-links.csv" download>Download source links (CSV)</a></div>
     <nav class="category-links" aria-label="Source categories">{' '.join(jumps)} {link('Bill source register', '#bill-sources')}</nav>
     <p id="sourceCount" class="result-count" role="status">{len(sources)} source entries</p>

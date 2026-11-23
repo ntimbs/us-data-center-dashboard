@@ -129,7 +129,7 @@
     policy: {
       title: "Tracked state legislation",
       insight: ["Bill activity varies by topic and status", "Use the measure menu to map total bills, legislative status, or one of 22 policy types. Click a state for counts and bill-level records."],
-      source: "State legislative tracking of data-center-related bills (NCSL-derived), reviewed 28 September 2026.",
+      source: "Project compilation based principally on LegiScan legislative records, 2024–April 2026; dashboard context reviewed 8 October 2026.",
       categories: [["Dedicated incentive", "#2dd4bf"], ["Moratorium tracker entry", "#fb7185"], ["Other state context", "#60a5fa"]],
       key: f => f.incentive ? "Dedicated incentive" : f.moratoriumCount > 0 ? "Moratorium tracker entry" : "Other state context"
     },

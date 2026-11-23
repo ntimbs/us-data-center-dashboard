@@ -1,0 +1,650 @@
+url,contexts,status,http_status,final_url,note,checked
+https://api.census.gov/data/2023/cbp.html,catalog:cbp,http_ok,200,https://api.census.gov/data/2023/cbp.html,Census Data API: /data/2023/cbp,2026-11-23
+https://civicapi.org/,catalog:house-results,http_ok,200,https://civicapi.org/,Home | civicAPI,2026-11-23
+https://civicapi.org/faq,catalog:house-results,http_ok,200,https://civicapi.org/faq,FAQ | civicAPI,2026-11-23
+https://docs.google.com/spreadsheets/d/1ZHx5E0-5vuXxcZShBgsAl_vwAntkkanGqYQp0owNjoQ/edit?gid=0,catalog:presidential-districts,http_ok,200,https://docs.google.com/spreadsheets/d/1ZHx5E0-5vuXxcZShBgsAl_vwAntkkanGqYQp0owNjoQ/edit?gid=0,2024 Pres by CD - Google Sheets,2026-11-23
+https://doi.org/10.3133/cir1441,catalog:usgs-water,http_ok,200,https://pubs.usgs.gov/publication/cir1441,Estimated use of water in the United States in 2015,2026-11-23
+https://doi.org/10.5066/F7TB15V5,catalog:usgs-water,http_ok,200,https://www.sciencebase.gov/catalog/item/get/5af3311be4b0da30c1b245d8,Estimated Use of Water in the United States County-Level Data for 2015 - ScienceBase-Catalog,2026-11-23
+https://download.geofabrik.de/north-america/us.html,catalog:osm,http_ok,200,https://download.geofabrik.de/north-america/us/index.html,Download OpenStreetMap for United States of America | Geofabrik Download Server,2026-11-23
+https://edg.epa.gov/epa_data_license.html,catalog:egrid-regions,http_ok,200,https://edg.epa.gov/epa_data_license.html,EPA Standard Open Data License,2026-11-23
+https://emp.lbl.gov/queues,catalog:queues,http_error,403,https://emp.lbl.gov/queues,HTTP Error 403: Forbidden,2026-11-23
+https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909,catalog:facilities,http_ok,200,https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909,Experience,2026-11-23
+https://fractracker.org/data-centers/,catalog:facilities;catalog:local-actions,http_ok,200,https://fractracker.org/data-centers/,Data Centers - FracTracker Alliance,2026-11-23
+https://gem.anl.gov/tool/layers/electric_retail_service_territories/versions/1/metadata.pdf,catalog:utility-territories,http_error,403,https://gem.anl.gov/tool/layers/electric_retail_service_territories/versions/1/metadata.pdf,HTTP Error 403: Forbidden,2026-11-23
+https://github.com/Georgeingebretsen/datacenter-opposition-tracker,catalog:opposition-events,http_ok,200,https://github.com/Georgeingebretsen/datacenter-opposition-tracker,text/html; charset=utf-8,2026-11-23
+https://github.com/USEPA/egrid/tree/8932a073aa4c0dac227f953e2805d5f64634b57e,catalog:egrid-plants,http_ok,200,https://github.com/USEPA/egrid/tree/8932a073aa4c0dac227f953e2805d5f64634b57e,text/html; charset=utf-8,2026-11-23
+https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities,catalog:aware;catalog:electricity-prices;catalog:fema-nri,http_ok,200,https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities,text/html; charset=utf-8,2026-11-23
+https://github.com/nytimes/presidential-precinct-map-2024,catalog:nyt-precincts,http_ok,200,https://github.com/nytimes/presidential-precinct-map-2024,text/html; charset=utf-8,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/AL-precincts-with-results.topojson.gz,runtime-precinct:AL,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/AL-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/AR-precincts-with-results.topojson.gz,runtime-precinct:AR,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/AR-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/AZ-precincts-with-results.topojson.gz,runtime-precinct:AZ,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/AZ-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/CA-precincts-with-results.topojson.gz,runtime-precinct:CA,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/CA-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/CO-precincts-with-results.topojson.gz,runtime-precinct:CO,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/CO-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/CT-precincts-with-results.topojson.gz,runtime-precinct:CT,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/CT-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/DC-precincts-with-results.topojson.gz,runtime-precinct:DC,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/DC-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/DE-precincts-with-results.topojson.gz,runtime-precinct:DE,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/DE-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/FL-precincts-with-results.topojson.gz,runtime-precinct:FL,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/FL-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/GA-precincts-with-results.topojson.gz,runtime-precinct:GA,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/GA-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/HI-precincts-with-results.topojson.gz,runtime-precinct:HI,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/HI-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/IA-precincts-with-results.topojson.gz,runtime-precinct:IA,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/IA-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/ID-precincts-with-results.topojson.gz,runtime-precinct:ID,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/ID-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/IL-precincts-with-results.topojson.gz,runtime-precinct:IL,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/IL-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/IN-precincts-with-results.topojson.gz,runtime-precinct:IN,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/IN-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/KS-precincts-with-results.topojson.gz,runtime-precinct:KS,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/KS-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/KY-precincts-with-results.topojson.gz,runtime-precinct:KY,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/KY-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/LA-precincts-with-results.topojson.gz,runtime-precinct:LA,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/LA-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MA-precincts-with-results.topojson.gz,runtime-precinct:MA,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MA-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MD-precincts-with-results.topojson.gz,runtime-precinct:MD,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MD-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/ME-precincts-with-results.topojson.gz,runtime-precinct:ME,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/ME-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MI-precincts-with-results.topojson.gz,runtime-precinct:MI,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MI-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MN-precincts-with-results.topojson.gz,runtime-precinct:MN,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MN-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MO-precincts-with-results.topojson.gz,runtime-precinct:MO,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MO-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MS-precincts-with-results.topojson.gz,runtime-precinct:MS,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MS-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MT-precincts-with-results.topojson.gz,runtime-precinct:MT,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/MT-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NC-precincts-with-results.topojson.gz,runtime-precinct:NC,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NC-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/ND-precincts-with-results.topojson.gz,runtime-precinct:ND,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/ND-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NE-precincts-with-results.topojson.gz,runtime-precinct:NE,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NE-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NH-precincts-with-results.topojson.gz,runtime-precinct:NH,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NH-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NJ-precincts-with-results.topojson.gz,runtime-precinct:NJ,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NJ-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NM-precincts-with-results.topojson.gz,runtime-precinct:NM,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NM-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NV-precincts-with-results.topojson.gz,runtime-precinct:NV,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NV-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NY-precincts-with-results.topojson.gz,runtime-precinct:NY,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/NY-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/OH-precincts-with-results.topojson.gz,runtime-precinct:OH,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/OH-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/OK-precincts-with-results.topojson.gz,runtime-precinct:OK,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/OK-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/OR-precincts-with-results.topojson.gz,runtime-precinct:OR,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/OR-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/PA-precincts-with-results.topojson.gz,runtime-precinct:PA,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/PA-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/RI-precincts-with-results.topojson.gz,runtime-precinct:RI,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/RI-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/SC-precincts-with-results.topojson.gz,runtime-precinct:SC,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/SC-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/SD-precincts-with-results.topojson.gz,runtime-precinct:SD,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/SD-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/TN-precincts-with-results.topojson.gz,runtime-precinct:TN,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/TN-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/TX-precincts-with-results.topojson.gz,runtime-precinct:TX,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/TX-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/UT-precincts-with-results.topojson.gz,runtime-precinct:UT,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/UT-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/VA-precincts-with-results.topojson.gz,runtime-precinct:VA,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/VA-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/VT-precincts-with-results.topojson.gz,runtime-precinct:VT,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/VT-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/WA-precincts-with-results.topojson.gz,runtime-precinct:WA,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/WA-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/WI-precincts-with-results.topojson.gz,runtime-precinct:WI,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/WI-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/WV-precincts-with-results.topojson.gz,runtime-precinct:WV,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/WV-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://int.nyt.com/newsgraphics/elections/map-data/2024/national/WY-precincts-with-results.topojson.gz,runtime-precinct:WY,http_ok,200,https://int.nyt.com/newsgraphics/elections/map-data/2024/national/WY-precincts-with-results.topojson.gz,application/gzip,2026-11-23
+https://legiscan.com/AK/bill/HCR3/2025,bill,http_error,403,https://legiscan.com/AK/bill/HCR3/2025,HTTP Error 403: Forbidden,2026-11-23
+https://legiscan.com/AK/bill/SB250/2026,bill,http_error,403,https://legiscan.com/AK/bill/SB250/2026,HTTP Error 403: Forbidden,2026-11-23
+https://legiscan.com/AL/bill/HB403/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AL/bill/HB611/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AL/bill/SB270/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AL/bill/SB304/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AR/bill/HB1444/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AR/bill/SB10/2025,bill,http_error,403,https://legiscan.com/AR/bill/SB10/2025,HTTP Error 403: Forbidden,2026-11-23
+https://legiscan.com/AR/bill/SB60/2025,bill,http_error,403,https://legiscan.com/AR/bill/SB60/2025,HTTP Error 403: Forbidden,2026-11-23
+https://legiscan.com/AR/bill/SB78/2024,bill,http_error,403,https://legiscan.com/AR/bill/SB78/2024,HTTP Error 403: Forbidden,2026-11-23
+https://legiscan.com/AR/bill/SB79/2024,bill,http_error,403,https://legiscan.com/AR/bill/SB79/2024,HTTP Error 403: Forbidden,2026-11-23
+https://legiscan.com/AZ/bill/HB2119/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2388/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2452/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2467/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2527/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2631/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2639/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2702/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2738/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2820/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2893/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB2949/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/HB4009/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/SB1274/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/SB1430/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/SB1463/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/SB1467/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/SB1749/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/AZ/bill/SB1799/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/AB1095/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/AB1577/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/AB222/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/AB2469/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/AB2487/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/AB2619/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/AB93/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/SB1168/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/SB1298/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/SB57/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/SB58/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/SB887/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CA/bill/SB978/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CO/bill/HB1030/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CO/bill/SB102/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CO/bill/SB280/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CT/bill/HB5076/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/CT/bill/SB01292/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/DE/bill/HB233/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/DE/bill/HB475/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/DE/bill/SB205/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/DE/bill/SCR18/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/H0817/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/H1125/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/H1517/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/HB1645/2024 ; https://legiscan.com/FL/bill/SB1645/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/HB7031/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/S0484/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/S1118/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/S1264/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/FL/bill/SB484/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB101/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB1012/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB1043/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB1059/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB1063/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB1192/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB1323/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB1387/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB1468/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB276/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB528/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/HB559/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/SB34/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/GA/bill/SB410/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/HI/bill/HR196/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/HI/bill/SB2526/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/HI/bill/SCR95/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/HI/bill/SR90/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IA/bill/HF2198/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IA/bill/HF2688/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IA/bill/HF976/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IA/bill/HSB727/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IA/bill/SF2498/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IA/bill/SF657/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ID/bill/H0315/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ID/bill/H0609/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ID/bill/H0820/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ID/bill/H0897/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ID/bill/H395/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ID/bill/HB315/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ID/bill/HB585/2024 ; https://legiscan.com/ID/bill/SB1296/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB3565/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB3574/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB3587/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB3758/2025 ; https://legiscan.com/IL/bill/SB2497/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB4319/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB4659/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB4989/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB5005/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB5015/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB5545/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB5607/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HB5827/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/HR0744/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB0094/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB0227/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB1239/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB2030/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB2181/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB2290/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB2473/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB3120/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB3607/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB3980/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IL/bill/SB4004/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/HB1043/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/HB1189/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/HB1245/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/HB1333/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/HB1446/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/HB1601/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/SB0079/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/SB0083/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/SB0135/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/SB0431/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/SB135/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/SB257/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/SB425/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/IN/bill/SB431/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KS/bill/HB2450/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KS/bill/HB2664/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KS/bill/SB400/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KS/bill/SB526/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KS/bill/SB531/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KS/bill/SB545/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KS/bill/SB81/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KS/bill/SB98/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KY/bill/HB544/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KY/bill/HB593/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KY/bill/HB775/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KY/bill/HB8/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KY/bill/HB856/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KY/bill/SB319/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/KY/bill/SB330/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/LA/bill/HB1206/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/LA/bill/HB827/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/LA/bill/HB922/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/LA/bill/HCR61/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/LA/bill/HR249/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/LA/bill/SB79/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/LA/bill/SR195/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MA/bill/H2792/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MA/bill/H4804/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MA/bill/H4889/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MA/bill/H495/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MA/bill/H5100/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MA/bill/H83/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MA/bill/S1958/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB1036/2025 ; https://legiscan.com/MD/bill/SB931/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB1082/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB1160/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB120/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB1219/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB1411/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB1534/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB1595/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB270/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB560/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB900/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/HB949/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB0474/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB0903/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB0978/2025 ; https://legiscan.com/MD/bill/HB1484/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB1000/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB116/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB316/2025; https://legiscan.com/MD/bill/HB398/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB427/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB474/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB853/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB903/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB909/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB937/2025 ; https://legiscan.com/MD/bill/HB1035/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB947/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MD/bill/SB992/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ME/bill/LD307/2026 ; https://legiscan.com/ME/bill/HP207/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ME/bill/LD912/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB4027/HB4028/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB4085/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB4905/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB4906/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5396/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5398/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5399/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5594/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5595/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5776/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5777/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5785/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5786/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5787/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5790/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5791/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HB5792/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/HR0240/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/SB0237/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/SB0238/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/SB0643/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/SB0645/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/SB0761/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/SB0762/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MI/bill/SB0763/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/HF1150/2025 ; https://legiscan.com/MN/bill/SF1117/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/HF16/2025/X1,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/HF28/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/HF28/SF1393/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/HF2928/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/HF3007/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/HF4512/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/HF4990/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF1393/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF1393/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF1879/2025 ; https://legiscan.com/MN/bill/SF3444/2025 ; https://legiscan.com/MN/bill/HF3296/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF19/2025/X1,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF20/2025/X1,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF2393/2025 ; https://legiscan.com/MN/bill/HF2862/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF3265/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF3332/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF3444/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF3968/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF4203/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF4296/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF4298/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF4681/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF4816/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF5100/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF608/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MN/bill/SF769/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MO/bill/HB1231/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MO/bill/HB2239/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MO/bill/HB3369/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MO/bill/HB3390/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MO/bill/SB1050/2024 ; https://legiscan.com/MO/bill/HB2107/2024 ; https://legiscan.com/MO/bill/SB1507/2024 ; https://legiscan.com/MO/bill/SB309/2024 ; https://legiscan.com/MO/bill/SB614/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MO/bill/SB1790/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MS/bill/HB1239/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MS/bill/HB1489/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MS/bill/HB1590/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MS/bill/SB3168/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MS/bill/SB3410/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MT/bill/HB263/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MT/bill/HB424/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MT/bill/HB5/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MT/bill/HB877/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MT/bill/HJ46/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MT/bill/SB32/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/MT/bill/SB540/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NC/bill/H1002/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NC/bill/H638/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NC/bill/HB1002/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ND/bill/HB1265/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ND/bill/HB1427/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ND/bill/HB1579/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/ND/bill/SB2021/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB1010/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB1088/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB1111/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB1319/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB1389/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB209/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB468/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB613/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NE/bill/LB991/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NH/bill/HB1265/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NH/bill/HB1444/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NH/bill/HB1739/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NH/bill/HB672/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NH/bill/SB439/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A1170/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A2770/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A2774/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A3611/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A3966/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A4096/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A4558/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A4696/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A4710/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A4769/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A5466/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A5548/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A5564/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A5892/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A5898/2025 ; https://legiscan.com/NJ/bill/S4676/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A6040/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/A6181/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S2274/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S3379/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S3432/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S3611/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S3639/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S4307/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S4811/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S4827/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S4928/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S680/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NJ/bill/S731/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NV/bill/AB226/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NV/bill/AB77/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/A09136/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/A09297/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/A10216/2026 ; https://legiscan.com/NY/bill/S9288/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/A4341/2025 ; https://legiscan.com/NY/bill/S3409/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/A7806/S2478/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/A9039A/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/A9136/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S06394/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S08536/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S08546/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S08645/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S09144/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S09960/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S4205/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S6394A/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/NY/bill/S8540/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/HB15/SB2/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/HB392/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/HB646/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/HB706/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/HB710/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/HB784/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/SB374/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/SB378/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OH/bill/SB381/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/HB1600/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/HB1920/2025 ; https://legiscan.com/OK/bill/HB1919/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/HB2992/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/HB3394/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/HB3917/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/HB4194/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/SB1488/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/SB1619/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/SB1706/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/SB1833/2024 ; https://legiscan.com/OK/bill/HB3594/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OK/bill/SB480/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OR/bill/HB2065/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OR/bill/HB2066/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OR/bill/HB3546/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OR/bill/HB3698/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/OR/bill/SB553/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB1834/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB1924/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB2061/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB2150/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB2151/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB2153/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB2198/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB2246/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB2372/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/HB502/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/SB1114/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/SB654/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/SB724/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/SB939/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/SB991/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/PA/bill/SR185/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/RI/bill/S0921/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/RI/bill/S2346/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/RI/bill/S2776/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/H4583/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/H5118/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/H5215/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/H5286/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/H5484/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/H5526/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/S0051/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/S0724/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/S0784/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/S0867/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SC/bill/S0902/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/HB1005/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/HB1038/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/HB1301/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/SB127/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/SB135/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/SB177/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/SB232/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/SB234/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/SD/bill/SB235/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/HB0549/2025 ; https://legiscan.com/TN/bill/SB0378/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/HB1461/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/HB1847/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/HB2061/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/HB2182/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/HB2309/2024 ; https://legiscan.com/TN/bill/SB2370/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/HB2456/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/SB0962/2025 ; https://legiscan.com/TN/bill/HB0946/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/SB1600/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/SB1682/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/SB2112/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/SB2128/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/SB2583/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/SB2653/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TN/bill/SB2681/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TX/bill/HB3970/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TX/bill/HB4908/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TX/bill/SB1641/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TX/bill/SB1942/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TX/bill/SB2222/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TX/bill/SB2888/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TX/bill/SB6/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/TX/bill/SB819/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/UT/bill/HB0076/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/UT/bill/HB0585/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/UT/bill/SB0223/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/UT/bill/SB0318/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/UT/bill/SB132/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/UT/bill/SB227/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1010/2024 ; https://legiscan.com/VA/bill/HB1984/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1101/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1132/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB116/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1502/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1515/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1521/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB154/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1546/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1600/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB1984/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2026/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2028/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2035/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2084/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2101/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2377/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2422/2025 ; https://legiscan.com/VA/bill/HB1288/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2428/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2578/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2663/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2684/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2685/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2712/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB2715/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB323/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB338/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB429/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB434/2026 ; https://legiscan.com/VA/bill/SB621/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB496/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB503/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB507/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB511/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB563/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB589/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB591/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB607/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB641/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB658/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB784/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB824/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB897/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB910/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB961/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HB991/2025 ; https://legiscan.com/VA/bill/SB540/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/HJR64/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1001/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1021/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1045/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1046/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1196/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1243/2025 ; https://legiscan.com/VA/bill/SB664/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1336/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1353/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1358/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1425/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1448/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB1449/2025 ; https://legiscan.com/VA/bill/HB1601/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB191/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB192/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB223/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB249/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB284/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB285/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB286/2024 ; https://legiscan.com/VA/bill/HB340/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB289/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB336/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB393/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB465/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB521/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB552/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB553/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB899/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB93/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB94/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB94/2026 ; https://legiscan.com/VA/bill/HB153/2026 ; https://legiscan.com/VA/bill/SB130/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB960/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SB976/2025 ; https://legiscan.com/VA/bill/SB667/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VA/bill/SJ25/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VT/bill/H0720/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VT/bill/H0727/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/VT/bill/S0205/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WA/bill/HB2502/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WA/bill/HB2515/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WA/bill/HB2655/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WA/bill/HB2708/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WA/bill/SB5431/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WA/bill/SB6171/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WA/bill/SB6231/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/AB1036/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/AB140/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/AB245/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/AB302/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/AB472/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/AB722/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/AB722/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/SB1061/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/SB241/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/SB244/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/SB308/2023,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/SB502/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/SB729/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/SB843/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WI/bill/SB969/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB2002/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB2014/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB3173/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB3264/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB4509/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB4683/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB4822/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB4832/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB4854/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB4948/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB4983/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB5032/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB5443/2024,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB5590/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB5611/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/HB5620/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/SB583/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/SB623/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/SB652/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/SB658/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/SB695/2026,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/SB803/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/SB818/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://legiscan.com/WV/bill/SB857/2025,bill,not_tested_host_blocked,,,Further requests stopped after five access denials or rate limits from this host.,2026-11-23
+https://polling-desk.com/house-districts,catalog:house-results,http_ok,200,https://polling-desk.com/house-districts,"2026 House Results by District, All 435 | Polling Desk",2026-11-23
+https://polling-desk.com/house-districts.csv,catalog:house-results,http_ok,200,https://polling-desk.com/house-districts.csv,text/csv,2026-11-23
+https://polling-desk.com/terms,catalog:house-results,http_ok,200,https://polling-desk.com/terms,Terms of Use: The Rules for Using Polling Desk | Polling Desk,2026-11-23
+https://raw.githubusercontent.com/Georgeingebretsen/datacenter-opposition-tracker/main/LICENSE,catalog:opposition-events,http_ok,200,https://raw.githubusercontent.com/Georgeingebretsen/datacenter-opposition-tracker/main/LICENSE,text/plain; charset=utf-8,2026-11-23
+https://raw.githubusercontent.com/Georgeingebretsen/datacenter-opposition-tracker/main/site/data/fights.json,catalog:opposition-events,http_ok,200,https://raw.githubusercontent.com/Georgeingebretsen/datacenter-opposition-tracker/main/site/data/fights.json,text/plain; charset=utf-8,2026-11-23
+https://raw.githubusercontent.com/USEPA/egrid/8932a073aa4c0dac227f953e2805d5f64634b57e/LICENSE.md,catalog:egrid-plants,http_ok,200,https://raw.githubusercontent.com/USEPA/egrid/8932a073aa4c0dac227f953e2805d5f64634b57e/LICENSE.md,text/plain; charset=utf-8,2026-11-23
+https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/AWARE_US_CF.csv,catalog:aware,http_ok,200,https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/AWARE_US_CF.csv,text/plain; charset=utf-8,2026-11-23
+https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/NRI_Table_Counties.csv,catalog:fema-nri,http_ok,200,https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/NRI_Table_Counties.csv,text/plain; charset=utf-8,2026-11-23
+https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/eia861_state_prices_real_2020_with_volatility.csv,catalog:electricity-prices,http_ok,200,https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/eia861_state_prices_real_2020_with_volatility.csv,text/plain; charset=utf-8,2026-11-23
+https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/energy_price_inflaction_adjusted.py,catalog:cpi,http_ok,200,https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/energy_price_inflaction_adjusted.py,text/plain; charset=utf-8,2026-11-23
+https://raw.githubusercontent.com/nytimes/presidential-precinct-map-2024/main/LICENSE,catalog:nyt-precincts,http_ok,200,https://raw.githubusercontent.com/nytimes/presidential-precinct-map-2024/main/LICENSE,text/plain; charset=utf-8,2026-11-23
+https://services3.arcgis.com/OYP7N6mAJJCyH6hd/arcgis/rest/services/Electric_Retail_Service_Territories_HIFLD/FeatureServer,catalog:utility-territories,http_ok,200,https://services3.arcgis.com/OYP7N6mAJJCyH6hd/arcgis/rest/services/Electric_Retail_Service_Territories_HIFLD/FeatureServer,Electric_Retail_Service_Territories_HIFLD (FeatureServer),2026-11-23
+https://tigerweb.geo.census.gov/tigerweb/,catalog:census-geography,http_ok,200,https://tigerweb.geo.census.gov/tigerweb/,TigerWEB,2026-11-23
+https://wulca-waterlca.org/what-is-aware/official-versions/,catalog:aware,http_ok,200,https://wulca-waterlca.org/what-is-aware/official-versions/,Official versions of AWARE - WULCA,2026-11-23
+https://www.arcgis.com/home/item.html?id=597555ce8e4a4892a030784a7c657fdd,catalog:utility-territories,http_ok,200,https://www.arcgis.com/home/item.html?id=597555ce8e4a4892a030784a7c657fdd,ArcGIS,2026-11-23
+https://www.bls.gov/cpi/tables/supplemental-files/home.htm,catalog:cpi,http_ok,200,https://www.bls.gov/cpi/tables/supplemental-files/home.htm,Archived Consumer Price Index Supplemental Files : U.S. Bureau of Labor Statistics,2026-11-23
+https://www.bls.gov/opub/copyright-information.htm,catalog:cpi,http_ok,200,https://www.bls.gov/opub/copyright-information.htm,BLS Copyright Information : U.S. Bureau of Labor Statistics,2026-11-23
+https://www.census.gov/data/datasets/2023/econ/cbp/2023-cbp.html,catalog:cbp,http_ok,200,https://www.census.gov/data/datasets/2023/econ/cbp/2023-cbp.html,County Business Patterns: 2023,2026-11-23
+https://www.census.gov/data/developers/about/terms-of-service.html,catalog:cbp,http_ok,200,https://www.census.gov/data/developers/about/terms-of-service.html,Terms of Service,2026-11-23
+https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html,catalog:census-geography,http_ok,200,https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html,Gazetteer Files,2026-11-23
+https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html,app-reference,http_ok,200,https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html,Congressional Districts,2026-11-23
+https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.html,catalog:district-boundaries,http_ok,200,https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.html,Congressional Districts,2026-11-23
+https://www.eia.gov/about/copyrights_reuse.php,catalog:eia-utilities;catalog:electricity-prices,http_ok,200,https://www.eia.gov/about/copyrights_reuse.php,U.S. Energy Information Administration - EIA - Independent Statistics and Analysis,2026-11-23
+https://www.eia.gov/electricity/data/eia861/,catalog:eia-utilities;catalog:electricity-prices,http_ok,200,https://www.eia.gov/electricity/data/eia861/,"Annual Electric Power Industry Report, Form EIA-861 detailed data files - U.S. Energy Information Administration (EIA)",2026-11-23
+https://www.epa.gov/egrid/detailed-data,catalog:egrid-plants,http_ok,200,https://www.epa.gov/egrid/detailed-data,Detailed Data | US EPA,2026-11-23
+https://www.epa.gov/egrid/egrid-mapping-files,catalog:egrid-regions,http_ok,200,https://www.epa.gov/egrid/egrid-mapping-files,eGRID Mapping Files | US EPA,2026-11-23
+https://www.epa.gov/egrid/frequent-questions-about-egrid,catalog:egrid-plants,http_ok,200,https://www.epa.gov/egrid/frequent-questions-about-egrid,Frequent Questions About eGRID | US EPA,2026-11-23
+https://www.fema.gov/nri,catalog:fema-nri,http_ok,200,https://www.fema.gov/flood-maps/products-tools/national-risk-index,National Risk Index for Natural Hazards | FEMA.gov,2026-11-23
+https://www.ncsl.org/fiscal/subsidizing-servers-how-states-are-competing-to-attract-data-centers,catalog:ncsl-incentives,http_ok,200,https://www.ncsl.org/fiscal/subsidizing-servers-how-states-are-competing-to-attract-data-centers,Subsidizing Servers: How States Are Competing to Attract Data Centers,2026-11-23
+https://www.ncsl.org/fiscal/which-states-are-banning-data-centers,catalog:ncsl-moratoria,http_ok,200,https://www.ncsl.org/fiscal/which-states-are-banning-data-centers,Which States Are Banning Data Centers?,2026-11-23
+https://www.ncsl.org/terms-of-use,catalog:ncsl-incentives;catalog:ncsl-moratoria,http_ok,200,https://www.ncsl.org/terms-of-use,Terms of Use,2026-11-23
+https://www.nytimes.com/interactive/2025/us/elections/2024-election-map-precinct-results.html,catalog:nyt-precincts,http_error,403,https://www.nytimes.com/interactive/2025/us/elections/2024-election-map-precinct-results.html,HTTP Error 403: Forbidden,2026-11-23
+https://www.openstreetmap.org/copyright,catalog:osm,http_ok,200,https://www.openstreetmap.org/copyright,Copyright and License | OpenStreetMap,2026-11-23
+https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits,catalog:usgs-water,http_ok,200,https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits,Copyrights and Credits | U.S. Geological Survey,2026-11-23
+https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_cd119_500k.zip,catalog:district-boundaries,http_ok,200,https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_cd119_500k.zip,application/zip,2026-11-23
+https://www2.census.gov/geo/tiger/TIGER2023/STATE/,catalog:census-geography,http_ok,200,https://www2.census.gov/geo/tiger/TIGER2023/STATE/,Index of /geo/tiger/TIGER2023/STATE,2026-11-23
+https://www2.census.gov/geo/tiger/TIGER2024/CD/tl_2024_29_cd119.zip,catalog:district-boundaries,http_ok,200,https://www2.census.gov/geo/tiger/TIGER2024/CD/tl_2024_29_cd119.zip,application/zip,2026-11-23
+https://www2.census.gov/geo/tiger/TIGER2024/COUNTY/,catalog:census-geography,http_ok,200,https://www2.census.gov/geo/tiger/TIGER2024/COUNTY/,Index of /geo/tiger/TIGER2024/COUNTY,2026-11-23
+https://www2.census.gov/geo/tiger/TIGER2026/CD/,catalog:district-boundaries,http_ok,200,https://www2.census.gov/geo/tiger/TIGER2026/CD/,Index of /geo/tiger/TIGER2026/CD,2026-11-23

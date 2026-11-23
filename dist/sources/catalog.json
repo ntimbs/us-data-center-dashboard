@@ -18,7 +18,11 @@
           "label": "Interactive source map",
           "url": "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Restricted: noncommercial sharing",
+        "notes": "FracTracker permits downloading and sharing this tracker for noncommercial use with credit. Public access is not an unrestricted open-data license."
+      }
     },
     {
       "id": "egrid-plants",
@@ -36,8 +40,20 @@
         {
           "label": "EPA eGRID data",
           "url": "https://www.epa.gov/egrid/detailed-data"
+        },
+        {
+          "label": "EPA data reuse statement",
+          "url": "https://www.epa.gov/egrid/frequent-questions-about-egrid"
+        },
+        {
+          "label": "Development code license",
+          "url": "https://raw.githubusercontent.com/USEPA/egrid/8932a073aa4c0dac227f953e2805d5f64634b57e/LICENSE.md"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Public-domain EPA data; MIT code",
+        "notes": "EPA states that eGRID data are public domain and may be used commercially or noncommercially. The recorded development repository also carries an MIT software license. This dashboard uses provisional output; retain the EPA credit and snapshot caveat."
+      }
     },
     {
       "id": "egrid-regions",
@@ -51,8 +67,16 @@
         {
           "label": "EPA mapping files",
           "url": "https://www.epa.gov/egrid/egrid-mapping-files"
+        },
+        {
+          "label": "EPA data policy",
+          "url": "https://edg.epa.gov/epa_data_license.html"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Public-domain EPA data",
+        "notes": "EPA’s default data policy places EPA-produced data in the U.S. public domain unless a dataset says otherwise. Keep attribution and the boundary-vintage caveat."
+      }
     },
     {
       "id": "utility-territories",
@@ -61,13 +85,25 @@
       "publisher": "Homeland Infrastructure Foundation-Level Data (HIFLD)",
       "vintage": "Downloaded 21 August 2025",
       "use": "Candidate electric utility territories for facility locations.",
-      "notes": "Overlapping territories remain ambiguous. A geographic match is not confirmation of the serving utility. The link documents the source dataset; it is not an archived copy of the project download.",
+      "notes": "Overlapping territories remain ambiguous. A geographic match is not confirmation of the serving utility. The original ArcGIS item and service identify the downloaded dataset; current contents may differ from the saved snapshot.",
       "links": [
         {
           "label": "Dataset documentation (Argonne)",
           "url": "https://gem.anl.gov/tool/layers/electric_retail_service_territories/versions/1/metadata.pdf"
+        },
+        {
+          "label": "Original ArcGIS dataset and terms",
+          "url": "https://www.arcgis.com/home/item.html?id=597555ce8e4a4892a030784a7c657fdd"
+        },
+        {
+          "label": "Original feature service",
+          "url": "https://services3.arcgis.com/OYP7N6mAJJCyH6hd/arcgis/rest/services/Electric_Retail_Service_Territories_HIFLD/FeatureServer"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Public use: no use restrictions in metadata",
+        "notes": "The saved HIFLD item metadata states “None (Public Use)” and credits Oak Ridge National Laboratory and U.S. DOE CESER. Read its geographic and accuracy limitations."
+      }
     },
     {
       "id": "eia-utilities",
@@ -81,8 +117,16 @@
         {
           "label": "EIA-861 detailed data",
           "url": "https://www.eia.gov/electricity/data/eia861/"
+        },
+        {
+          "label": "EIA reuse policy",
+          "url": "https://www.eia.gov/about/copyrights_reuse.php"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Public-domain EIA data",
+        "notes": "EIA permits reuse and redistribution of its data and requests acknowledgement. The policy excludes any separately identified third-party copyrighted material."
+      }
     },
     {
       "id": "electricity-prices",
@@ -95,13 +139,25 @@
       "links": [
         {
           "label": "Prepared price dataset",
-          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/blob/main/Section%202%20and%204/Data/eia861_state_prices_real_2020_with_volatility.csv"
+          "url": "https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/eia861_state_prices_real_2020_with_volatility.csv"
         },
         {
           "label": "EIA source program",
           "url": "https://www.eia.gov/electricity/data/eia861/"
+        },
+        {
+          "label": "EIA reuse policy",
+          "url": "https://www.eia.gov/about/copyrights_reuse.php"
+        },
+        {
+          "label": "Prepared-file repository",
+          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Mixed: EIA public domain; prepared-file license unverified",
+        "notes": "EIA permits reuse of its original data. No repository-wide license was found for the prepared research CSV or preparation code; public GitHub access alone does not establish a license for those contributions."
+      }
     },
     {
       "id": "cpi",
@@ -118,9 +174,17 @@
         },
         {
           "label": "Price preparation script",
-          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/blob/main/Section%202%20and%204/energy_price_inflaction_adjusted.py"
+          "url": "https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/energy_price_inflaction_adjusted.py"
+        },
+        {
+          "label": "BLS copyright policy",
+          "url": "https://www.bls.gov/opub/copyright-information.htm"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Public-domain BLS data",
+        "notes": "BLS identifies its published statistical material as public domain and requests citation. This covers the CPI input, not a separate license for third-party price-preparation code."
+      }
     },
     {
       "id": "osm",
@@ -139,13 +203,17 @@
           "label": "Attribution and license",
           "url": "https://www.openstreetmap.org/copyright"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Open data: ODbL 1.0",
+        "notes": "Credit OpenStreetMap contributors and link the license. The ODbL includes share-alike requirements for adapted databases; public availability alone is not the full set of reuse conditions."
+      }
     },
     {
       "id": "queues",
       "category": "Power & grid",
       "title": "Queued Up interconnection data",
-      "publisher": "Lawrence Berkeley National Laboratory",
+      "publisher": "Lawrence Berkeley National Laboratory and GridTracker",
       "vintage": "Project-level generation queue records through 2025",
       "use": "County-level active generation queue MW and contextual queue pressure.",
       "notes": "Positive reported capacity components are aggregated by county. These are generation interconnection requests, not data-center load requests or guaranteed future power supply.",
@@ -154,7 +222,11 @@
           "label": "Queued Up data and methodology",
           "url": "https://emp.lbl.gov/queues"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Open data: CC BY 4.0",
+        "notes": "The Queued Up download page identifies CC BY 4.0 and requires credit to Lawrence Berkeley National Laboratory and GridTracker. The dashboard aggregates project records to county totals."
+      }
     },
     {
       "id": "aware",
@@ -167,13 +239,21 @@
       "links": [
         {
           "label": "Prepared county factors",
-          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/blob/main/Section%202%20and%204/Data/AWARE_US_CF.csv"
+          "url": "https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/AWARE_US_CF.csv"
         },
         {
           "label": "AWARE method and versions",
           "url": "https://wulca-waterlca.org/what-is-aware/official-versions/"
+        },
+        {
+          "label": "Prepared-file repository",
+          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Unverified for the exact prepared snapshot",
+        "notes": "The exact AWARE release and license of AWARE_US_CF.csv were not recorded. The distribution repository has no repository-wide license. A license for a newer WULCA release cannot establish permission for this saved file."
+      }
     },
     {
       "id": "usgs-water",
@@ -191,8 +271,16 @@
         {
           "label": "Water-use report",
           "url": "https://doi.org/10.3133/cir1441"
+        },
+        {
+          "label": "USGS copyright policy",
+          "url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Public-domain USGS data",
+        "notes": "USGS-produced data are in the U.S. public domain; keep the dataset citation. Separately credited third-party material may have different rights."
+      }
     },
     {
       "id": "fema-nri",
@@ -205,13 +293,21 @@
       "links": [
         {
           "label": "Prepared county table",
-          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/blob/main/Section%202%20and%204/Data/NRI_Table_Counties.csv"
+          "url": "https://raw.githubusercontent.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/main/Section%202%20and%204/Data/NRI_Table_Counties.csv"
         },
         {
           "label": "FEMA National Risk Index",
           "url": "https://www.fema.gov/nri"
+        },
+        {
+          "label": "Prepared-file repository",
+          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Unverified for the exact prepared snapshot",
+        "notes": "The source program is FEMA, but the exact release and reuse terms of the prepared NRI_Table_Counties.csv were not preserved. The research repository has no repository-wide license, so this audit does not certify the prepared copy as openly licensed."
+      }
     },
     {
       "id": "cbp",
@@ -229,17 +325,25 @@
         {
           "label": "2023 CBP API documentation",
           "url": "https://api.census.gov/data/2023/cbp.html"
+        },
+        {
+          "label": "Census API terms",
+          "url": "https://www.census.gov/data/developers/about/terms-of-service.html"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Federal statistical data; Census use conditions",
+        "notes": "Published Census statistics are federal data. Census API terms permit applications and analysis, prohibit respondent identification, and specify source/nonendorsement notices. This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau."
+      }
     },
     {
       "id": "census-geography",
       "category": "Land & geography",
       "title": "Census boundaries and Gazetteer locations",
       "publisher": "U.S. Census Bureau",
-      "vintage": "2023 state boundaries; 2024 county boundaries; 2026 Gazetteer files",
+      "vintage": "2023 state boundaries; 2024 county boundaries; 2026 Gazetteer files; Census TIGERweb fallback point",
       "use": "State outlines, county assignments, area-based measures, Virginia’s 133 counties and independent cities, and the boundary framework for derived hexagons. Gazetteer internal points locate local-action jurisdictions.",
-      "notes": "The 50 km and 100 km hexagon grids are project-generated in an equal-area projection. Gazetteer points represent jurisdictions, not data-center sites. County and state attributes assigned to cells remain contextual geographic measures.",
+      "notes": "The 50 km and 100 km hexagon grids are project-generated in an equal-area projection. Gazetteer points represent jurisdictions, not data-center sites. County and state attributes assigned to cells remain contextual geographic measures. The local-action preparation also uses a Census TIGERweb federal-reservation internal point for Eastern Cherokee Reservation (code 0990). The exact service version was not saved.",
       "links": [
         {
           "label": "2023 state boundary files",
@@ -252,8 +356,16 @@
         {
           "label": "Census Gazetteer files",
           "url": "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html"
+        },
+        {
+          "label": "Census TIGERweb (reservation-point fallback)",
+          "url": "https://tigerweb.geo.census.gov/tigerweb/"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Federal geographic data; Census acknowledgement",
+        "notes": "The saved 2024 TIGER/Line metadata says the files are not copyrighted and permits use with Census acknowledgement. The Gazetteer and TIGERweb inputs are Census geographic data; geographic boundaries are not legal land descriptions."
+      }
     },
     {
       "id": "ncsl-incentives",
@@ -267,8 +379,16 @@
         {
           "label": "NCSL incentive tables",
           "url": "https://www.ncsl.org/fiscal/subsidizing-servers-how-states-are-competing-to-attract-data-centers"
+        },
+        {
+          "label": "NCSL terms of use",
+          "url": "https://www.ncsl.org/terms-of-use"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Restricted: NCSL rights reserved",
+        "notes": "NCSL’s general terms do not provide an open-data license. They allow personal viewing/printing and require permission for reproduction or redistribution unless specifically authorized. This source attribution does not itself establish permission for a derivative compilation."
+      }
     },
     {
       "id": "ncsl-moratoria",
@@ -282,17 +402,25 @@
         {
           "label": "NCSL tracker and bill links",
           "url": "https://www.ncsl.org/fiscal/which-states-are-banning-data-centers"
+        },
+        {
+          "label": "NCSL terms of use",
+          "url": "https://www.ncsl.org/terms-of-use"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Restricted: NCSL rights reserved",
+        "notes": "NCSL’s general terms do not provide an open-data license. They allow personal viewing/printing and require permission for reproduction or redistribution unless specifically authorized. This source attribution does not itself establish permission for a derivative compilation."
+      }
     },
     {
       "id": "legislation",
       "category": "Policy & opposition",
       "title": "State data-center legislation records",
-      "publisher": "MultiState compilation; LegiScan and linked bill sources",
+      "publisher": "Project compilation based principally on LegiScan legislative records",
       "vintage": "2024–April 2026 collection; dashboard context reviewed 8 October 2026",
       "use": "State bill counts, topic filters, source status, and bill-detail links.",
-      "notes": "The source register below reproduces every bill record in the published dashboard. Topic categories may overlap; bill counts do not measure regulatory stringency. Follow the individual source for subsequent actions.",
+      "notes": "The original workbook’s methodology identifies LegiScan metadata, summaries, and bill texts as its principal inputs. The published dashboard retains 547 state bill records from the 549-row workbook, omitting two federal records. The register below reproduces every published record and its source URL. Categories may overlap; bill counts do not measure regulatory stringency. Follow the individual source for subsequent actions.",
       "links": [
         {
           "label": "Browse every bill source",
@@ -302,16 +430,20 @@
           "label": "Download bill source register",
           "url": "legislation-sources.csv"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Unverified: compilation and provider terms",
+        "notes": "No explicit open license was recorded in the source workbook. All 544 distinct links in the 547-record register point to LegiScan. Bill texts, provider metadata, and the project’s classifications are distinct contributions; public access to a bill does not establish an open license for the whole compilation."
+      }
     },
     {
       "id": "opposition-events",
       "category": "Policy & opposition",
       "title": "U.S. Datacenter Fights event database",
-      "publisher": "George Ingebretsen and community contributors",
+      "publisher": "Cam Acosta, George Ingebretsen, and community contributors",
       "vintage": "Accessed 18 September 2026; context reviewed 8 October 2026",
       "use": "County and state opposition-event counts and contextual tracker matches.",
-      "notes": "This opposition-event database is not a representative opinion survey. No tracker match means unknown. Direct facility-pushback flags originate in the FracTracker inventory. Data attribution: CC BY 4.0.",
+      "notes": "This opposition-event database is not a representative opinion survey. No tracker match means unknown. Direct facility-pushback flags originate in the FracTracker inventory. This dashboard derives county and state summaries from the event database.",
       "links": [
         {
           "label": "Source repository and references",
@@ -319,9 +451,17 @@
         },
         {
           "label": "Source event data",
-          "url": "https://github.com/Georgeingebretsen/datacenter-opposition-tracker/blob/main/site/data/fights.json"
+          "url": "https://raw.githubusercontent.com/Georgeingebretsen/datacenter-opposition-tracker/main/site/data/fights.json"
+        },
+        {
+          "label": "Data and code licenses",
+          "url": "https://raw.githubusercontent.com/Georgeingebretsen/datacenter-opposition-tracker/main/LICENSE"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Open data: CC BY 4.0; code: MIT",
+        "notes": "The repository explicitly distinguishes CC BY 4.0 data from MIT code. Credit Cam Acosta and George Ingebretsen, link the license, and identify aggregations or other changes."
+      }
     },
     {
       "id": "local-actions",
@@ -336,7 +476,11 @@
           "label": "FracTracker data and local-action sources",
           "url": "https://fractracker.org/data-centers/"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Unverified workbook; provider has noncommercial terms",
+        "notes": "FracTracker’s tracker page permits noncommercial sharing with credit. The exact local-action workbook did not carry a separately recorded license, so unrestricted reuse of that workbook is not verified."
+      }
     },
     {
       "id": "nyt-precincts",
@@ -357,9 +501,17 @@
         },
         {
           "label": "Terms and license",
-          "url": "https://github.com/nytimes/presidential-precinct-map-2024/blob/main/LICENSE"
+          "url": "https://raw.githubusercontent.com/nytimes/presidential-precinct-map-2024/main/LICENSE"
+        },
+        {
+          "label": "Checked state feed URLs and link-audit results",
+          "url": "link-checks.csv"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Restricted: NYT noncommercial data agreement",
+        "notes": "The repository uses the NYT Computational Use of Data Agreement, Version 1.0 – Non-Commercial. It requires attribution and limits computational use, results, and redistribution, with a specified editorial exception. This is not an unrestricted open-data license."
+      }
     },
     {
       "id": "presidential-districts",
@@ -374,7 +526,11 @@
           "label": "Results spreadsheet",
           "url": "https://docs.google.com/spreadsheets/d/1ZHx5E0-5vuXxcZShBgsAl_vwAntkkanGqYQp0owNjoQ/edit?gid=0"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Unverified: no explicit open license found",
+        "notes": "The public spreadsheet and its contributor/source credits do not establish an open license for the compiled sheet. Preserve attribution; permission for unrestricted reuse remains unverified."
+      }
     },
     {
       "id": "house-results",
@@ -396,8 +552,20 @@
         {
           "label": "civicAPI",
           "url": "https://civicapi.org/"
+        },
+        {
+          "label": "civicAPI reuse terms",
+          "url": "https://civicapi.org/faq"
+        },
+        {
+          "label": "Polling Desk terms",
+          "url": "https://polling-desk.com/terms"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Reuse allowed with attribution: civicAPI terms",
+        "notes": "civicAPI’s FAQ permits personal, noncommercial, and commercial data use and requires noncommercial/commercial users to credit civicAPI. Polling Desk says underlying data retain their original licenses; its own writing, design, and charts are separately protected. This is a provider use statement, not a blanket software license."
+      }
     },
     {
       "id": "district-boundaries",
@@ -424,7 +592,11 @@
           "label": "Census boundary notes",
           "url": "https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.html"
         }
-      ]
+      ],
+      "reuse": {
+        "status": "Federal geographic data; Census acknowledgement",
+        "notes": "TIGER/Line metadata permits reuse with Census acknowledgement and says the shapefiles are not copyrighted. Boundaries are statistical products, not legal land descriptions."
+      }
     }
   ]
 }
