@@ -1,5 +1,9 @@
 # U.S. Data Center Ecosystem Tracker
 
+| [Dashboard](https://ntimbs.github.io/us-data-center-dashboard/) | [Sources](SOURCES.md) |
+| --- | --- |
+| Interactive maps and explorers | Source catalogue, original links, and snapshot notes |
+
 The UVA National Security Institute’s U.S. Data Center Dashboard is a living ecosystem tracker of the infrastructure behind AI. Currently, we map data centers alongside a variety of energy, water, climate, and policy considerations. Its interactive interface helps researchers and the public explore how material constraints and community concerns may shape U.S. AI infrastructure. 
 
 Designed to be a living and customizable tool ,the U.S. Data Center Ecosystem Tracker can evolve with feedback from researchers, community organizers, and others working to understand these impacts. The project will also provide a foundation for future comparative analysis of U.S. and Chinese capabilities as that work develops. 
@@ -16,7 +20,7 @@ Designed to be a living and customizable tool ,the U.S. Data Center Ecosystem Tr
 
 The public dashboard is built in the `dist` directory. The GitHub Pages workflow deploys that directory on pushes to `main`.
 
-The source directory is generated from `dist/sources/catalog.json` and the bill records in `dist/dashboard-data.js`. After changing either input, run `python3 scripts/build_sources.py` and commit the generated source page and CSV registers. The source directory documents the published snapshots; it does not refresh the underlying maps.
+The [GitHub source catalogue](SOURCES.md), website source directory, and CSV registers are generated from `dist/sources/catalog.json` and the bill records in `dist/dashboard-data.js`. After changing either input, run `python3 scripts/build_sources.py` and commit the generated files. The source directory documents the published snapshots; it does not refresh the underlying maps.
 
 The timeline offers an inventory-added basis and an online/active basis. The latter uses a reported or expected online year when available and also includes records currently classified Operating or Expanding no later than their inventory-added year. It is a cumulative screening timeline, not a verified history of facility openings or status transitions.
 

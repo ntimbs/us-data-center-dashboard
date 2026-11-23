@@ -1,4 +1,4 @@
-"""Build the public source directory and bill register from committed inputs.
+"""Build the GitHub catalogue, public source directory, and bill register.
 
 Run after editing dist/sources/catalog.json or refreshing dashboard-data.js.
 Only Python's standard library is required; no local research files are needed.
@@ -50,6 +50,41 @@ def main():
     groups = defaultdict(list)
     for s in sources:
         groups[s["category"]].append(s)
+
+    markdown = [
+        "# Sources",
+        "[Repository overview](README.md) · [Searchable source directory](https://ntimbs.github.io/us-data-center-dashboard/sources/)",
+        f"The {len(sources)} source entries below cover the published national facility, U.S. hexagon, and Virginia county views. Each entry identifies the publisher, the snapshot used, its contribution to the dashboard, and the original source links.",
+        "Facility inventory: **27 October 2026**. Spatial and policy context reviewed: **8 October 2026**. Preliminary 2026 House results retrieved: **5 November 2026**. Source websites may show newer data; these dates describe the versions used by the dashboard.",
+        "[Source links CSV](dist/sources/source-links.csv) · [Legislative source register CSV](dist/sources/legislation-sources.csv)",
+    ]
+    for category, entries in groups.items():
+        markdown.append(f"## {category}")
+        for s in entries:
+            markdown.extend([
+                f"### {s['title']}",
+                f"**Publisher:** {s['publisher']}\n\n**Version / snapshot:** {s['vintage']}",
+                f"**Used for:** {s['use']}",
+                s["notes"],
+            ])
+            source_links = []
+            for item in s["links"]:
+                url = item["url"]
+                if url == "#bill-sources":
+                    url = "#individual-legislative-sources"
+                elif not urlsplit(url).scheme:
+                    url = "dist/sources/" + url
+                source_links.append(f"- [{item['label']}]({url})")
+            markdown.append("\n".join(source_links))
+    markdown.extend([
+        "## Individual legislative sources",
+        f"All **{len(bills)} bill records** from the published dashboard, including their individual source URLs, are available in the [legislative source register](dist/sources/legislation-sources.csv). [Search the bill register on the website](https://ntimbs.github.io/us-data-center-dashboard/sources/#bill-sources). Statuses describe the saved collection, not current law; repeated source URLs are retained as published.",
+        "## Project calculations and provenance",
+        "Hexagons, density measures, timeline summaries, correlations, regressions, and spatial statistics are project calculations. The measure guides in the hexagon and Virginia views explain the variables and calculations. Original record-level references remain with their source providers. Geographic proximity and county or state context do not establish site-specific utility service, capacity, water rights, policy applicability, or community views.",
+        f"Source-directory review: **{catalog['reviewed']}**. This catalogue and the website directory are generated together by [scripts/build_sources.py](scripts/build_sources.py) from [the source catalogue](dist/sources/catalog.json) and the published dashboard data.",
+    ])
+    (ROOT / "SOURCES.md").write_text("\n\n".join(markdown) + "\n")
+
     sections = []
     jumps = []
     for index, (category, entries) in enumerate(groups.items(), 1):
