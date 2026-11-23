@@ -1,0 +1,430 @@
+{
+  "reviewed": "23 November 2026",
+  "sources": [
+    {
+      "id": "facilities",
+      "category": "Facilities",
+      "title": "U.S. Data Centers Tracker",
+      "publisher": "FracTracker Alliance",
+      "vintage": "27 October 2026 workbook; 1,730 facilities",
+      "use": "Facility locations, project status, reported MW, operators, power-source labels, acreage, direct community-pushback flags, and timeline fields.",
+      "notes": "Uses Data_Centers_Database_102726.xlsx, sheet DB_Output_V2. Missing capacity remains unknown. Reported or expected online years and inventory-added dates are not a verified opening history. FracTracker’s source records contain the underlying facility references.",
+      "links": [
+        {
+          "label": "Tracker and methodology",
+          "url": "https://fractracker.org/data-centers/"
+        },
+        {
+          "label": "Interactive source map",
+          "url": "https://experience.arcgis.com/experience/5a4d072ad01449bba5698a80103fb909"
+        }
+      ]
+    },
+    {
+      "id": "egrid-plants",
+      "category": "Power & grid",
+      "title": "eGRID 2024 power plants",
+      "publisher": "U.S. Environmental Protection Agency",
+      "vintage": "2024 data; provisional development snapshot",
+      "use": "Plant locations, fuel categories, nameplate capacity, generation, capacity factors, and nearby generation totals.",
+      "notes": "The dashboard uses a provisional development build, not a final eGRID release. The recorded development commit is linked below. Nearby generation does not establish supply to a data center.",
+      "links": [
+        {
+          "label": "Development source at recorded commit",
+          "url": "https://github.com/USEPA/egrid/tree/8932a073aa4c0dac227f953e2805d5f64634b57e"
+        },
+        {
+          "label": "EPA eGRID data",
+          "url": "https://www.epa.gov/egrid/detailed-data"
+        }
+      ]
+    },
+    {
+      "id": "egrid-regions",
+      "category": "Power & grid",
+      "title": "eGRID subregion boundaries",
+      "publisher": "U.S. Environmental Protection Agency",
+      "vintage": "2023 Subregions and Multiple Subregions shapefiles",
+      "use": "Facility eGRID subregion assignments and regional grid context.",
+      "notes": "Boundary vintage differs from the 2024 power-plant data. Geographic assignment does not verify a physical grid connection.",
+      "links": [
+        {
+          "label": "EPA mapping files",
+          "url": "https://www.epa.gov/egrid/egrid-mapping-files"
+        }
+      ]
+    },
+    {
+      "id": "utility-territories",
+      "category": "Power & grid",
+      "title": "Electric Retail Service Territories",
+      "publisher": "Homeland Infrastructure Foundation-Level Data (HIFLD)",
+      "vintage": "Downloaded 21 August 2025",
+      "use": "Candidate electric utility territories for facility locations.",
+      "notes": "Overlapping territories remain ambiguous. A geographic match is not confirmation of the serving utility. The link documents the source dataset; it is not an archived copy of the project download.",
+      "links": [
+        {
+          "label": "Dataset documentation (Argonne)",
+          "url": "https://gem.anl.gov/tool/layers/electric_retail_service_territories/versions/1/metadata.pdf"
+        }
+      ]
+    },
+    {
+      "id": "eia-utilities",
+      "category": "Power & grid",
+      "title": "EIA-861 utility and operational data",
+      "publisher": "U.S. Energy Information Administration",
+      "vintage": "2024 Utility, Operational, and Balancing Authority files",
+      "use": "Utility context and reported facility MW relative to a candidate utility’s peak demand.",
+      "notes": "Utility-relative scale uses an unverified spatial utility candidate. It is not available grid capacity or a deliverability assessment.",
+      "links": [
+        {
+          "label": "EIA-861 detailed data",
+          "url": "https://www.eia.gov/electricity/data/eia861/"
+        }
+      ]
+    },
+    {
+      "id": "electricity-prices",
+      "category": "Power & grid",
+      "title": "State electricity prices",
+      "publisher": "U.S. EIA; prepared by Dynamical Systems Laboratory",
+      "vintage": "2010–2024 series; map displays 2024",
+      "use": "State industrial electricity prices, companion total-sector prices, and historical variance in the national and U.S. hex views.",
+      "notes": "Uses eia861_state_prices_real_2020_with_volatility.csv from the linked research repository. Coverage is the contiguous 48 states. State averages are not a facility tariff or negotiated rate.",
+      "links": [
+        {
+          "label": "Prepared price dataset",
+          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/blob/main/Section%202%20and%204/Data/eia861_state_prices_real_2020_with_volatility.csv"
+        },
+        {
+          "label": "EIA source program",
+          "url": "https://www.eia.gov/electricity/data/eia861/"
+        }
+      ]
+    },
+    {
+      "id": "cpi",
+      "category": "Power & grid",
+      "title": "Consumer Price Index for All Urban Consumers (CPI-U)",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "vintage": "Historical CPI-U workbook, August 2025 edition; 2020 price base",
+      "use": "Inflation-adjusted companion values in the prepared electricity-price series.",
+      "notes": "The dashboard’s map uses nominal cents per kWh. CPI-adjusted companion values are part of its published price data.",
+      "links": [
+        {
+          "label": "BLS historical CPI-U table",
+          "url": "https://www.bls.gov/cpi/tables/supplemental-files/home.htm"
+        },
+        {
+          "label": "Price preparation script",
+          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/blob/main/Section%202%20and%204/energy_price_inflaction_adjusted.py"
+        }
+      ]
+    },
+    {
+      "id": "osm",
+      "category": "Power & grid",
+      "title": "OpenStreetMap power infrastructure",
+      "publisher": "OpenStreetMap contributors; distributed by Geofabrik",
+      "vintage": "7 September 2026 U.S. extract",
+      "use": "Transmission-line overlays and line length, plus nearest-line and nearest-substation context.",
+      "notes": "The national overlay includes lines tagged 200 kV or higher. Contributor coverage and voltage tags vary. Proximity does not establish connection or spare capacity. © OpenStreetMap contributors; ODbL.",
+      "links": [
+        {
+          "label": "Geofabrik U.S. extracts",
+          "url": "https://download.geofabrik.de/north-america/us.html"
+        },
+        {
+          "label": "Attribution and license",
+          "url": "https://www.openstreetmap.org/copyright"
+        }
+      ]
+    },
+    {
+      "id": "queues",
+      "category": "Power & grid",
+      "title": "Queued Up interconnection data",
+      "publisher": "Lawrence Berkeley National Laboratory",
+      "vintage": "Project-level generation queue records through 2025",
+      "use": "County-level active generation queue MW and contextual queue pressure.",
+      "notes": "Positive reported capacity components are aggregated by county. These are generation interconnection requests, not data-center load requests or guaranteed future power supply.",
+      "links": [
+        {
+          "label": "Queued Up data and methodology",
+          "url": "https://emp.lbl.gov/queues"
+        }
+      ]
+    },
+    {
+      "id": "aware",
+      "category": "Water & hazards",
+      "title": "AWARE water-scarcity factors",
+      "publisher": "WULCA; county file distributed by Dynamical Systems Laboratory",
+      "vintage": "Prepared county annual-average factors; context reviewed 8 October 2026",
+      "use": "Water-scarcity classes and comparison variables across facility, hexagon, and Virginia county views.",
+      "notes": "Uses AWARE_US_CF.csv. The exact AWARE release is not recorded in the dashboard metadata; do not assume it is the latest AWARE2.0 release. County factors do not measure facility water use or water rights.",
+      "links": [
+        {
+          "label": "Prepared county factors",
+          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/blob/main/Section%202%20and%204/Data/AWARE_US_CF.csv"
+        },
+        {
+          "label": "AWARE method and versions",
+          "url": "https://wulca-waterlca.org/what-is-aware/official-versions/"
+        }
+      ]
+    },
+    {
+      "id": "usgs-water",
+      "category": "Water & hazards",
+      "title": "County-level water-use estimates",
+      "publisher": "U.S. Geological Survey (USGS)",
+      "vintage": "2015 estimates; usco2015v2.0.csv",
+      "use": "Total county water withdrawal in the hexagon and Virginia county explorers.",
+      "notes": "Historical withdrawals are separate from water scarcity and do not establish present supply headroom or a specific data center’s consumption.",
+      "links": [
+        {
+          "label": "Dataset and citation",
+          "url": "https://doi.org/10.5066/F7TB15V5"
+        },
+        {
+          "label": "Water-use report",
+          "url": "https://doi.org/10.3133/cir1441"
+        }
+      ]
+    },
+    {
+      "id": "fema-nri",
+      "category": "Water & hazards",
+      "title": "National Risk Index",
+      "publisher": "Federal Emergency Management Agency; county file distributed by Dynamical Systems Laboratory",
+      "vintage": "Prepared county table; context reviewed 8 October 2026",
+      "use": "Overall risk and drought, heat-wave, riverine-flood, and wildfire scores or ratings.",
+      "notes": "Uses NRI_Table_Counties.csv. Exact NRI release is not recorded in the dashboard metadata. County screening measures are not parcel-level hazard determinations.",
+      "links": [
+        {
+          "label": "Prepared county table",
+          "url": "https://github.com/dynamicalsystemslaboratory/Data-centers-siting-across-U.S.-cities/blob/main/Section%202%20and%204/Data/NRI_Table_Counties.csv"
+        },
+        {
+          "label": "FEMA National Risk Index",
+          "url": "https://www.fema.gov/nri"
+        }
+      ]
+    },
+    {
+      "id": "cbp",
+      "category": "Land & geography",
+      "title": "County Business Patterns",
+      "publisher": "U.S. Census Bureau",
+      "vintage": "2023; NAICS 518210",
+      "use": "County counts of data-processing, hosting, and related-services establishments.",
+      "notes": "Establishments are a broader business measure and should not be read as the dashboard’s physical data-center count.",
+      "links": [
+        {
+          "label": "2023 CBP data",
+          "url": "https://www.census.gov/data/datasets/2023/econ/cbp/2023-cbp.html"
+        },
+        {
+          "label": "2023 CBP API documentation",
+          "url": "https://api.census.gov/data/2023/cbp.html"
+        }
+      ]
+    },
+    {
+      "id": "census-geography",
+      "category": "Land & geography",
+      "title": "Census boundaries and Gazetteer locations",
+      "publisher": "U.S. Census Bureau",
+      "vintage": "2023 state boundaries; 2024 county boundaries; 2026 Gazetteer files",
+      "use": "State outlines, county assignments, area-based measures, Virginia’s 133 counties and independent cities, and the boundary framework for derived hexagons. Gazetteer internal points locate local-action jurisdictions.",
+      "notes": "The 50 km and 100 km hexagon grids are project-generated in an equal-area projection. Gazetteer points represent jurisdictions, not data-center sites. County and state attributes assigned to cells remain contextual geographic measures.",
+      "links": [
+        {
+          "label": "2023 state boundary files",
+          "url": "https://www2.census.gov/geo/tiger/TIGER2023/STATE/"
+        },
+        {
+          "label": "2024 county boundary files",
+          "url": "https://www2.census.gov/geo/tiger/TIGER2024/COUNTY/"
+        },
+        {
+          "label": "Census Gazetteer files",
+          "url": "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html"
+        }
+      ]
+    },
+    {
+      "id": "ncsl-incentives",
+      "category": "Policy & opposition",
+      "title": "Subsidizing Servers: state tax incentives",
+      "publisher": "National Conference of State Legislatures",
+      "vintage": "Source updated 1 April 2026; accessed 25 September 2026",
+      "use": "Dedicated data-center incentives, electricity-tax treatment, and other state-policy context.",
+      "notes": "A state incentive flag does not establish project eligibility, receipt, or the value of an award.",
+      "links": [
+        {
+          "label": "NCSL incentive tables",
+          "url": "https://www.ncsl.org/fiscal/subsidizing-servers-how-states-are-competing-to-attract-data-centers"
+        }
+      ]
+    },
+    {
+      "id": "ncsl-moratoria",
+      "category": "Policy & opposition",
+      "title": "Which States Are Banning Data Centers?",
+      "publisher": "National Conference of State Legislatures",
+      "vintage": "Source updated 15 September 2026; accessed 25 September 2026",
+      "use": "State moratorium tracker counts and statuses.",
+      "notes": "Tracked proposals include introduced, failed, vetoed, and other statuses. A tracker entry does not mean a ban is in force.",
+      "links": [
+        {
+          "label": "NCSL tracker and bill links",
+          "url": "https://www.ncsl.org/fiscal/which-states-are-banning-data-centers"
+        }
+      ]
+    },
+    {
+      "id": "legislation",
+      "category": "Policy & opposition",
+      "title": "State data-center legislation records",
+      "publisher": "MultiState compilation; LegiScan and linked bill sources",
+      "vintage": "2024–April 2026 collection; dashboard context reviewed 8 October 2026",
+      "use": "State bill counts, topic filters, source status, and bill-detail links.",
+      "notes": "The source register below reproduces every bill record in the published dashboard. Topic categories may overlap; bill counts do not measure regulatory stringency. Follow the individual source for subsequent actions.",
+      "links": [
+        {
+          "label": "Browse every bill source",
+          "url": "#bill-sources"
+        },
+        {
+          "label": "Download bill source register",
+          "url": "legislation-sources.csv"
+        }
+      ]
+    },
+    {
+      "id": "opposition-events",
+      "category": "Policy & opposition",
+      "title": "U.S. Datacenter Fights event database",
+      "publisher": "George Ingebretsen and community contributors",
+      "vintage": "Accessed 18 September 2026; context reviewed 8 October 2026",
+      "use": "County and state opposition-event counts and contextual tracker matches.",
+      "notes": "This opposition-event database is not a representative opinion survey. No tracker match means unknown. Direct facility-pushback flags originate in the FracTracker inventory. Data attribution: CC BY 4.0.",
+      "links": [
+        {
+          "label": "Source repository and references",
+          "url": "https://github.com/Georgeingebretsen/datacenter-opposition-tracker"
+        },
+        {
+          "label": "Source event data",
+          "url": "https://github.com/Georgeingebretsen/datacenter-opposition-tracker/blob/main/site/data/fights.json"
+        }
+      ]
+    },
+    {
+      "id": "local-actions",
+      "category": "Policy & opposition",
+      "title": "Local bans, moratoriums, and protective ordinances",
+      "publisher": "FracTracker Alliance",
+      "vintage": "Prepared local-action inventory; context reviewed 8 October 2026",
+      "use": "Local-action counts and county context in the national, hexagon, and Virginia views.",
+      "notes": "Uses the project’s geocoded FracTracker local-action workbook. A county action count does not establish that an action applies to a particular facility.",
+      "links": [
+        {
+          "label": "FracTracker data and local-action sources",
+          "url": "https://fractracker.org/data-centers/"
+        }
+      ]
+    },
+    {
+      "id": "nyt-precincts",
+      "category": "Elections",
+      "title": "2024 Precinct-Level Election Results",
+      "publisher": "The New York Times",
+      "vintage": "2024 election; accessed 15 October 2026",
+      "use": "Presidential vote margins and precinct maps loaded by state in the national view.",
+      "notes": "© The New York Times Company. Precinct coverage and boundary quality vary. The dashboard loads precinct data from NYT and stores only a coverage manifest. Voting is political context, not evidence of views about data centers.",
+      "links": [
+        {
+          "label": "Published precinct map",
+          "url": "https://www.nytimes.com/interactive/2025/us/elections/2024-election-map-precinct-results.html"
+        },
+        {
+          "label": "Data and caveats",
+          "url": "https://github.com/nytimes/presidential-precinct-map-2024"
+        },
+        {
+          "label": "Terms and license",
+          "url": "https://github.com/nytimes/presidential-precinct-map-2024/blob/main/LICENSE"
+        }
+      ]
+    },
+    {
+      "id": "presidential-districts",
+      "category": "Elections",
+      "title": "2024 Pres by CD",
+      "publisher": "Drew Savicki and contributing election-data researchers",
+      "vintage": "2024 presidential election; 435 House districts",
+      "use": "Harris, Trump, and all-candidate presidential vote totals by congressional district.",
+      "notes": "This compiled sheet combines state election sources and contributed calculations. Ten rows have one-vote rounding differences. Margins use all presidential votes as the denominator.",
+      "links": [
+        {
+          "label": "Results spreadsheet",
+          "url": "https://docs.google.com/spreadsheets/d/1ZHx5E0-5vuXxcZShBgsAl_vwAntkkanGqYQp0owNjoQ/edit?gid=0"
+        }
+      ]
+    },
+    {
+      "id": "house-results",
+      "category": "Elections",
+      "title": "2026 U.S. House election results",
+      "publisher": "Polling Desk, using civicAPI",
+      "vintage": "Preliminary snapshot retrieved 5 November 2026",
+      "use": "Democratic, Republican, and all-candidate House votes, race calls, and reporting estimates.",
+      "notes": "This snapshot is not live or certified. Four districts have no reported vote totals. Margins use all reported candidate votes; voting does not measure attitudes toward data centers.",
+      "links": [
+        {
+          "label": "Polling Desk results",
+          "url": "https://polling-desk.com/house-districts"
+        },
+        {
+          "label": "Source CSV",
+          "url": "https://polling-desk.com/house-districts.csv"
+        },
+        {
+          "label": "civicAPI",
+          "url": "https://civicapi.org/"
+        }
+      ]
+    },
+    {
+      "id": "district-boundaries",
+      "category": "Elections",
+      "title": "Congressional district boundaries",
+      "publisher": "U.S. Census Bureau",
+      "vintage": "119th Congress (2024 files); 120th Congress (2026 files)",
+      "use": "District geometry and facility-to-district assignments for both congressional voting layers.",
+      "notes": "The presidential layer uses 119th Congress boundaries. The 2026 House layer uses 120th Congress boundaries for 49 states and the unchanged 119th Congress Missouri plan. Four facility points are unassigned in the presidential layer and two in the 2026 House layer.",
+      "links": [
+        {
+          "label": "119th Congress cartographic boundaries",
+          "url": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_cd119_500k.zip"
+        },
+        {
+          "label": "120th Congress TIGER/Line files",
+          "url": "https://www2.census.gov/geo/tiger/TIGER2026/CD/"
+        },
+        {
+          "label": "Missouri 119th Congress boundaries",
+          "url": "https://www2.census.gov/geo/tiger/TIGER2024/CD/tl_2024_29_cd119.zip"
+        },
+        {
+          "label": "Census boundary notes",
+          "url": "https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.html"
+        }
+      ]
+    }
+  ]
+}

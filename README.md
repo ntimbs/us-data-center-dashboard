@@ -12,8 +12,11 @@ Designed to be a living and customizable tool ,the U.S. Data Center Ecosystem Tr
 - **[National facility view](https://ntimbs.github.io/us-data-center-dashboard/):** facility status, reported capacity, power source, eGRID power plants by generation source, optional 200+ kV transmission lines, 2024 state industrial electricity prices, separate AWARE water-scarcity and FEMA hazard themes, legislation, local opposition, and a cumulative facility timeline.
 - **[U.S. hexagon spatial explorer](https://ntimbs.github.io/us-data-center-dashboard/hex/):** equal-area cells for comparing data-center activity with contextual measures—including state industrial electricity prices—and spatial statistics, with facility measures re-aggregated through the selected timeline year.
 - **[Virginia county explorer](https://ntimbs.github.io/us-data-center-dashboard/virginia/):** county-level data-center and contextual measures for Virginia, with a cumulative facility timeline.
+- **[Sources](https://ntimbs.github.io/us-data-center-dashboard/sources/):** a searchable directory of the 23 source datasets and programs used by the dashboard, with original links, snapshot dates, use notes, and all 547 published legislative records. Source links and the bill register are also downloadable as CSV.
 
-The public dashboard is built in the `dist` directory and published through the repository's `gh-pages` branch.
+The public dashboard is built in the `dist` directory. The GitHub Pages workflow deploys that directory on pushes to `main`.
+
+The source directory is generated from `dist/sources/catalog.json` and the bill records in `dist/dashboard-data.js`. After changing either input, run `python3 scripts/build_sources.py` and commit the generated source page and CSV registers. The source directory documents the published snapshots; it does not refresh the underlying maps.
 
 The timeline offers an inventory-added basis and an online/active basis. The latter uses a reported or expected online year when available and also includes records currently classified Operating or Expanding no later than their inventory-added year. It is a cumulative screening timeline, not a verified history of facility openings or status transitions.
 

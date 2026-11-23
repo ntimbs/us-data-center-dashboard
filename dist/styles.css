@@ -268,7 +268,7 @@ h2 { margin: 3px 0 0; font-size: 1rem; line-height: 1.25; }
   .map-caption span:last-child { display: none; }
 }
 @media (max-width: 480px) {
-  .snapshot, .header-actions > a { display: none; }
+  .snapshot { display: none; }
   .header-actions { justify-content:flex-start; }
   .institutional-logos img { height:24px; }
   .brand h1 { font-size: .9rem; }
